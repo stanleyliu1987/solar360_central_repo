@@ -1,0 +1,11 @@
+--- PrintCustTransPortrait.php	2011-01-13 15:12:23 +0000
++++ PrintCustTransPortrait.php	2011-01-14 17:18:54 +0000
+@@ -52,7 +52,7 @@
+     $Right_Margin=30;
+ 
+ 	$pdf = new Cpdf('P', 'pt', 'A4');
+-	$pdf->addInfo('Author','webERP ' . $Version);
++	$pdf->addInfo('Author','webERP ' . $_SESSION['VersionNumber']);
+ 	$pdf->addInfo('Creator','webERP http://www.web-erp.org');
+ 
+ 	if ($InvOrCredit=='Invoice'){

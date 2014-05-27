@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form name="Purchase Order">
+	<PaperSize name="Paper size">A4</PaperSize>
+	<LineHeight name="Line height">16</LineHeight>
+	<LineWidth name="Line height">1.2</LineWidth>
+	<logo type="image" name="Logo" id="Logo">
+		<x>360</x>
+		<y>95</y>
+		<width>160</width>
+		<height>95</height>
+	</logo>
+	<POTitle type="SimpleText" name="POTitle" id="POTitle">
+		<FontSize>24</FontSize>
+		<x>32</x>
+		<y>820</y>
+	</POTitle>
+	<OrderNumber type="SimpleText" name="Invoice Number" id="InvoiceNumber">
+		<FontSize>14</FontSize>
+		<x>40</x>
+		<y>700</y>
+	</OrderNumber>
+	<OrderDate type="SimpleText" name="Invoice date" id="InvoiceDate">
+		<FontSize>14</FontSize>
+		<x>330</x>
+		<y>700</y>
+	</OrderDate>
+	<ViewingOnly type="SimpleText" name="Viewing only warning text" id="ViewingOnly">
+		<FontSize>8</FontSize>
+		<x>150</x>
+		<y>25</y>
+	</ViewingOnly>
+	<PageNumber type="SimpleText" name="Page number" id="PageNumber">
+		<FontSize>10</FontSize>
+		<x>762</x>
+		<y>30</y>
+	</PageNumber>
+	<TaxAuthority type="SimpleText" name="Tax Authority" id="TaxAuthority">
+		<FontSize>10</FontSize>
+		<x>40</x>
+		<y>106</y>
+	</TaxAuthority>
+	<CompanyName type="SimpleText" name="Company name" id="CompanyName">
+		<FontSize>10</FontSize>
+		<x>470</x>
+		<y>740</y>
+	</CompanyName>
+	<CompanyAddress type="ElementArray" name="Company address">
+		<Line1 type="SimpleText" name="Line 1" id="CompanyAddress1">
+			<FontSize>8</FontSize>
+			<x>40</x>
+			<y>742</y>
+		</Line1>
+		<Line2 type="SimpleText" name="Line 2" id="CompanyAddress2">
+			<FontSize>8</FontSize>
+			<x>40</x>
+			<y>734</y>
+		</Line2>
+		<Line3 type="SimpleText" name="Line 3" id="CompanyAddress3">
+			<FontSize>8</FontSize>
+			<x>40</x>
+			<y>726</y>
+		</Line3>
+		<Line4 type="SimpleText" name="Line 4" id="CompanyAddress4">
+			<FontSize>8</FontSize>
+			<x>40</x>
+			<y>720</y>
+		</Line4>
+		<Line5 type="SimpleText" name="Line 5" id="CompanyAddress5">
+			<FontSize>8</FontSize>
+			<x>40</x>
+			<y>712</y>
+		</Line5>
+	</CompanyAddress>
+	<CompanyPhone type="SimpleText" name="Company phone number" id="CompanyPhone">
+		<FontSize>10</FontSize>
+		<x>40</x>
+		<y>182</y>
+	</CompanyPhone>
+	<CompanyFax type="SimpleText" name="Company fax number" id="CompanyFax">
+		<FontSize>10</FontSize>
+		<x>40</x>
+		<y>192</y>
+	</CompanyFax>
+	<CompanyEmail type="SimpleText" name="Company email address" id="CompanyEmail">
+		<FontSize>10</FontSize>
+		<x>40</x>
+		<y>202</y>
+	</CompanyEmail>
+   
+    <DrawLine type="SimpleText" name="drawline1" id="drawline1">
+		<x1>40</x1>
+		<y1>710</y1>
+	    <x2>565</x2>
+		<y2>710</y2>
+	</DrawLine>
+	<DrawLine1 type="SimpleText" name="drawline1" id="drawline1">
+		<x1>40</x1>
+		<y1>620</y1>
+	    <x2>565</x2>
+		<y2>620</y2>
+	</DrawLine1>
+	 <DrawLine2 type="SimpleText" name="drawline2" id="drawline2">
+		<x1>40</x1>
+		<y1>260</y1>
+	    <x2>565</x2>
+		<y2>260</y2>
+	</DrawLine2>
+    <DrawLine3 type="SimpleText" name="drawline3" id="drawline3">
+		<x1>40</x1>
+		<y1>200</y1>
+	    <x2>565</x2>
+		<y2>200</y2>
+	</DrawLine3>
+	<DrawVerticalLine type="SimpleText" name="vdrawline1" id="vdrawline1">
+		<x1>300</x1>
+		<y1>700</y1>
+	    <x2>300</x2>
+		<y2>610</y2>
+	</DrawVerticalLine>
+    <DrawVerticalLine2 type="SimpleText" name="vdrawline2" id="vdrawline2">
+		<x1>450</x1>
+		<y1>260</y1>
+	    <x2>450</x2>
+		<y2>180</y2>
+	</DrawVerticalLine2>
+	<DrawVerticalLine3 type="SimpleText" name="vdrawline3" id="vdrawline3">
+		<x1>300</x1>
+		<y1>170</y1>
+	    <x2>300</x2>
+		<y2>50</y2>
+	</DrawVerticalLine3>
+        
+        <SalesReference type="ElementArray" name="SalesRef">
+		<Caption type="SimpleText" name="Caption" id="SalesRefCaption">
+			<FontSize>12</FontSize>
+			<x>330</x>
+			<y>680</y>
+		</Caption>
+	</SalesReference>
+        
+	<SupplierAddress type="ElementArray" name="Bill address">
+		<Caption type="SimpleText" name="Caption" id="BillAddressCaption">
+			<FontSize>12</FontSize>
+			<x>40</x>
+			<y>680</y>
+		</Caption>
+                <Caption2 type="SimpleText" name="Caption2" id="BillAddressCaption2">
+			<FontSize>9</FontSize>
+			<x>40</x>
+			<y>662</y>
+		</Caption2>
+		<Line1 type="SimpleText" name="Line 1" id="BillAddress1">
+			<FontSize>9</FontSize>
+			<x>100</x>
+			<y>677</y>
+		</Line1>
+		<Line2 type="SimpleText" name="Line 2" id="BillAddress2">
+			<FontSize>9</FontSize>
+			<x>100</x>
+			<y>662</y>
+		</Line2>
+		<Line3 type="SimpleText" name="Line 3" id="BillAddress3">
+			<FontSize>9</FontSize>
+			<x>100</x>
+			<y>652</y>
+		</Line3>
+		<Line4 type="SimpleText" name="Line 4" id="BillAddress4">
+			<FontSize>9</FontSize>
+			<x>100</x>
+			<y>642</y>
+		</Line4>
+		<Line5 type="SimpleText" name="Line 5" id="BillAddress5">
+			<FontSize>9</FontSize>
+			<x>100</x>
+			<y>632</y>
+		</Line5>
+		<Line6 type="SimpleText" name="Line 6" id="BillAddress6">
+			<FontSize>9</FontSize>
+			<x>100</x>
+			<y>622</y>
+		</Line6>
+	</SupplierAddress>
+	
+    <DeliveryAddress type="ElementArray" name="Ship address">
+	    <Caption type="SimpleText" name="Caption" id="ShipAddressCaption">
+			<FontSize>12</FontSize>
+			<x>330</x>
+			<y>680</y>
+		</Caption>
+		<Line1 type="SimpleText" name="Line 1" id="ShipAddress1">
+			<FontSize>9</FontSize>
+			<x>390</x>
+			<y>677</y>
+		</Line1>
+		<Line2 type="SimpleText" name="Line 2" id="ShipAddress2">
+			<FontSize>9</FontSize>
+			<x>390</x>
+			<y>667</y>
+		</Line2>
+		<Line3 type="SimpleText" name="Line 3" id="ShipAddress3">
+			<FontSize>9</FontSize>
+			<x>390</x>
+			<y>657</y>
+		</Line3>
+		<Line4 type="SimpleText" name="Line 4" id="ShipAddress4">
+			<FontSize>9</FontSize>
+			<x>390</x>
+			<y>647</y>
+		</Line4>
+	</DeliveryAddress>
+	
+	<RequisitionNumber type="SimpleText" name="Requisition Number" id="RequisitionNumber">
+		<FontSize>12</FontSize>
+		<x>450</x>
+		<y>260</y>
+	</RequisitionNumber>
+	
+	<Initiator type="SimpleText" name="Order initiator" id="Initiator">
+		<FontSize>12</FontSize>
+		<x>450</x>
+		<y>264</y>
+	</Initiator>
+	<PaymentTerms type="SimpleText" name="Payment terms" id="PaymentTerms">
+		<PTCaption type="SimpleText" name="Heading 1" id="Heading1">
+			<FontSize>14</FontSize>
+		    <x>50</x>
+		    <y>80</y>
+		</PTCaption>
+                <PTRCTICaption type="SimpleText" name="Heading 1" id="Heading1">
+			<FontSize>12</FontSize>
+		    <x>50</x>
+		    <y>155</y>
+		</PTRCTICaption>
+		<PT type="SimpleText" name="Heading 2" id="Heading2">
+			<FontSize>12</FontSize>
+		    <x>50</x>
+		    <y>40</y>
+		</PT>
+                <PTDoc type="SimpleText" name="Heading 3" id="Heading3">
+			<FontSize>14</FontSize>
+		    <x>50</x>
+		    <y>40</y>
+		</PTDoc>
+                <PTRCTI type="SimpleText" name="Heading 3" id="Heading3">
+			<FontSize>9</FontSize>
+		    <x>50</x>
+		    <y>130</y>
+		</PTRCTI>
+	</PaymentTerms>
+	<CourierInfo type="SimpleText" name="CourierInfo" id="CourierInfo">
+		<CICaption type="SimpleText" name="Heading 1" id="Heading1">
+			<FontSize>14</FontSize>
+		    <x>50</x>
+		    <y>170</y>
+		</CICaption>
+		<CI type="SimpleText" name="Heading 2" id="Heading2">
+			<FontSize>12</FontSize>
+		    <x>50</x>
+		    <y>130</y>
+		</CI>
+	</CourierInfo>
+	
+	<Comments type="MultiLineText" name="Comments" id="Comments">
+		<FontSize>10</FontSize>
+		<Length>250</Length>
+		<x>60</x>
+		<y>230</y>
+	</Comments>
+        
+        <Warehouse type="MultiLineText" name="Warehouse" id="Warehouse">
+		<FontSize>10</FontSize>
+		<Length>250</Length>
+		<x>80</x>
+		<y>240</y>
+	</Warehouse>
+        
+	<Currency type="SimpleText" name="Currency text" id="Currency">
+		<FontSize>8</FontSize>
+		<x>40</x>
+		<y>620</y>
+	</Currency>
+    <HeaderRectangle type="Rectangle" name="Header rectangle" id="HeaderRectangle">
+		<x>40</x>
+		<y>600</y>
+		<width>525</width>
+		<height>32</height>
+	</HeaderRectangle>
+		<Headings type="ElementArray" name="Column headings">
+		<Column1 type="SimpleText" name="Heading 1" id="Heading1">
+			<FontSize>12</FontSize>
+			<x>45</x>
+			<y>595</y>
+		</Column1>
+		<Column2 type="SimpleText" name="Heading 2" id="Heading2">
+			<FontSize>12</FontSize>
+			<x>130</x>
+			<y>595</y>
+		</Column2>
+		<Column3 type="SimpleText" name="Heading 3" id="Heading3">
+			<FontSize>12</FontSize>
+			<x>330</x>
+			<y>595</y>
+		</Column3>
+		<Column4 type="SimpleText" name="Heading 4" id="Heading4">
+			<FontSize>12</FontSize>
+			<x>385</x>
+			<y>595</y>
+		</Column4>
+		<Column5 type="SimpleText" name="Heading 5" id="Heading5">
+			<FontSize>12</FontSize>
+			<x>460</x>
+			<y>595</y>
+		</Column5>
+		<Column6 type="SimpleText" name="Heading 6" id="Heading6">
+			<FontSize>12</FontSize>
+			<x>520</x>
+			<y>595</y>
+		</Column6>
+	</Headings>
+	<DataRectangle type="Rectangle" name="Data rectangle" id="DataRectangle">
+		<x>40</x>
+		<y>600</y>
+		<width>525</width>
+		<height>420</height>
+	</DataRectangle>
+	<Data type="ElementArray" name="Column Data">
+		<y type="StartLine" name="Y co-ordinate of first data line" id="DataStartLine">362</y>
+		<Column1 type="DataText" name="Column 1" id="Data1">
+			<FontSize>9</FontSize>
+			<x>45</x>
+			<Length>40</Length>
+		</Column1>
+		<Column2 type="DataText" name="Column 2" id="Data2">
+			<FontSize>9</FontSize>
+			<x>130</x>
+			<Length>100</Length>
+		</Column2>
+		<Column3 type="DataText" name="Column 3" id="Data3">
+			<FontSize>9</FontSize>
+			<x>320</x>
+			<Length>40</Length>
+		</Column3>
+		<Column4 type="DataText" name="Column 4" id="Data4">
+			<FontSize>9</FontSize>
+			<x>390</x>
+			<Length>40</Length>
+		</Column4>
+		<Column5 type="DataText" name="Column 5" id="Data5">
+			<FontSize>9</FontSize>
+			<x>460</x>
+			<Length>60</Length>
+		</Column5>
+		<Column6 type="DataText" name="Column 6" id="Data6">
+			<FontSize>9</FontSize>
+			<x>520</x>
+			<Length>50</Length>
+		</Column6>
+	</Data>
+	
+	<OrderTotal type="SimpleText" name="Invoice total caption" id="InvoiceTotalCaption">
+	<SubTotal type="SimpleText" name="SubTotal" id="SubTotal">
+		<FontSize>11</FontSize>
+		<x>390</x>
+		<y>245</y>
+		<width>50</width>
+	</SubTotal>
+	<Freight type="SimpleText" name="Freight" id="Freight">
+		<FontSize>11</FontSize>
+		<x>390</x>
+		<y>225</y>
+		<width>50</width>
+	</Freight>
+	<Tax type="SimpleText" name="Tax" id="Tax">
+		<FontSize>11</FontSize>
+		<x>390</x>
+		<y>215</y>
+		<width>50</width>
+	</Tax>
+	<Total type="SimpleText" name="Tax" id="Tax">
+		<FontSize>11</FontSize>
+		<x>390</x>
+		<y>185</y>
+		<width>50</width>
+	</Total>
+	</OrderTotal>
+	
+	<OrderTotalData type="SimpleText" name="Order total caption" id="OrderTotalCaptionData">
+	<SubTotalData type="SimpleText" name="SubTotalData" id="SubTotalData">
+		<FontSize>9</FontSize>
+		<x>490</x>
+		<y>245</y>
+		<width>50</width>
+	</SubTotalData>
+	<FreightData type="SimpleText" name="FreightData" id="FreightData">
+		<FontSize>9</FontSize>
+		<x>490</x>
+		<y>225</y>
+		<width>50</width>
+	</FreightData>
+	<TaxData type="SimpleText" name="TaxData" id="TaxData">
+		<FontSize>9</FontSize>
+		<x>490</x>
+		<y>215</y>
+		<width>50</width>
+	</TaxData>
+	<TotalData type="SimpleText" name="TaxData" id="TaxData">
+		<FontSize>9</FontSize>
+		<x>490</x>
+		<y>185</y>
+		<width>50</width>
+	</TotalData>
+	</OrderTotalData>
+	
+  
+</form>

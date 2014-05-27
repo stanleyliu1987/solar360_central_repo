@@ -1,0 +1,22 @@
+/* tables */
+
+table#SortableTable thead tr th, table.tablesorter tfoot tr th {
+	
+	border: 1px solid #FFF;
+	font-size: 8pt;
+	padding: 4px;
+}
+table#SortableTable thead tr .sorttableheader {
+	background-image: url(bg_sort.gif);
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+
+table#SortableTable thead tr .tableheaderSortUp {
+	background-image: url(asc.gif);
+}
+table#SortableTable thead tr .tableheaderSortDown {
+	background-image: url(desc.gif);
+}
+

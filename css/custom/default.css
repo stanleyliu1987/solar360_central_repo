@@ -1,0 +1,25 @@
+/*--------------------------------------------------\
+|    'gel' Stylesheet                               |
+|       v1.1                                        |
+|Pretty blue gradients with lighting.               |
+|---------------------------------------------------|
+| For use with:                                     |
+| Web-ERP - http://web-erp.sourceforge.net          |
+| by Logic Works Ltd                                |
+|---------------------------------------------------|
+| Developer:                                        |
+| CombatWombat	                                    |
+| combatwombat at combatwombat dot 7doves dot com   |
+|---------------------------------------------------|
+| Note:                                             |
+| Changes can be made to this CSS that will be      |
+| reflected throughout Web-ERP.                     |
+\--------------------------------------------------*/
+/* $Id: default.css 4219 2014-05-15:35:42Z tim_schofield $*/
+
+
+ .halfpanelpage{width:100%; clear:both; }
+ 
+ .leftpanelcontent{min-width:30%;float:left;}
+ 
+ .rightpanelcontent{min-width:70%;float:left;}
