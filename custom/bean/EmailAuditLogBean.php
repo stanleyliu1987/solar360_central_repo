@@ -13,6 +13,8 @@ class EmailAuditLogBean extends Bean{
     protected $emailtemplateid;
     protected $emailfromaddress;
     protected $emailtoaddress;
+    protected $emailccaddress;
+    protected $emailbccaddress;
     
     public function getSenddate() {
         return $this->senddate;
@@ -63,7 +65,23 @@ class EmailAuditLogBean extends Bean{
     }
 
 
-    
+    public function getEmailccaddress() {
+        return $this->emailccaddress;
+    }
+
+    public function getEmailbccaddress() {
+        return $this->emailbccaddress;
+    }
+
+    public function setEmailccaddress($emailccaddress) {
+        $this->emailccaddress = $emailccaddress;
+    }
+
+    public function setEmailbccaddress($emailbccaddress) {
+        $this->emailbccaddress = $emailbccaddress;
+    }
+
+
     
     
 }
