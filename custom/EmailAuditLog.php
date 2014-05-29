@@ -22,14 +22,15 @@ class EmailAuditLog{
                                                      emailtemplateid,
                                                      emailfromaddress,
                                                      emailtoaddress,
-                                                     emailccaddress)
+                                                     emailccaddress,
+                                                     emailbccaddress)
                                      VALUES ('" . $emaillogbean->senddate ."',
                                             '" . $emaillogbean->sendstatus ."',
                                             '" . $emaillogbean->ordernumber ."',
                                             '" . $emaillogbean->emailtemplateid."',
                                             '" . $emaillogbean->emailfromaddress."',
                                             '" . $emaillogbean->emailtoaddress."',
-                                            '" . $emaillogbean->emailccaddress."')",
+                                            '" . $emaillogbean->emailccaddress."', '" . $emaillogbean->emailbccaddress."')",
                                             $this->db, $ErrMsg);
           return $SaveEmailAuditLog;
     }

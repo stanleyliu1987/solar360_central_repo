@@ -176,6 +176,10 @@ echo '<tr><td class=number>' . number_format($CustomerRecord['balance'],$Custome
 	<td class=number>' . number_format($CustomerRecord['overdue2'],$CustomerRecord['decimalplaces']) . '</td>
 	</tr></table></div>';
 
+/* 29052014 Try to get Company email address and Set it to Email BCC */
+$BccResult = DB_query("SELECT email FROM companies WHERE coycode=1",$db);
+$bccrow = DB_fetch_array($BccResult); 
+/* End of retrieving */
 
 /* 15052014 Logic to Retrieve Email Templates Options */
 $TemplateSQL= "SELECT * FROM emailtemplates where emailtype=10";
@@ -184,6 +188,7 @@ $templates = DB_query($TemplateSQL,$db);
 
 /*15052014 Bottom Panel and Choose different templates */
 echo '<br><div><table><tr><td>'._('Choose a Template:').'<select id="ChooseEmailTemplate" name="ChooseEmailTemplate">';
+echo '<option selected>Please Choose a Template</option>';
 while ($myrow = DB_fetch_array($templates)) {
 echo '<option value='.$myrow["emailtemp_id"].'>'.$myrow["templatename"].'</option>';
 }
@@ -193,6 +198,8 @@ echo '<tr><td>'  . _('To Address') . ':</td>
 	<td><input type="text" name="EmailAddr" maxlength=60 size=60 value="' . $EmailAddress . '"></td></tr>';
 echo '<tr><td>' . _('CC') . ':</td>
 	<td><input type="text" name="EmailAddrCC" maxlength=60 size=60 value="' . $EmailAddress . '"></td></tr>';
+echo '<tr><td>' . _('BCC') . ':</td>
+	<td><input type="text" name="EmailAddrBCC" maxlength=60 size=60 value="' . $bccrow['email'] . '"></td></tr>';
 echo '<tr><td>'. _('Subject') .':</td>
 	<td><input type="Text" name="EmailSubject" value="'. $EmailSubject .'" size=86 maxlength=100></td></tr>';
 echo '<tr><td>'. _('Email Message') .':</td>

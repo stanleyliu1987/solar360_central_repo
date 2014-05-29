@@ -677,6 +677,7 @@ If (isset($PrintPDF)
 		$mail->addAttachment($Attachment, $FileName, 'application/pdf');
 		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $_SESSION['CompanyRecord']['email'] . '>');
                 $mail->setCc($_POST['EmailAddrCC']);
+                $mail->setBcc($_POST['EmailAddrBCC']);
 		$result = $mail->send(array($_POST['EmailAddr']));
                 /* Record Email Audit Log details */
                 $emaillog=new EmailAuditLog($db);
@@ -688,6 +689,7 @@ If (isset($PrintPDF)
                 $emaillogbean->emailfromaddress=$_SESSION['CompanyRecord']['email']<>''?$_SESSION['CompanyRecord']['email']:'';
                 $emaillogbean->emailtoaddress=$_POST['EmailAddr']<>''?$_POST['EmailAddr']:'';
                 $emaillogbean->emailccaddress=$_POST['EmailAddrCC']<>''?$_POST['EmailAddrCC']:'';
+                $emaillogbean->emailbccaddress=$_POST['EmailAddrBCC']<>''?$_POST['EmailAddrBCC']:'';
                 $emaillog->SaveEmailAuditLog($emaillogbean);
                 /* End of record the audit log */
 		unlink($FileName); //delete the temporary file
