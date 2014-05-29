@@ -18,11 +18,18 @@ if($InvOrCredit=='Invoice'){
 if (isset($_GET['FromTransNo'])) {
 	$FromTransNo = $_GET['FromTransNo'];
 } elseif (isset($_POST['FromTransNo'])){
-	$FromTransNo = ConvertSOtoInvNo($_POST['FromTransNo'],$db,$rootpath);
+/* 29052014 if Email invoice to customer rather than print */
+if (isset($_POST['EmailAddr'])){ 
+    $FromTransNo =$_POST['FromTransNo'];
+}
+else{
+    $FromTransNo = ConvertSOtoInvNo($_POST['FromTransNo'],$db,$rootpath);
+}
 } else {
 	$FromTransNo = '';
 }
 
+/* End of logic */
 If (!isset($_POST['ToTransNo'])
 	or trim($_POST['ToTransNo'])==''
 	or ConvertSOtoInvNo($_POST['ToTransNo'],$db,$rootpath) < $FromTransNo) {
@@ -647,13 +654,16 @@ If (isset($PrintPDF)
             unset($TotalSaleAmount);
             unset($tempAP);
 	} /* end loop to print invoices */
-        
+
 /* 15052014 Send Email Through POST Method, Will replace the GET method due to meta syntax not allow double quotation*/
 	if (isset($_POST['EmailAddr'])){ 
 		include('includes/header.inc');
-
-		include ('includes/htmlMimeMail.php');
-		$FileName =  'Inv_' .$FromTransNo . '.pdf';
+                include ('includes/htmlMimeMail.php');
+                
+                $FileName =   'Inv_' . $myrow['sales_ref_num'] . '.pdf';
+                if($InvOrCredit=='Invoice'){
+                    $FromTransNo=$_POST['InvoiceNumber'];
+                }
                 /* 05152014 use different email templates */
                 if(isset($_POST['EmailSubject']) and $_POST['EmailSubject']!=''){
                 $EmailSubject=$_POST['EmailSubject'];
@@ -696,9 +706,6 @@ If (isset($PrintPDF)
 
 		$title = _('Emailing') . ' ' .$InvOrCredit . ' ' . _('Number') . ' ' . $_POST['InvoiceNumber'];
 		include('includes/header.inc');
-                if($InvOrCredit=='Invoice'){
-                    $FromTransNo=$_POST['InvoiceNumber'];
-                }
 		echo '<p>' . $InvOrCredit . ' '  . _('number') . ' ' . $FromTransNo . ' ' . _('has been emailed to') . ' ' . $_POST['EmailAddr'];
 		include('includes/footer.inc');
 		exit;
