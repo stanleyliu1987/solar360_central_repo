@@ -42,10 +42,11 @@ echo '<input type=hidden name="InvOrCredit" value="' . $_GET['InvOrCredit'] . '"
 echo '<input type=hidden name="PrintPDF" value="Yes">';
 
 
-$SQL = "SELECT custbranch.email, debtortrans.debtorno, debtortrans.order_
-		FROM custbranch INNER JOIN debtortrans
-			ON custbranch.debtorno= debtortrans.debtorno
-			AND custbranch.branchcode=debtortrans.branchcode
+$SQL = "SELECT custbranch.email, debtortrans.debtorno, debtortrans.order_, altemail1, altemail2, altemail3,act_prim,act_alt1,act_alt2,act_alt3
+		FROM custbranch INNER JOIN debtortrans ON custbranch.debtorno= debtortrans.debtorno
+		AND custbranch.branchcode=debtortrans.branchcode
+                LEFT JOIN custbranchemails ON custbranch.debtorno= custbranchemails.debtorno
+		AND custbranch.branchcode=custbranchemails.branchcode
 	WHERE debtortrans.type='" . $TypeCode . "' 
 	AND debtortrans.transno='" .$_GET['FromTransNo'] . "'";
 
@@ -53,14 +54,27 @@ $ErrMsg = _('There was a problem retrieving the contact details for the customer
 $ContactResult=DB_query($SQL,$db,$ErrMsg);
 
 if (DB_num_rows($ContactResult)>0){
-	$EmailAddrRow = DB_fetch_row($ContactResult);
-	$EmailAddress = $EmailAddrRow[0];
-	$CustomerID = $EmailAddrRow[1];
-        $InvoiceNumber= $EmailAddrRow[2];
+	$EmailAddrRow = DB_fetch_array($ContactResult);
+	$CustomerID = $EmailAddrRow['debtorno'];
+        $InvoiceNumber= $EmailAddrRow['order_'];
+        if($EmailAddrRow['act_prim']==1 and isset($EmailAddrRow['email'])){
+        $EmailAddress = $EmailAddrRow['email'];    
+        }
+        if($EmailAddrRow['act_alt1']==1 and isset($EmailAddrRow['altemail1'])){
+        $EmailCCAddress = $EmailAddrRow['altemail1'];   
+        }
+        if($EmailAddrRow['act_alt2']==1 and isset($EmailAddrRow['altemail2'])){
+        $EmailCCAddress .= ', '.$EmailAddrRow['altemail2'];   
+        }
+        if($EmailAddrRow['act_alt3']==1 and isset($EmailAddrRow['altemail3'])){
+        $EmailCCAddress .= ', '.$EmailAddrRow['altemail3'];   
+        }
+         
 } else {
 	$EmailAddress ='';
         $CustomerID='';
         $InvoiceNumber='';
+        $EmailCCAddress='';
 }
 /* 15052014 Logic to Retrieve Customer Record details, duplicate with code in CustomerInquiry.php */
 $SQL = "SELECT debtorsmaster.name,
@@ -192,7 +206,7 @@ echo '</select></td></tr>';
 echo '<tr><td>'  . _('To Address') . ':</td>
 	<td><input type="text" name="EmailAddr" maxlength=60 size=60 value="' . $EmailAddress . '"></td></tr>';
 echo '<tr><td>' . _('CC') . ':</td>
-	<td><input type="text" name="EmailAddrCC" maxlength=60 size=60 value="' . $EmailAddress . '"></td></tr>';
+	<td><input type="text" name="EmailAddrCC" maxlength=60 size=60 value="' . $EmailCCAddress . '"></td></tr>';
 echo '<tr><td>' . _('BCC') . ':</td>
 	<td><input type="text" name="EmailAddrBCC" maxlength=60 size=60></td></tr>';
 echo '<tr><td>'. _('Subject') .':</td>

@@ -89,6 +89,10 @@ if (isset($_POST['submit'])) {
 		$latitude=0.0;
 		$longitude=0.0;
 	}
+        $_POST['act_prim'] = isset($_POST['act_prim'])  ? "1" : "0";
+        $_POST['act_alt1'] = isset($_POST['act_alt1'])  ? "1" : "0";
+        $_POST['act_alt2'] = isset($_POST['act_alt2'])  ? "1" : "0";
+        $_POST['act_alt3'] = isset($_POST['act_alt3'])  ? "1" : "0";
 //	if ($_SESSION['geocode_integration']==1 ){
 //		// Get the lat/long from our geocoding host
 //		$sql = "SELECT * FROM geocode_param WHERE 1";
@@ -165,7 +169,15 @@ if (isset($_POST['submit'])) {
 					WHERE branchcode = '".$SelectedBranch."' AND debtorno='".$DebtorNo."'";
 
 		$msg = $_POST['BrName'] . ' '._('branch has been updated.');
-
+                
+        /* 02062014 Customize Multi Branch Update Emails */
+        $sqlmultiemails = "UPDATE custbranchemails SET
+                           email='" . $_POST['Email'] . "', altemail1='" . $_POST['AltEmail1'] . "', altemail2='" . $_POST['AltEmail2'] . "',
+                           altemail3='" . $_POST['AltEmail3'] . "',act_prim=" . $_POST['act_prim'] . ", act_alt1=". $_POST['act_alt1'] . ", 
+                           act_alt2=" . $_POST['act_alt2'] . ", act_alt3=" . $_POST['act_alt3'].",  prim_comment='" . $_POST['prim_comment'] . "',
+                           alt1_comment='" . $_POST['alt1_comment'] . "', alt2_comment='" . $_POST['alt2_comment'] . "', alt3_comment='" . $_POST['alt3_comment'] . "'
+                           WHERE branchcode = '".$SelectedBranch."' AND debtorno='".$DebtorNo."'";
+        $msgMultEmail=$_POST['BrName'] . ' '._('branch email has been updated.');
 	} else if ($InputError !=1) {
 
 	/*Selected branch is null cos no item selected on first time round so must be adding a	record must be submitting new entries in the new Customer Branches form */
@@ -231,10 +243,20 @@ if (isset($_POST['submit'])) {
 					'" . $_POST['CustBranchCode'] ."',
 					'" . $_POST['DeliverBlind'] . "'
 					)";
-	}
 	echo '<br />';
 	$msg = _('Customer branch').'<b> ' . $_POST['BranchCode'] . ': ' . $_POST['BrName'] . ' </b>'._('has been added, add another branch, or return to the') . ' <a href="index.php">' . _('Main Menu') . '</a>';
-
+        
+        /* 02062014 Customize Multi Branch Insert Emails */ 
+        $sqlmultiemails = "INSERT INTO custbranchemails 
+                           (branchcode,debtorno,email,altemail1,altemail2,altemail3,act_prim,act_alt1,act_alt2,
+                           act_alt3,prim_comment,alt1_comment,alt2_comment,alt3_comment)
+                           VALUES ('" . $_POST['BranchCode'] . "','" . $DebtorNo . "','" . $_POST['Email'] . "','" . $_POST['AltEmail1'] . "',
+                                   '" . $_POST['AltEmail2'] . "','" . $_POST['AltEmail3'] . "','" . $_POST['act_prim'] . "','" . $_POST['act_alt1'] . "',
+                                   '" . $_POST['act_alt2'] . "','" . $_POST['act_alt3'] . "','" . $_POST['prim_comment'] . "','" . $_POST['alt1_comment'] . "',
+                                   '" . $_POST['alt2_comment'] . "','" . $_POST['alt3_comment'] . "')"; 
+        $msgMultEmail=_('Customer branch email').'<b> ' . $_POST['BranchCode'] . ': ' . $_POST['BrName'] . ' </b>'._('has been added successfully');
+    }
+        $ErrMsgMultiEmail = _('The branch email records could not be inserted or updated because');
 	//run the SQL from either of the above possibilites
 
 	$ErrMsg = _('The branch record could not be inserted or updated because');
@@ -244,7 +266,6 @@ if (isset($_POST['submit'])) {
 
 	if (DB_error_no($db) ==0 and $InputError==0) {
 		prnMsg($msg,'success');
-		unset($_POST['BranchCode']);
 		unset($_POST['BrName']);
 		unset($_POST['BrAddress1']);
 		unset($_POST['BrAddress2']);
@@ -260,7 +281,6 @@ if (isset($_POST['submit'])) {
 		unset($_POST['FaxNo']);
 		unset($_POST['ContactName']);
 		unset($_POST['Area']);
-		unset($_POST['Email']);
 		unset($_POST['TaxGroup']);
 		unset($_POST['DefaultLocation']);
 		unset($_POST['DisableTrans']);
@@ -273,6 +293,26 @@ if (isset($_POST['submit'])) {
 		unset($_POST['DeliverBlind']);
 		unset($SelectedBranch);
     }
+    /* 02062014 Insert into Branch email table */
+    	if ($InputError==0) {
+		$resultMultiEmail = DB_query($sqlmultiemails,$db, $ErrMsgMultiEmail);
+	}
+        if (DB_error_no($db) ==0 and $InputError==0) {
+           prnMsg($msgMultEmail,'success'); 
+           unset($_POST['BranchCode']); 
+           unset($_POST['Email']);
+           unset($_POST['AltEmail1']);
+           unset($_POST['AltEmail2']);
+           unset($_POST['AltEmail3']);
+           unset($_POST['act_prim']);
+           unset($_POST['act_alt1']);
+           unset($_POST['act_alt2']);
+           unset($_POST['act_alt3']);
+           unset($_POST['prim_comment']);
+           unset($_POST['alt1_comment']);
+           unset($_POST['alt2_comment']);
+           unset($_POST['alt3_comment']);
+        }
 } else if (isset($_GET['delete'])) {
 //the link to delete a selected record was clicked instead of the submit button
 
@@ -316,7 +356,9 @@ if (isset($_POST['submit'])) {
 				    echo '<br />'._('There are').' ' . $myrow[0] . ' '._('users referring to this Branch/customer');
 				} else {
 
-					$sql="DELETE FROM custbranch WHERE branchcode='" . $SelectedBranch . "' AND debtorno='" . $DebtorNo . "'";
+					$sql="DELETE cb,ce FROM custbranch cb inner join custbranchemails ce 
+                                              ON cb.branchcode=ce.branchcode and cb.debtorno=ce.debtorno
+                                              WHERE cb.branchcode='" . $SelectedBranch . "' AND cb.debtorno='" . $DebtorNo . "'";
 					$ErrMsg = _('The branch record could not be deleted') . ' - ' . _('the SQL server returned the following message');
     					$result = DB_query($sql,$db,$ErrMsg);
 					if (DB_error_no($db)==0){
@@ -371,7 +413,7 @@ if (!isset($SelectedBranch)){
 				<th>'._('Area').'</th>
 				<th>'._('Phone No').'</th>
 				<th>'._('Fax No').'</th>
-				<th>'._('Email').'</th>
+				<th>'._('Email').'</th>    
 				<th>'._('Tax Group').'</th>
 				<th>'._('Enabled?').'</th></tr>';
 
@@ -525,6 +567,29 @@ if (!isset($_GET['delete'])) {
 			$_POST['CustBranchCode'] = $myrow['custbranchcode'];
 			$_POST['DeliverBlind'] = $myrow['deliverblind'];
 		}
+                
+                /* 02062014 Retrieve Customer banch email records */
+                $sql = "SELECT * from custbranchemails WHERE branchcode='".$SelectedBranch."'
+			AND debtorno='".$DebtorNo."'";
+                $result = DB_query($sql, $db);
+		$myrow = DB_fetch_array($result);
+                if ($InputError==0) {
+			$_POST['AltEmail1'] = $myrow['altemail1'];
+			$_POST['AltEmail2']  = $myrow['altemail2'];
+			$_POST['AltEmail3']  = $myrow['altemail3'];
+                        $checked_prim=($myrow['act_prim']==1)?'checked':'';
+                        $checked_alt1=($myrow['act_alt1']==1)?'checked':'';
+                        $checked_alt2=($myrow['act_alt2']==1)?'checked':'';
+                        $checked_alt3=($myrow['act_alt3']==1)?'checked':'';
+//			$_POST['act_prim']  = $myrow['act_prim'];
+//			$_POST['act_alt1']  = $myrow['act_alt1'];
+//			$_POST['act_alt2']  = $myrow['act_alt2'];
+//                      $_POST['act_alt3']  = $myrow['act_alt3'];
+                        $_POST['prim_comment']  = $myrow['prim_comment'];
+                        $_POST['alt1_comment']  = $myrow['alt1_comment'];
+                        $_POST['alt2_comment']  = $myrow['alt2_comment'];
+                        $_POST['alt3_comment']  = $myrow['alt3_comment'];
+                }
 
 		echo '<input type=hidden name="SelectedBranch" value="' . $SelectedBranch . '" />';
 		echo '<input type=hidden name="BranchCode" value="' . $_POST['BranchCode'] . '" />';
@@ -628,7 +693,7 @@ if (!isset($_GET['delete'])) {
 	echo '<td><input tabindex=9 type="text" name="BrAddress6" size=16 maxlength=15 value="'. $_POST['BrAddress6'].'"></td></tr>';
 	echo '<tr><td>'._('Special Instructions').':</td>';
 	if (!isset($_POST['specialinstructions'])) {$_POST['specialinstructions']='';}
-	echo '<td><input tabindex=10 type="text" name="specialinstructions" size=56 value="'. $_POST['specialinstructions'].'"></td></tr>';
+	echo '<td><input tabindex=10 type="text" name="specialinstructions" size=41 value="'. $_POST['specialinstructions'].'"></td></tr>';
 	echo '<tr><td>'._('Default days to deliver').':</td>';
 	if (!isset($_POST['EstDeliveryDays'])) {$_POST['EstDeliveryDays']=0;}
 	echo '<td><input ' .(in_array('EstDeliveryDays',$Errors) ?  'class="inputerror"' : '' ) .' tabindex=11 type="text" class=number name="EstDeliveryDays" size=4 maxlength=2 value='. $_POST['EstDeliveryDays'].'></td></tr>';
@@ -711,12 +776,36 @@ if (!isset($_GET['delete'])) {
 	echo '<tr><td>'._('Fax Number').':</td>';
 	if (!isset($_POST['FaxNo'])) {$_POST['FaxNo']='';}
 	echo '<td><input tabindex=17 type="Text" name="FaxNo" size=22 maxlength=20 value="'. $_POST['FaxNo'].'"></td></tr>';
-
+        
+        echo '<tr><td></td><td></td><td>Invoice</td><td>Comments:</td>';
 	if (!isset($_POST['Email'])) {$_POST['Email']='';}
-	echo '<tr><td>'.(($_POST['Email']) ? '<a href="Mailto:'.$_POST['Email'].'">'._('Email').':</a>' : _('Email').':').'</td>';
+	echo '<tr><td>'.(($_POST['Email']) ? '<a href="Mailto:'.$_POST['Email'].'">'._('Primary Email Address').':</a>' : _('Primary Email Address').':').'</td>';
       //only display email link if there is an email address
-	echo '<td><input tabindex=18 type="text" name="Email" size=56 maxlength=55 value="'. $_POST['Email'].'"></td></tr>';
 
+       
+	echo '<td><input tabindex=18 type="text" name="Email" size=41 maxlength=55 value="'. $_POST['Email'].'"></td>
+              <td><input tabindex=18 type="checkbox" value=1 name="act_prim"  '.$checked_prim.'></td>
+              <td><input tabindex=18 type="text" name="prim_comment" value="'. $_POST['prim_comment'].'"></td></tr>';
+        /* 29052014 by Stan Add Alternate Address fields */
+        if (!isset($_POST['AltEmail1'])) {$_POST['AltEmail1']='';}
+	echo '<tr><td>'.(($_POST['AltEmail1']) ? '<a href="Mailto:'.$_POST['AltEmail1'].'">'._('Alternate Email Address1').':</a>' : _('Alternate Email Address1').':').'</td>';
+        echo '<td><input tabindex=18 type="text" name="AltEmail1" size=41 maxlength=55 value="'. $_POST['AltEmail1'].'">
+              <td><input tabindex=18 type="checkbox" value=1 name="act_alt1"  '.$checked_alt1.'></td>
+              <td><input tabindex=18 type="text" name="alt1_comment" value="'. $_POST['alt1_comment'].'"></td></tr>';
+        
+        if (!isset($_POST['AltEmail2'])) {$_POST['AltEmail2']='';}
+	echo '<tr><td>'.(($_POST['AltEmail2']) ? '<a href="Mailto:'.$_POST['AltEmail2'].'">'._('Alternate Email Address2').':</a>' : _('Alternate Email Address2').':').'</td>';
+        echo '<td><input tabindex=18 type="text" name="AltEmail2" size=41 maxlength=55 value="'. $_POST['AltEmail2'].'"></td>
+              <td><input tabindex=18 type="checkbox" value=1 name="act_alt2" '.$checked_alt2.'></td>
+              <td><input tabindex=18 type="text" name="alt2_comment" value="'. $_POST['alt2_comment'].'"></td></tr>';
+        
+        if (!isset($_POST['AltEmail3'])) {$_POST['AltEmail3']='';}
+	echo '<tr><td>'.(($_POST['AltEmail3']) ? '<a href="Mailto:'.$_POST['AltEmail3'].'">'._('Alternate Email Address3').':</a>' : _('Alternate Email Address3').':').'</td>';
+        echo '<td><input tabindex=18 type="text" name="AltEmail3" size=41 maxlength=55 value="'. $_POST['AltEmail3'].'"></td>
+              <td><input tabindex=18 type="checkbox" value=1 name="act_alt3" '.$checked_alt3.'></td>
+              <td><input tabindex=18 type="text" name="alt3_comment" value="'. $_POST['alt3_comment'].'"></td></tr>';
+       /* End of Logic */
+        
 	echo '<tr><td>'._('Tax Group').':</td>';
 	echo '<td><select tabindex=19 name="TaxGroup">';
 
