@@ -328,6 +328,12 @@ if (count($_SESSION['AllowedPageSecurityTokens'])==1 and $SupplierLogin==0){
 								<?php echo '<p>&bull; <a href="' . $rootpath . '/SelectInvoice.php">' . _('Invoice Modification') . '</a></p>'; ?>
 							</td>
 							</tr>
+                                                        <tr>
+							<td class="menu_group_item">
+
+								<?php echo '<p>&bull; <a href="' . $rootpath . '/OrderManagement.php">' . _('Order Management') . '</a></p>'; ?>
+							</td>
+							</tr>
 						</table>
 					</td>
 					<td class="menu_group_items">

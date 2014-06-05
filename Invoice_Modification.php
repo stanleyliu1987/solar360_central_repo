@@ -19,7 +19,7 @@ if (isset($_GET['ModifyOrderNumber'])) {
 include('includes/header.inc');
 include('includes/GetPrice.inc');
 include('includes/SQL_CommonFunctions.inc');
-echo '<a href="' . $rootpath . '/SelectInvoice.php">' . _('Back to Search Invoice') . '</a> ';
+echo '<a href="' . $rootpath . '/OrderManagement.php">' . _('Back to Search Invoice') . '</a> ';
 
 
 if (isset($_POST['order_items'])) {
@@ -273,6 +273,7 @@ if (isset($_POST['CancelOrder'])) {
             /* Update invoice details to null, and invoice tax to 0 */
             $SQL = "UPDATE debtortrans, debtortranstaxes SET debtortranstaxes.taxamount=0,
                                        debtortrans.mod_flag=2,
+                                       debtortrans.order_stages=4,
                                        debtortrans.settled=0,
                                        debtortrans.ovamount =0,
                                        debtortrans.ovgst =0,
