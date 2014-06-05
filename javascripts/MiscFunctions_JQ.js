@@ -15,3 +15,16 @@ $(document).ready(function(){
      });
   });
 });
+
+  function ChangeOrderStages(transno){ 
+  $.post("custom/OrderStagesUpdate.php",
+  {
+    OrderStages:$("#OrderStagesList_"+transno).val(),
+    TransnoID:transno
+  },
+  function(data,status){
+     if(status!='success'){ 
+       alert('Order Stages Updated Failed!');
+     }
+    });
+  }
