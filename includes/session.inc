@@ -27,6 +27,7 @@ include($PathPrefix . 'includes/ConnectDB.inc');
 include($PathPrefix . 'includes/DateFunctions.inc');
 include($PathPrefix . 'includes/ConstParameter.inc');
 include($PathPrefix . 'custom/EmailAuditLog.php');
+include($PathPrefix . 'custom/CustomerTransSearch.php');
 include($PathPrefix . 'custom/bean/Bean.php');
 include($PathPrefix . 'custom/bean/EmailAuditLogBean.php');
 // Un comment to turn off attempts counter

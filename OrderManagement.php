@@ -7,13 +7,20 @@ $title = 'Search Invoice';
 include('includes/session.inc');
 include('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
+$CustomerSearch=new CustomerTransSearch($db);
+$SearchArray='';
+$RowIndex = 0;
 
-if (isset($_GET['OrderNumber'])){
-	$OrderNumber=trim($_GET['OrderNumber']);
-} elseif (isset($_POST['OrderNumber'])){
-	$OrderNumber=trim($_POST['OrderNumber']);
+
+if(!isset($_POST['PageOffset']) || $_POST['PageOffset'] == 0){
+    $_POST['PageOffset']=1;
+} 
+    
+if ($_SESSION['InvoicePortraitFormat']==1){ //Invoice/credits in portrait
+		$PrintCustomerTransactionScript = 'PrintCustTransPortrait.php';
+} else { //produce pdfs in landscape
+		$PrintCustomerTransactionScript = 'PrintCustTrans.php';
 }
-
 echo '<form action="' . $_SERVER['PHP_SELF'] . '" method=post>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 echo '<a href="' . $rootpath . '/index.php">' . _('Back to Main Menu') . '</a>';
@@ -49,279 +56,215 @@ if (isset($_GET['RelaseOrderNumber']) and $_GET['RelaseOrderNumber']!='') {
     
        $SQL = DB_Txn_Commit($db);
 }
-/*Display Invoice Number*/
 
-if (isset($OrderNumber) AND $OrderNumber!='') {
-	if (!is_numeric($OrderNumber)){
-		echo '<br><b>' . _('The Invoice Number entered') . ' <U>' . _('MUST') . '</U> ' . _('be numeric') . '.</b><br>';
-		unset ($OrderNumber);
+/*Search Invoice according to partial infomation*/
+if (isset($_POST['Search']) or isset($_POST['SearchOrders']) or isset($_POST['Go']) OR isset($_POST['Next']) OR isset($_POST['Previous'])) {
+        if (strlen($_POST['OrderNumber'])>0) {
+		$msg = _('Search Result: Order Number has been used in search') . '<br />';
+	}elseif (strlen($_POST['Keywords'])>0) {
+		$msg = _('Search Result: Customer Name has been used in search') . '<br />';
+		$_POST['Keywords'] = strtoupper($_POST['Keywords']);
+	}elseif (strlen($_POST['CustCode'])>0) {
+		$msg = _('Search Result: Customer Code has been used in search') . '<br />';
+	}elseif (strlen($_POST['CustPhone'])>0) {
+		$msg = _('Search Result: Customer Phone has been used in search') . '<br />';
+	}elseif (strlen($_POST['CustAdd'])>0) {
+		$msg = _('Search Result: Customer Address has been used in search') . '<br />';
+	}elseif (strlen($_POST['CustBranchContact'])>0) {
+		$msg = _('Search Result: Customer Branch Contact has been used in search') . '<br />';
+	} elseif (isset($_POST['CustType']) AND $_POST['CustType']!='ALL') {
+		$msg = _('Search Result: Customer Type has been used in search') . '<br />';
+	} elseif (isset($_POST['Area']) AND $_POST['Area']!='ALL') {
+		$msg = _('Search Result: Customer branch area has been used in search') . '<br />';
+	} elseif (isset($_POST['OrderStages']) AND $_POST['OrderStages']!='ALL') {
+		$msg = _('Search Result: Customer order stage has been used in search') . '<br />';
+	}
+        $SearchArray = array(
+         "OrderNumber"=>$_POST['OrderNumber'],
+         "CustName"=>$_POST['Keywords'],
+         "CustCode"=>$_POST['CustCode'],
+         "CustPhone"=>$_POST['CustPhone'],   
+         "CustAdd"=>$_POST['CustAdd'],   
+         "CustBranchContact"=>$_POST['CustBranchContact'],
+         "CustType"=>$_POST['CustType'],
+         "Area"=>$_POST['Area'],
+         "OrderStage"=>$_POST['OrderStages']   
+            );
+ } 
+       $InvoicesResult=$CustomerSearch->SearchCustomerTransResult($SearchArray); 
+/*EndSearch Invoice according to partial infomation*/
+
+if (strlen($msg)>1){
+	prnMsg($msg,'info');
+}
+/*Display Invoice Search Options*/	
+echo '<p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/magnifier.png" title="' . _('Search') . '" alt="">' . ' ' . $title.'</p>';
+echo '<table class=selection><tr><td>'._('Invoice Number') . ': <input type="text" name="OrderNumber" maxlength="8" size="9" value="' . $_POST['OrderNumber'] . '" />  '
+    .'<input type=submit name="SearchOrders" value="' . _('Search Invoices') . '"></td></tr></table>';
+
+/* Search By Customer Details */
+echo '<p class="page_title_text"><img src="' . $rootpath . '/css/' . $theme . '/images/magnifier.png" title="' . _('Search') . '" alt="" />' . ' ' . _('Search for Customers').'</p>';
+echo '<table cellpadding="3" colspan="4" class="selection">';
+echo '<tr><td colspan="2">' . _('Enter a partial Name') . ':</td><td>';
+echo '<input type="Text" name="Keywords" value="' . $_POST['Keywords'] . '" size="20" maxlength="25">';
+echo '</td><td><font size=3><b>' . _('OR') . '</b></font></td><td>' . _('Enter a partial Code') . ':</td><td>';
+echo '<input type="Text" name="CustCode" value="' . $_POST['CustCode'] . '" size="15" maxlength="18">';
+echo '</td></tr><tr><td><font size=3><b>' . _('OR') . '</b></font></td><td>' . _('Enter a partial Phone Number') . ':</td><td>';
+echo '<input type="Text" name="CustPhone" value="' . $_POST['CustPhone'] . '" size="15" maxlength="18"></td>';
+echo '<td><font size=3><b>' . _('OR') . '</b></font></td><td>' . _('Enter part of the Address') . ':</td><td>';
+echo '<input type="Text" name="CustAdd" value="' . $_POST['CustAdd'] . '" size=20 maxlength=25></td></tr>';
+echo '<tr><td><font size=3><b>' . _('OR') . '</b></font></td><td>' . _('Enter a partial Branch Contact') . ':</td><td>';
+echo '<input type="Text" name="CustBranchContact" value="' . $_POST['CustBranchContact'] . '" size="20" maxlength="25"></td>';
+
+/* Search By Customer Types */
+echo '<td><font size=3><b>' . _('OR') . '</b></font></td><td>' . _('Choose a Type') . ':</td><td>';
+if (isset($_POST['CustType'])) {
+	// Show Customer Type drop down list
+	$result2 = DB_query('SELECT typeid, typename FROM debtortype', $db);
+	// Error if no customer types setup
+	if (DB_num_rows($result2) == 0) {
+		$DataError = 1;
+		echo '<a href="CustomerTypes.php?" target="_parent">Setup Types</a>';
+		echo '<tr><td colspan=2>' . prnMsg(_('No Customer types defined'), 'error') . '</td></tr>';
 	} else {
-		echo '<br>'._('Invoice Number') . '  ' . $OrderNumber.'';
+		// If OK show select box with option selected
+		echo '<select name="CustType">';
+		echo '<option value="ALL">' . _('Any') . '</option>';
+		while ($myrow = DB_fetch_array($result2)) {
+			if ($_POST['CustType'] == $myrow['typename']) {
+				echo '<option selected value="' . $myrow['typename'] . '">' . $myrow['typename']  . '</option>';
+			} else {
+				echo '<option value="' . $myrow['typename'] . '">' . $myrow['typename']  . '</option>';
+			}
+		} //end while loop
+		DB_data_seek($result2, 0);
+		echo '</select></td>';
+	}
+} else {
+	// No option selected yet, so show Customer Type drop down list
+	$result2 = DB_query('SELECT typeid, typename FROM debtortype', $db);
+	// Error if no customer types setup
+	if (DB_num_rows($result2) == 0) {
+		$DataError = 1;
+		echo '<a href="CustomerTypes.php?" target="_parent">Setup Types</a>';
+		echo '<tr><td colspan=2>' . prnMsg(_('No Customer types defined'), 'error') . '</td></tr>';
+	} else {
+		// if OK show select box with available options to choose
+		echo '<select name="CustType">';
+		echo '<option value="ALL">' . _('Any'). '</option>';
+		while ($myrow = DB_fetch_array($result2)) {
+			echo '<option value="' . $myrow['typename'] . '">' . $myrow['typename'] . '</option>';
+		} //end while loop
+		DB_data_seek($result2, 0);
+		echo '</select></td></tr>';
 	}
 }
 
-                 $SQL = "SELECT debtortrans.id,  debtortrans.transno,
-                                        debtortrans.trandate,
-					debtortrans.ovamount,
-                                        debtortrans.order_,
-					debtortrans.ovdiscount,
-					debtortrans.ovfreight,
-					debtortrans.ovgst,
-					debtortrans.rate,
-					debtortrans.invtext,
-					debtortrans.consignment,
-                                        debtortrans.mod_flag,
-					debtorsmaster.name,
-					custbranch.brname,
-					debtortrans.debtorno,
-					debtortrans.branchcode,
-                                        debtortrans.sales_ref_num,
-                                        invoice_status.status as invoice_status,
-                                        order_stages.stages as order_stages,
-                                        debtortrans.order_stages
-				FROM debtortrans,
-					debtorsmaster,
-					custbranch,
-					invoice_status,
-                                        order_stages
-				WHERE  debtortrans.type=10
-				AND debtortrans.debtorno=debtorsmaster.debtorno
-				AND debtortrans.debtorno=custbranch.debtorno
-				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag=invoice_status.status_id
-                                AND debtortrans.order_stages=order_stages.stages_id
-                                order by debtortrans.trandate desc , debtortrans.sales_ref_num desc";
-/*Search Invoice according to partial infomation*/
-
-if (isset($_POST['SearchParts'])) {
-	
-	
-	if (!empty($_POST['CustCode']) AND !empty($_POST['CustName'])) {
-	
-		//insert wildcard characters in spaces
-		$SearchName = '%' . str_replace(' ', '%', $_POST['CustName']) . '%';
-                $SearchCode = '%' . str_replace(' ', '%', $_POST['CustCode']) . '%';
-                $SQL = "SELECT  debtortrans.id, debtortrans.transno,
-                                        debtortrans.trandate,
-					debtortrans.ovamount,
-					debtortrans.ovdiscount,
-                                        debtortrans.order_,
-					debtortrans.ovfreight,
-					debtortrans.ovgst,
-					debtortrans.rate,
-					debtortrans.invtext,
-					debtortrans.consignment,
-                                        debtortrans.mod_flag,
-					debtorsmaster.name,
-					custbranch.brname,
-					debtortrans.debtorno,
-					debtortrans.branchcode,
-                                        debtortrans.sales_ref_num,
-                                        invoice_status.status as invoice_status,
-                                        order_stages.stages as order_stages,
-                                        debtortrans.order_stages
-				FROM debtortrans,
-					debtorsmaster,
-					custbranch,
-                                        invoice_status,
-                                        order_stages
-				WHERE  debtortrans.type=10
-                                AND debtorsmaster.name " . LIKE . " '" . $SearchName ."'
-				AND  debtortrans.debtorno " . LIKE . " '" . $SearchCode ."'
-				AND debtortrans.debtorno=debtorsmaster.debtorno
-				AND debtortrans.debtorno=custbranch.debtorno
-				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag=invoice_status.status_id
-                                AND debtortrans.order_stages=order_stages.stages_id 
-                                 order by debtortrans.trandate desc ,debtortrans.sales_ref_num desc";
-              
-  
-        }
-        elseif(!empty($_POST['CustCode']) AND empty($_POST['CustName'])){
-                $SearchCode = '%' . str_replace(' ', '%', $_POST['CustCode']) . '%';
-                $SQL = "SELECT debtortrans.id,  debtortrans.transno,
-                                        debtortrans.trandate,
-					debtortrans.ovamount,
-					debtortrans.ovdiscount,
-                                        debtortrans.order_,
-					debtortrans.ovfreight,
-					debtortrans.ovgst,
-					debtortrans.rate,
-					debtortrans.invtext,
-					debtortrans.consignment,
-                                        debtortrans.mod_flag,
-					debtorsmaster.name,
-					custbranch.brname,
-					debtortrans.debtorno,
-					debtortrans.branchcode,
-                                        debtortrans.sales_ref_num,
-                                        invoice_status.status as invoice_status,
-                                        order_stages.stages as order_stages,
-                                        debtortrans.order_stages
-				FROM debtortrans,
-					debtorsmaster,
-					custbranch,
-                                        invoice_status,
-                                        order_stages
-				WHERE  debtortrans.type=10
-				AND  debtortrans.debtorno " . LIKE . " '" . $SearchCode ."'
-				AND debtortrans.debtorno=debtorsmaster.debtorno
-				AND debtortrans.debtorno=custbranch.debtorno
-				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag=invoice_status.status_id
-                                AND debtortrans.order_stages=order_stages.stages_id  
-                                order by debtortrans.trandate desc , debtortrans.sales_ref_num asc";
-        }
-        elseif(empty($_POST['CustCode']) AND !empty($_POST['CustName'])){
-            $SearchName = '%' . str_replace(' ', '%', $_POST['CustName']) . '%';
-            $SQL = "SELECT  debtortrans.id,  debtortrans.transno,
-                                        debtortrans.trandate,
-					debtortrans.ovamount,
-					debtortrans.ovdiscount,
-                                        debtortrans.order_,
-					debtortrans.ovfreight,
-					debtortrans.ovgst,
-					debtortrans.rate,
-					debtortrans.invtext,
-					debtortrans.consignment,
-                                        debtortrans.mod_flag,
-					debtorsmaster.name,
-					custbranch.brname,
-					debtortrans.debtorno,
-					debtortrans.branchcode,
-                                        debtortrans.sales_ref_num,
-                                        invoice_status.status as invoice_status,
-                                        order_stages.stages as order_stages,
-                                        debtortrans.order_stages
-				FROM debtortrans,
-					debtorsmaster,
-					custbranch,
-                                        invoice_status,
-                                        order_stages
-				WHERE  debtortrans.type=10
-                                AND debtorsmaster.name " . LIKE . " '" . $SearchName ."'
-				AND debtortrans.debtorno=debtorsmaster.debtorno
-				AND debtortrans.debtorno=custbranch.debtorno
-				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag=invoice_status.status_id
-                                AND debtortrans.order_stages=order_stages.stages_id   
-                                 order by debtortrans.trandate desc , debtortrans.sales_ref_num desc";
-        }
-   
+/* Option to select a order stage */
+$OrderStagesSQL= "SELECT * FROM order_stages";
+$orderstageslist = DB_query($OrderStagesSQL,$db);
+/* End of logic */      
+$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['transno'].'" name="OrderStagesList_'.$myrow['transno'].'" onchange="ChangeOrderStages(\''.$myrow['transno'].'\');">';
+while ($os = DB_fetch_array($orderstageslist)) {
+if($os["stages_id"]==$myrow['order_stages'])    
+$OrderStagesDropdown.= '<option value='.$os["stages_id"].' selected>'.$os["stages"].'</option>';
+else
+$OrderStagesDropdown.= '<option value='.$os["stages_id"].'>'.$os["stages"].'</option>';    
+//}
 }
-
-
-
-/*EndSearch Invoice according to partial infomation*/
-
-
-/*Display Invoice Search Options*/	
-echo '<p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/magnifier.png" title="' . _('Search') . '" alt="">' . ' ' . $title.'</p>';
-echo '<table class=selection><tr><td>'._('Invoice Number') . ': <input type="text" name="OrderNumber" maxlength="8" size="9" />  '
-    .'<input type=submit name="SearchOrders" value="' . _('Search Invoices') . '"></td></tr></table>';
-
-
-echo '<br /><font size=1><div class="page_help_text">' ._('To search for Invoice for a specific part use the part selection facilities below')
-		.'</div> </font>';
-echo '<br /><table class="selection"><tr>';
-
-echo '<td><font size=1>' . _('Enter a partial') . '<b>' . _(' Customer Code') . '</b>:</font></td>';
-echo '<td><input type="Text" name="CustCode" size=20 maxlength=25></td></tr>';
-echo '<tr><td><font size<b>' . _('OR') . '</b></font><font size=1>' .  _(' A partial') .  '<b>' .  _(' Customer Name') . '</b>:</font></td>';
-echo '<td><input type="Text" name="CustName"></td></tr></table><br>';
-echo '<table><tr><td><input type=submit name="SearchParts" value="' . _('Search Parts') . '">';
-echo '<input type=submit name="SearchParts" value="' . _('Show All') . '"></td></tr></table>';
-echo '<br />';
-
-
-
-
-
-
-/*Search Invoice base on specific Invoice Number*/
-	if (isset($OrderNumber) && $OrderNumber !='') {
-     $SQL = "SELECT debtortrans.id, 
-                    debtortrans.transno,
-                                        debtortrans.trandate,
-                                        debtortrans.order_,
-					debtortrans.ovamount,
-					debtortrans.ovdiscount,
-					debtortrans.ovfreight,
-					debtortrans.ovgst,
-					debtortrans.rate,
-					debtortrans.invtext,
-					debtortrans.consignment,
-                                        debtortrans.mod_flag,
-					debtorsmaster.name,
-					custbranch.brname,
-					debtortrans.debtorno,
-					debtortrans.branchcode,
-                                        debtortrans.sales_ref_num,
-                                        invoice_status.status as invoice_status,
-                                        order_stages.stages as order_stages,
-                                        debtortrans.order_stages
-				FROM debtortrans,
-					debtorsmaster,
-					custbranch,
-                                        invoice_status,
-                                        order_stages
-				WHERE  debtortrans.type=10
-                                AND debtortrans.order_='" . $OrderNumber . "'
-				AND debtortrans.debtorno=debtorsmaster.debtorno
-				AND debtortrans.debtorno=custbranch.debtorno
-				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag=invoice_status.status_id
-                                AND debtortrans.order_stages=order_stages.stages_id  
-                                order by debtortrans.trandate desc , debtortrans.sales_ref_num desc";
-
-       
-	} else {
-// search via status
-   } 
+$OrderStagesDropdown.= '</select>'; 
+echo '<tr><td><font size=3><b>' . _('OR') . '</b></font></td><td>' . _('Choose a Order Stage') . ':</td><td>';
+$result2 = DB_query("SELECT * FROM order_stages order by stages_id", $db);
+// Error if no sales areas setup
+if (DB_num_rows($result2) != 0) {
+	// if OK show select box with available options to choose
+	echo '<select name="OrderStages">';
+	echo '<option value="ALL">' . _('Any') . '</option>';
+	while ($myrow = DB_fetch_array($result2)) {
+		if (isset($_POST['OrderStages']) and $_POST['OrderStages']==$myrow['stages_id']) {
+			echo '<option selected value="' . $myrow['stages_id'] . '">' . $myrow['stages'] . '</option>';
+		} else {
+			echo '<option value="' . $myrow['stages_id'] . '">' . $myrow['stages'] . '</option>';
+		}
+	} //end while loop
+	DB_data_seek($result2, 0);
+	echo '</select></td>';
+}
+/* Option to select a sales area */
+echo '<td><font size=3><b>' . _('OR') . '</b></font></td><td>' . _('Choose an Area') . ':</td><td>';
+$result2 = DB_query('SELECT areacode, areadescription FROM areas', $db);
+// Error if no sales areas setup
+if (DB_num_rows($result2) == 0) {
+	$DataError = 1;
+	echo '<a href="Areas.php?" target="_parent">' . _('Setup Types') . '</a>';
+	echo '<tr><td colspan=2>' . prnMsg(_('No Sales Areas defined'), 'error') . '</td></tr>';
+} else {
+	// if OK show select box with available options to choose
+	echo '<select name="Area">';
+	echo '<option value="ALL">' . _('Any') . '</option>';
+	while ($myrow = DB_fetch_array($result2)) {
+		if (isset($_POST['Area']) and $_POST['Area']==$myrow['areacode']) {
+			echo '<option selected value="' . $myrow['areacode'] . '">' . $myrow['areadescription'] . '</option>';
+		} else {
+			echo '<option value="' . $myrow['areacode'] . '">' . $myrow['areadescription'] . '</option>';
+		}
+	} //end while loop
+	DB_data_seek($result2, 0);
+	echo '</select></td></tr>';      
+}
+echo '</table><br />';
+ echo '<div align=center><input type=submit name="Search" value="' . _('Search Now') . '"></div>';
    
-   //Pagination for Select Invoice List
-   	if (isset($_POST['Next'])) {
-			$Offset = $_POST['nextlist'];
+//Pagination for Select Invoice List
+    if (isset($InvoicesResult)) {
+	$ListCount = DB_num_rows($InvoicesResult);
+	$ListPageMax = ceil($ListCount / $_SESSION['DisplayRecordsMax']);
+		if (isset($_POST['Next'])) {
+			if ($_POST['PageOffset'] < $ListPageMax) {
+				$_POST['PageOffset'] = $_POST['PageOffset'] + 1;
+			}
 		}
-		if (isset($_POST['Prev'])) {
-			$Offset = $_POST['previous'];
+		if (isset($_POST['Previous'])) {
+			if ($_POST['PageOffset'] > 1) {
+				$_POST['PageOffset'] = $_POST['PageOffset'] - 1;
+			}
 		}
-		if (!isset($Offset) or $Offset<0) {
-			$Offset=0;
-		}
-         $SQL .=  " LIMIT " . $_SESSION['DefaultDisplayRecordsMax'] . " OFFSET " . number_format($_SESSION['DefaultDisplayRecordsMax']*$Offset);
-
-	$ErrMsg = _('No orders were returned by the SQL because');
-	
-	$InvoicesResult = DB_query($SQL,$db,$ErrMsg);
-    
-	
+		if ($ListPageMax > 1) {
+			echo '<p><div class=centre>&nbsp;&nbsp;' . $_POST['PageOffset'] . ' ' . _('of') . ' ' . $ListPageMax . ' ' . _('pages') . '. ' . _('Go to Page') . ': ';
+			echo '<select name="PageOffset">';
+			$ListPage = 1;
+			while ($ListPage <= $ListPageMax) {
+				if ($ListPage == $_POST['PageOffset']) {
+					echo '<option value=' . $ListPage . ' selected>' . $ListPage . '</option>';
+				} else {
+					echo '<option value=' . $ListPage . '>' . $ListPage . '</option>';
+				}
+				$ListPage++;
+			}
+			echo '</select>
+				<input type=submit name="Go" value="' . _('Go') . '">
+				<input type=submit name="Previous" value="' . _('Previous') . '">
+				<input type=submit name="Next" value="' . _('Next') . '">';
+			echo '</div>';
+		}	
         
    /* End Search Invoice base on specific Invoice Number*/
 
    /*Show a table of the Invoices returned by the SQL */
-
 	echo '<table cellpadding=2  width=97% class=selection>';
-        
-        echo '<tr><td colspan=6><input type="hidden" name="previous" value='.number_format($Offset-1).'><input  type="submit" name="Prev" value="'._('Prev').'"></td>';
-        
-        if (DB_num_rows($InvoicesResult)>=$_SESSION['DisplayRecordsMax']){
-        echo '<td><div align=right><input type="hidden" name="nextlist" value='.number_format($Offset+1).'><input  type="submit" name="Next" value="'._('Next').'"></div></td></tr>';
-            }
-	echo '<tr><th>' . _('Invoice #') .
-			'</th><th>' . _('Invoice Date') .
-			'</th><th>' . _('Customer') .
-			'</th><th>' . _('Branch') .
-			'</th>';
+	$TableHeader= '<tr><th>' . _('Invoice #') .
+			'</th><th>' . _('Invoice Date') .'</th>'.
+			'<th>' . _('Customer') .'</th>';
 	if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
-		echo '<th>' . _('Balance') .'</th>';
+	$TableHeader.=  '<th>' . _('Balance') .'</th>';
 	}
-	echo '<th>' . _('Order Stages') . '</th>
-	      <th>' . _('Invoice Status') . '</th></tr>';
+	$TableHeader.=  '<th>' . _('Order Stages') . '</th>
+	                 <th>' . _('Invoice Status') . '</th></tr>';
+        echo $TableHeader;
 	$j = 1;
 	$k=0; 
-        
-while ($myrow=DB_fetch_array($InvoicesResult)) {
+        DB_data_seek($InvoicesResult, ($_POST['PageOffset'] - 1) * $_SESSION['DisplayRecordsMax']);
+while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['DisplayRecordsMax'])) {
 
     $SQLPOExist="select * from purchorders where ref_salesorder='".$myrow['order_']."'";
     
@@ -385,36 +328,30 @@ $OrderStagesDropdown.= '<option value='.$os["stages_id"].'>'.$os["stages"].'</op
 //}
 }
 $OrderStagesDropdown.= '</select>';     
-
-
-  /*  
-   * Turn GL OFF    
-        $SQL="Select count(*) from gltrans where typeno='" . $myrow['transno'] . "' and posted=1";
-        $ifPosted = DB_query($SQL,$db,$ErrMsg);
-        $myrowIfPost=DB_fetch_array($ifPosted);
-        if($myrowIfPost[0]>0){
-          $status = _('Posted');
-          $DisplayBalance=number_format(0,2);
-        }
-    */    
+   
    /*Show a table of the Invoices without modified */
         $FormatedOrderDate = ConvertSQLDate($myrow['trandate']);
 	$FormatedOrderValue = number_format($myrow['ordervalue'],2);
-
-		echo '<td>' . $myrow['sales_ref_num'] . '</td>
+        /* 12062014 Replace Invoice no with pdf download link by Stan*/
+        $RowInvoicePDFLink ='<a href="'.$rootpath.'/'.$PrintCustomerTransactionScript.'?FromTransNo='.$myrow['transno'].'&InvOrCredit=Invoice&PrintPDF=True"><img src="'.$rootpath.'/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '">'  . $myrow['sales_ref_num'] .  '</a>';     
+		echo '<td>' . $RowInvoicePDFLink . '</td>
 					<td>' . $FormatedOrderDate . '</td>
-					<td>' . $myrow['name'] . '</td>
-					<td>' . $myrow['brname'] . '</td>';
+					<td>' . $myrow['name'] . '</td>';
 		if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
 			echo '<td class=number>'.$DisplayBalance . '</td>';
 		}
                 echo  '<td>'.$OrderStagesDropdown.'</td>
                        <td>'.$Invoice_status.'</td>';
 
-        unset($tempAP); 
-   
+        unset($tempAP);
+        $j++;
+	if ($j == 11 AND ($RowIndex + 1 != $_SESSION['DisplayRecordsMax'])) {
+				$j = 1;
+				echo $TableHeader;
+	}
+   $RowIndex++;
    /*End Show a table of the Invoices without modified */  
-
+}
  }	
 
 echo '</table>';
