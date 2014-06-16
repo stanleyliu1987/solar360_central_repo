@@ -26,10 +26,14 @@ session_start();
 include($PathPrefix . 'includes/ConnectDB.inc');
 include($PathPrefix . 'includes/DateFunctions.inc');
 include($PathPrefix . 'includes/ConstParameter.inc');
-include($PathPrefix . 'custom/EmailAuditLog.php');
-include($PathPrefix . 'custom/CustomerTransSearch.php');
+
+include($PathPrefix . 'custom/EmailAuditLogModel.php');
+include($PathPrefix . 'custom/OrderStagesMessageModel.php');
+include($PathPrefix . 'custom/CustomerTransSearchModel.php');
+
 include($PathPrefix . 'custom/bean/Bean.php');
 include($PathPrefix . 'custom/bean/EmailAuditLogBean.php');
+include($PathPrefix . 'custom/bean/OrderStagesMessageBean.php');
 // Un comment to turn off attempts counter
 //$_SESSION['AttemptsCounter'] = 0;
  ob_end_clean();

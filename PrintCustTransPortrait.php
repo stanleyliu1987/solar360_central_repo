@@ -690,7 +690,7 @@ If (isset($PrintPDF)
                 $mail->setBcc($_POST['EmailAddrBCC']);
 		$result = $mail->send(array($_POST['EmailAddr']),'smtp');
                 /* Record Email Audit Log details */
-                $emaillog=new EmailAuditLog($db);
+                $emaillog=new EmailAuditLogModel($db);
                 $emaillogbean=new EmailAuditLogBean();
                 $emaillogbean->senddate=date('Y-m-d H:i:s');
                 $emaillogbean->sendstatus=$result;
