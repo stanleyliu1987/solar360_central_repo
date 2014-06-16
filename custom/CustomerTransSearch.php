@@ -9,9 +9,15 @@
 class CustomerTransSearch{
     
     private $db;
+    private $CustomerID;
+    private $PastDueDays1;
+    private $PastDueDays2;
     
-    function __construct($db) {
+    function __construct($db, $CustomerID, $PastDueDays1, $PastDueDays2) {
         $this->db=$db;
+        $this->CustomerID=$CustomerID;
+        $this->PastDueDays1=$PastDueDays1;
+        $this->PastDueDays2=$PastDueDays2;
     }
     /* Save Email Audit Log Details -- by Stan 22052014 */
     function SearchCustomerTransResult($param){
@@ -371,7 +377,62 @@ else{
            }   
          }
          $ErrMsg = _('No orders were returned by the SQL because');
-	 $result = DB_query($SQL,$this->db,$ErrMsg);
-         Return $result;
+	 Return DB_query($SQL,$this->db,$ErrMsg);
+    }
+    
+    /*16062014 Search Over Due Result by Stan*/
+    function SearchCustomerOverdueResult(){
+        $SQL = "SELECT debtorsmaster.name,
+		currencies.currency,
+		currencies.decimalplaces,
+		paymentterms.terms,
+		debtorsmaster.creditlimit,
+		holdreasons.dissallowinvoices,
+		holdreasons.reasondescription,
+		SUM(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount
+- debtortrans.alloc) AS balance,
+		SUM(CASE WHEN (paymentterms.daysbeforedue > 0) THEN
+			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate)) >= paymentterms.daysbeforedue
+			THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+		ELSE
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(DATE_ADD(DATE_ADD(debtortrans.trandate, " . INTERVAL('1', 'MONTH') . "), " . INTERVAL('(paymentterms.dayinfollowingmonth - DAYOFMONTH(debtortrans.trandate))', 'DAY') . ")) >= 0 THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+		END) AS due,
+		SUM(CASE WHEN (paymentterms.daysbeforedue > 0) THEN
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue
+			AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " .
+		$this->PastDueDays1 . ")
+			THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+		ELSE
+			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(DATE_ADD(DATE_ADD(debtortrans.trandate, ". INTERVAL('1', 'MONTH') . "), " . INTERVAL('(paymentterms.dayinfollowingmonth - DAYOFMONTH(debtortrans.trandate))','DAY') . ")) >= " . $this->PastDueDays1 . ")
+			THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount
+			- debtortrans.alloc ELSE 0 END
+		END) AS overdue1,
+		SUM(CASE WHEN (paymentterms.daysbeforedue > 0) THEN
+			CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue
+			AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $this->PastDueDays2 . ") THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+		ELSE
+			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(DATE_ADD(DATE_ADD(debtortrans.trandate, " . INTERVAL('1','MONTH') . "), " . INTERVAL('(paymentterms.dayinfollowingmonth - DAYOFMONTH(debtortrans.trandate))','DAY') . ")) >= " . $this->PastDueDays2 . ") THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc ELSE 0 END
+		END) AS overdue2
+		FROM debtorsmaster,
+     			paymentterms,
+     			holdreasons,
+     			currencies,
+     			debtortrans
+		WHERE  debtorsmaster.paymentterms = paymentterms.termsindicator
+     		AND debtorsmaster.currcode = currencies.currabrev
+     		AND debtorsmaster.holdreason = holdreasons.reasoncode
+     		AND debtorsmaster.debtorno = '" . $this->CustomerID . "'
+     		AND debtorsmaster.debtorno = debtortrans.debtorno
+		GROUP BY debtorsmaster.name,
+			currencies.currency,
+			paymentterms.terms,
+			paymentterms.daysbeforedue,
+			paymentterms.dayinfollowingmonth,
+			debtorsmaster.creditlimit,
+			holdreasons.dissallowinvoices,
+			holdreasons.reasondescription";
+
+$ErrMsg = _('The customer details could not be retrieved by the SQL because');
+return DB_fetch_array(DB_query($SQL,$this->db,$ErrMsg));
     }
 }

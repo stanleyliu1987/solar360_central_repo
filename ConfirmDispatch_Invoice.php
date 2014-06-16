@@ -12,6 +12,7 @@ include('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
 include('includes/FreightCalculation.inc');
 include('includes/GetSalesTransGLCodes.inc');
+$Order_Stage=0; 
 
 if (!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 	/* This page can only be called with an order number for invoicing*/
@@ -34,6 +35,8 @@ if (!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 	$OrderHeaderSQL = "SELECT salesorders.orderno,
 								salesorders.debtorno,
 								debtorsmaster.name,
+                                                                paymentterms.daysbeforedue,
+                                                                debtorsmaster.creditlimit,
 								salesorders.branchcode,
 								salesorders.customerref,
 								salesorders.comments,
@@ -63,12 +66,14 @@ if (!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 							debtorsmaster,
 							custbranch,
 							currencies,
-							locations
+							locations,
+                                                        paymentterms
 						WHERE salesorders.debtorno = debtorsmaster.debtorno
 						AND salesorders.branchcode = custbranch.branchcode
 						AND salesorders.debtorno = custbranch.debtorno
 						AND locations.loccode=salesorders.fromstkloc
 						AND debtorsmaster.currcode = currencies.currabrev
+                                                AND paymentterms.termsindicator=debtorsmaster.paymentterms
 						AND salesorders.orderno = '" . $_GET['OrderNumber']."'";
 
 	$ErrMsg = _('The order cannot be retrieved because');
@@ -83,6 +88,8 @@ if (!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 		$_SESSION['Items']->OrderNo = $myrow['orderno'];
 		$_SESSION['Items']->Branch = $myrow['branchcode'];
 		$_SESSION['Items']->CustomerName = $myrow['name'];
+                $_SESSION['Items']->PaymentTerms = $myrow['daysbeforedue'];
+                $_SESSION['Items']->CreditAvailable=$myrow['creditlimit'];
 		$_SESSION['Items']->CustRef = $myrow['customerref'];
 		$_SESSION['Items']->Comments = $myrow['comments'];
 		$_SESSION['Items']->DefaultSalesType =$myrow['ordertype'];
@@ -746,6 +753,14 @@ invoices can have a zero amount but there must be a quantity to invoice */
 	$DbgMsg = _('The following SQL to update the sales order was used');
 	$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
 
+/* 160602014 Logic to determine order should be released by Stan */
+        $CustomerSearch=new CustomerTransSearch($db,$_SESSION['Items']->DebtorNo,$_SESSION['PastDueDays1'],$_SESSION['PastDueDays2']); 
+        $CustomerRecord=$CustomerSearch->SearchCustomerOverdueResult();
+        if($_SESSION['Items']->PaymentTerms>1 and $CustomerRecord['balance']<$_SESSION['Items']->CreditAvailable and ($CustomerRecord['due']-$CustomerRecord['overdue1'])<1
+        and ($CustomerRecord['overdue1']-$CustomerRecord['overdue2'])<1 and $CustomerRecord['overdue2']<1){
+        $Order_Stage=1; 
+       }
+
 /*Now insert the DebtorTrans */
 
 	$SQL = "INSERT INTO debtortrans (	transno,
@@ -765,7 +780,8 @@ invoices can have a zero amount but there must be a quantity to invoice */
 									invtext,
 									shipvia,
 									consignment,
-                                                                        sales_ref_num)
+                                                                        sales_ref_num,
+                                                                        order_stages)
 								VALUES (
 									'". $InvoiceNo . "',
 									10,
@@ -784,7 +800,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 									'" . $_POST['InvoiceText'] . "',
 									'" . $_SESSION['Items']->ShipVia . "',
 									'"  . $_POST['Consignment'] . "',	
-                                                                        '". 'W'.$_SESSION['ProcessingOrder'].'-' .$InvoiceNo ."')";
+                                                                        '". 'W'.$_SESSION['ProcessingOrder'].'-' .$InvoiceNo ."','".$Order_Stage."')";
 
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The debtor transaction record could not be inserted because');
 	$DbgMsg = _('The following SQL to insert the debtor transaction record was used');
