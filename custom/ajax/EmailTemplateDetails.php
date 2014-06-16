@@ -4,7 +4,7 @@
  * Return Email Message to openwysiwyg textarea
  * editor  by Stan $ */
 
-$PathPrefix = '../';
+$PathPrefix = '../../';
 $_SESSION['DatabaseName']='solar360';
 //$PageSecurity = 1; // set security level for webERP 
 include($PathPrefix . 'config.php');

@@ -6,7 +6,7 @@
  * and open the template in the editor.
  */
 
-class CustomerTransSearch{
+class CustomerTransSearchModel{
     
     private $db;
     private $CustomerID;

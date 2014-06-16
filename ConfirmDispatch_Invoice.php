@@ -754,13 +754,13 @@ invoices can have a zero amount but there must be a quantity to invoice */
 	$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
 
 /* 160602014 Logic to determine order should be released by Stan */
-        $CustomerSearch=new CustomerTransSearch($db,$_SESSION['Items']->DebtorNo,$_SESSION['PastDueDays1'],$_SESSION['PastDueDays2']); 
+        $CustomerSearch=new CustomerTransSearchModel($db,$_SESSION['Items']->DebtorNo,$_SESSION['PastDueDays1'],$_SESSION['PastDueDays2']); 
         $CustomerRecord=$CustomerSearch->SearchCustomerOverdueResult();
         if($_SESSION['Items']->PaymentTerms>1 and $CustomerRecord['balance']<$_SESSION['Items']->CreditAvailable and ($CustomerRecord['due']-$CustomerRecord['overdue1'])<1
         and ($CustomerRecord['overdue1']-$CustomerRecord['overdue2'])<1 and $CustomerRecord['overdue2']<1){
         $Order_Stage=1; 
        }
-
+/* end of logic */       
 /*Now insert the DebtorTrans */
 
 	$SQL = "INSERT INTO debtortrans (	transno,
@@ -807,7 +807,14 @@ invoices can have a zero amount but there must be a quantity to invoice */
  	$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
                     
 	$DebtorTransID = DB_Last_Insert_ID($db,'debtortrans','id');
-
+/* 16062014 Insert Initial Status of each order into order stages messages table By Stan*/
+        $orderstage=new OrderStagesMessageModel($db);
+        $orderstagebean=new OrderStagesMessageBean();
+        $orderstagebean->changedatetime=date('Y-m-d H:i:s');
+        $orderstagebean->debtortranid=$DebtorTransID;
+        $orderstagebean->orderstagechange=$Order_Stage;
+        $orderstagebean->userid=$_SESSION['UserID'];
+        $orderstage->SaveOrderStagesMessage($orderstagebean);         
 /* Insert the tax totals for each tax authority where tax was charged on the invoice */
 	foreach ($TaxTotals AS $TaxAuthID => $TaxAmount) {
 

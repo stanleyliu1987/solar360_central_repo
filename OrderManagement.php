@@ -7,7 +7,7 @@ $title = 'Search Invoice';
 include('includes/session.inc');
 include('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
-$CustomerSearch=new CustomerTransSearch($db);
+$CustomerSearch=new CustomerTransSearchModel($db);
 $SearchArray='';
 $RowIndex = 0;
 
@@ -23,6 +23,7 @@ if ($_SESSION['InvoicePortraitFormat']==1){ //Invoice/credits in portrait
 }
 echo '<form action="' . $_SERVER['PHP_SELF'] . '" method=post>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
+echo '<input type="hidden" name="UserID" id="UserID" value="' . $_SESSION['UserID'] . '" />';
 echo '<a href="' . $rootpath . '/index.php">' . _('Back to Main Menu') . '</a>';
 
 
@@ -319,7 +320,7 @@ while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['Displ
 $OrderStagesSQL= "SELECT * FROM order_stages";
 $orderstageslist = DB_query($OrderStagesSQL,$db);
 /* End of logic */      
-$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['transno'].'" name="OrderStagesList_'.$myrow['transno'].'" onchange="ChangeOrderStages(\''.$myrow['transno'].'\');">';
+$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['id'].'" name="OrderStagesList_'.$myrow['id'].'" onchange="ChangeOrderStages(\''.$myrow['id'].'\');">';
 while ($os = DB_fetch_array($orderstageslist)) {
 if($os["stages_id"]==$myrow['order_stages'])    
 $OrderStagesDropdown.= '<option value='.$os["stages_id"].' selected>'.$os["stages"].'</option>';
@@ -329,6 +330,9 @@ $OrderStagesDropdown.= '<option value='.$os["stages_id"].'>'.$os["stages"].'</op
 }
 $OrderStagesDropdown.= '</select>';     
    
+   /* 16062014 Check Order Stage Change history by Stan */
+$HistoryButton='<input type=button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStageHistory_'.$myrow['id'].'" value="' . _('History') . '" onclick="popupwindow(\''.$myrow['id'].'\');">';
+   /* End of Logic */
    /*Show a table of the Invoices without modified */
         $FormatedOrderDate = ConvertSQLDate($myrow['trandate']);
 	$FormatedOrderValue = number_format($myrow['ordervalue'],2);
@@ -340,7 +344,7 @@ $OrderStagesDropdown.= '</select>';
 		if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
 			echo '<td class=number>'.$DisplayBalance . '</td>';
 		}
-                echo  '<td>'.$OrderStagesDropdown.'</td>
+                echo  '<td><span>'.$OrderStagesDropdown.'</span><span> '.$HistoryButton.'</span></td>
                        <td>'.$Invoice_status.'</td>';
 
         unset($tempAP);
