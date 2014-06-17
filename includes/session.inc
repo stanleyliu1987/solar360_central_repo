@@ -22,18 +22,21 @@ ini_set('session.gc_Maxlifetime',$SessionLifeTime);
 ini_set('max_execution_time',$MaximumExecutionTime);
 
 session_start();
-
+/* Default weberp class or function */
 include($PathPrefix . 'includes/ConnectDB.inc');
 include($PathPrefix . 'includes/DateFunctions.inc');
 include($PathPrefix . 'includes/ConstParameter.inc');
 
+/* Custom weberp Model Class */
 include($PathPrefix . 'custom/EmailAuditLogModel.php');
 include($PathPrefix . 'custom/OrderStagesMessageModel.php');
 include($PathPrefix . 'custom/CustomerTransSearchModel.php');
-
+include($PathPrefix . 'custom/OrderStagesModel.php');
+/* Custom weberp Bean Class */
 include($PathPrefix . 'custom/bean/Bean.php');
 include($PathPrefix . 'custom/bean/EmailAuditLogBean.php');
 include($PathPrefix . 'custom/bean/OrderStagesMessageBean.php');
+include($PathPrefix . 'custom/bean/OrderStagesBean.php');
 // Un comment to turn off attempts counter
 //$_SESSION['AttemptsCounter'] = 0;
  ob_end_clean();
