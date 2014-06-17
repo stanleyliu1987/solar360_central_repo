@@ -23,3 +23,11 @@
  .leftpanelcontent{min-width:30%;float:left;}
  
  .rightpanelcontent{min-width:70%;float:left;}
+ 
+ button[name^='OrderStageHistory'] {
+	font-family: Arial, Verdana, Helvetica, sans-serif;
+	font-size: 10px;
+}
+select[name^='OrderStagesList']{
+    width: 50%;
+}

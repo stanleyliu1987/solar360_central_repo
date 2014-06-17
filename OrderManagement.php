@@ -326,12 +326,12 @@ if($os["stages_id"]==$myrow['order_stages'])
 $OrderStagesDropdown.= '<option value='.$os["stages_id"].' selected>'.$os["stages"].'</option>';
 else
 $OrderStagesDropdown.= '<option value='.$os["stages_id"].'>'.$os["stages"].'</option>';    
-//}
 }
 $OrderStagesDropdown.= '</select>';     
    
    /* 16062014 Check Order Stage Change history by Stan */
-$HistoryButton='<input type=button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStageHistory_'.$myrow['id'].'" value="' . _('History') . '" onclick="popupwindow(\''.$myrow['id'].'\');">';
+$reportparam= json_encode(array('transid'=>$myrow['id'],'invoiceno'=>$myrow['sales_ref_num']));
+$HistoryButton='<button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStageHistory_'.$myrow['id'].'" value=\'' . $reportparam . '\' disabled >History</button>';
    /* End of Logic */
    /*Show a table of the Invoices without modified */
         $FormatedOrderDate = ConvertSQLDate($myrow['trandate']);
