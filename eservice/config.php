@@ -4,7 +4,7 @@
  * Database Credientail
  */
 //ftp user
-$dbuser='dbuser';
+$dbuser='stan';
 //ftp password
 $dbpassword='sentric01';
 //ftp database

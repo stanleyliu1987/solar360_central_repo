@@ -116,7 +116,7 @@ else{
 
 if(isset($_GET['InvDelStatus']) and $_GET['InvDelStatus']=='yes'){ 
     $sqlupdateInvoiceDelStatus="UPDATE debtortrans
-					SET delivery_status='".$_GET['Invdelstatus']."' 
+					SET order_stages='".$_GET['Invdelstatus']."' 
 					WHERE id = '".$_GET['InvoiceId']."'";
     $ErrMsg =_('The invoice delivery status could not be updated');
     $resultInvDelStatusUpdate=DB_query($sqlupdateInvoiceDelStatus,$db, $ErrMsg); 
@@ -184,18 +184,18 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.sales_ref_num,
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
-                                        deliverystatus.delivery_name,
-                                        deliverystatus.delivery_id
+                                        order_stages.stages,
+                                        order_stages.stages_id
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        deliverystatus
+                                        order_stages
 				WHERE  debtortrans.type=10
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.mod_flag <>2
-                                AND deliverystatus.delivery_id=debtortrans.delivery_status
+                                AND order_stages.stages_id=debtortrans.order_stages
                                 ".$SortFilter;
 	
 		if(strlen($_POST['OrderType']) > 0 AND $_POST['OrderType']!='ALL')  {
@@ -232,19 +232,19 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.sales_ref_num,
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
-                                        deliverystatus.delivery_name,
-                                        deliverystatus.delivery_id
+                                        order_stages.stages,
+                                        order_stages.stages_id
 				FROM    debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        deliverystatus
+                                        order_stages
 				WHERE  debtortrans.type=10
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.mod_flag <>2
-                                AND deliverystatus.delivery_id=debtortrans.delivery_status
-                                AND debtortrans.delivery_status='".$_POST['OrderType']."'
+                                AND order_stages.stages_id=debtortrans.order_stages
+                                AND debtortrans.order_stages='".$_POST['OrderType']."'
                                 ".$SortFilter;
                 }
                 elseif(strlen($_POST['FilterType']) > 0 AND $_POST['FilterType']!='NoFilter'){
@@ -281,12 +281,12 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.sales_ref_num,
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
-                                        deliverystatus.delivery_name,
-                                        deliverystatus.delivery_id
+                                        order_stages.stages,
+                                        order_stages.stages_id
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        deliverystatus,
+                                        order_stages,
                                         purchorders
 				WHERE debtortrans.order_=purchorders.ref_salesorder
                                 AND purchorders.status <> 'Cancelled'
@@ -300,7 +300,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.mod_flag <>2
-                                AND deliverystatus.delivery_id=debtortrans.delivery_status
+                                AND order_stages.stages_id=debtortrans.order_stages
                                 group by debtortrans.order_
                                 ".$SortFilter;
                 }
@@ -339,19 +339,19 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.sales_ref_num,
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
-                                        deliverystatus.delivery_name,
-                                        deliverystatus.delivery_id
+                                        order_stages.stages,
+                                        order_stages.stages_id
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        deliverystatus
+                                        order_stages
 				WHERE  debtortrans.type=10
 				AND  debtortrans.debtorno " . LIKE . " '" . $SearchCode ."'
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.mod_flag <>2
-                                AND deliverystatus.delivery_id=debtortrans.delivery_status
+                                AND order_stages.stages_id=debtortrans.order_stages
                                ".$SortFilter;
                 }
                 elseif(strlen($CustomerName) > 0){
@@ -389,19 +389,19 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.sales_ref_num,
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
-                                        deliverystatus.delivery_name,
-                                        deliverystatus.delivery_id
+                                        order_stages.stages,
+                                        order_stages.stages_id
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        deliverystatus
+                                        order_stages
 				WHERE  debtortrans.type=10
                                 AND debtorsmaster.name " . LIKE . " '" . $SearchName ."'
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.mod_flag <>2
-                                AND deliverystatus.delivery_id=debtortrans.delivery_status
+                                AND order_stages.stages_id=debtortrans.order_stages
                                 ".$SortFilter;
                 }
                elseif(strlen($CustomerBranch) > 0){ 
@@ -439,19 +439,19 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.sales_ref_num,
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
-                                        deliverystatus.delivery_name,
-                                        deliverystatus.delivery_id
+                                        order_stages.stages,
+                                        order_stages.stages_id
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        deliverystatus
+                                        order_stages
 				WHERE  debtortrans.type=10
                                 AND custbranch.brname " . LIKE . " '" . $SearchBranchName ."'
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.mod_flag <>2
-                                AND deliverystatus.delivery_id=debtortrans.delivery_status   
+                                AND order_stages.stages_id=debtortrans.order_stages   
                                 ".$SortFilter;
              
                 }
@@ -476,14 +476,14 @@ echo '<td><input type="Text" id="CustCode" name="CustCode" size=20 maxlength=25 
 
 echo '<td><font size=3><b>' . _('OR') . '</b></font><font size=1>' . _(' Choose a ') . '<b>' . _(' Order Type') . '</b>:</font></td>';
 
-$resultStatus = DB_query('SELECT delivery_id, delivery_name FROM deliverystatus', $db);
+$resultStatus = DB_query('SELECT stages_id, stages FROM order_stages', $db);
 echo '<td><select name="OrderType" id="OrderType" onchange="ChangeOrderTypeDefault(\''._('FilterType').'\');">';
 echo '<option  value="ALL">' . _('Any') . '</option>';
 		while ($myrow = DB_fetch_array($resultStatus)) {
-			if ($_POST['OrderType'] == $myrow['delivery_id']) {
-				echo '<option  selected value="' . $myrow['delivery_id'] . '">' . $myrow['delivery_name']  . '</option>';
+			if ($_POST['OrderType'] == $myrow['stages_id']) {
+				echo '<option  selected value="' . $myrow['stages_id'] . '">' . $myrow['stages']  . '</option>';
 			} else {
-				echo '<option value="' . $myrow['delivery_id'] . '">' . $myrow['delivery_name']  . '</option>';
+				echo '<option value="' . $myrow['stages_id'] . '">' . $myrow['stages']  . '</option>';
 			}
 		} //end while loop
 		
@@ -554,19 +554,19 @@ echo '<br />';
                                         debtortrans.sales_ref_num,
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
-                                        deliverystatus.delivery_name,
-                                        deliverystatus.delivery_id
+                                        order_stages.stages,
+                                        order_stages.stages_id
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        deliverystatus
+                                        order_stages
 				WHERE  debtortrans.type=10
                                 AND debtortrans.transno='" . $OrderNumber . "'
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.mod_flag <>2
-                                AND deliverystatus.delivery_id=debtortrans.delivery_status
+                                AND order_stages.stages_id=debtortrans.order_stages
                                 ".$SortFilter;
 
        
@@ -864,7 +864,7 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
     
    /*Select Whole Invoice Delivery Status */
 
-    $InvDelStatusSQL="select delivery_id, delivery_name from deliverystatus";
+    $InvDelStatusSQL="select stages_id,stages from order_stages";
     
     $ErrMsg = _('No Invoice Delivery Status Exist were returned by the SQL because');
 
@@ -872,11 +872,11 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
           
      while ($InvDelStatusInfo=DB_fetch_array($InvDelStatusList)){
          
-         if($InvDelStatusInfo['delivery_id'] == $myrow['delivery_id']){
-      $InvDelStatusoptions.='<option value="'.$InvDelStatusInfo['delivery_id'].'" selected>'.$InvDelStatusInfo['delivery_name'].'</option>';
+         if($InvDelStatusInfo['stages_id'] == $myrow['stages_id']){
+      $InvDelStatusoptions.='<option value="'.$InvDelStatusInfo['stages_id'].'" selected>'.$InvDelStatusInfo['stages'].'</option>';
          }
          else{
-      $InvDelStatusoptions.='<option value="'.$InvDelStatusInfo['delivery_id'].'">'.$InvDelStatusInfo['delivery_name'].'</option>';        
+      $InvDelStatusoptions.='<option value="'.$InvDelStatusInfo['stages_id'].'">'.$InvDelStatusInfo['stages'].'</option>';        
          }
      }   
     /*

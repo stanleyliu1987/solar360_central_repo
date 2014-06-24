@@ -15,8 +15,16 @@ class EmailAuditLogBean extends Bean{
     protected $emailtoaddress;
     protected $emailccaddress;
     protected $emailbccaddress;
-    
-    public function getSenddate() {
+    protected $userid;
+    public function getUserid() {
+        return $this->userid;
+    }
+
+    public function setUserid($userid) {
+        $this->userid = $userid;
+    }
+
+        public function getSenddate() {
         return $this->senddate;
     }
 

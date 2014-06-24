@@ -34,7 +34,7 @@ if (isset($_GET['RelaseOrderNumber']) and $_GET['RelaseOrderNumber']!='') {
      /* Update invoice details to make mod_flag to modified, and settled to 0 */
 	$SQL = "UPDATE debtortrans, debtortranstaxes SET 
                        debtortrans.mod_flag=1,
-                       debtortrans.order_stages=0,
+                       debtortrans.order_stages=1,
                        debtortrans.settled=0
                 WHERE  debtortrans.id= debtortranstaxes.debtortransid AND                                   
                        debtortrans.transno ='" . $_GET['RelaseOrderNumber'] . "' and debtortrans.type=10";  
@@ -165,15 +165,6 @@ if (isset($_POST['CustType'])) {
 $OrderStagesSQL= "SELECT * FROM order_stages";
 $orderstageslist = DB_query($OrderStagesSQL,$db);
 /* End of logic */      
-$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['transno'].'" name="OrderStagesList_'.$myrow['transno'].'" onchange="ChangeOrderStages(\''.$myrow['transno'].'\');">';
-while ($os = DB_fetch_array($orderstageslist)) {
-if($os["stages_id"]==$myrow['order_stages'])    
-$OrderStagesDropdown.= '<option value='.$os["stages_id"].' selected>'.$os["stages"].'</option>';
-else
-$OrderStagesDropdown.= '<option value='.$os["stages_id"].'>'.$os["stages"].'</option>';    
-//}
-}
-$OrderStagesDropdown.= '</select>'; 
 echo '<tr><td><font size=3><b>' . _('OR') . '</b></font></td><td>' . _('Choose a Order Stage') . ':</td><td>';
 $result2 = DB_query("SELECT * FROM order_stages order by stages_id", $db);
 // Error if no sales areas setup
@@ -257,6 +248,7 @@ echo '</table><br />';
 			'</th><th>' . _('Invoice Date') .'</th>'.
 			'<th>' . _('Customer') .'</th>';
 	if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
+        $TableHeader.=  '<th>' . _('Invoice Value') .'</th>';    
 	$TableHeader.=  '<th>' . _('Balance') .'</th>';
 	}
 	$TableHeader.=  '<th>' . _('Order Stages') . '</th>
@@ -304,6 +296,7 @@ while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['Displ
         $tempAP=$myrowAP['alloc'];
        }
       $DisplayBalance=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount']-$tempAP,2);
+      $DisplayInvoiceValue=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount'],2);
       if(DB_num_rows($POExistList)!=0 and DB_num_rows($FinishPOList)==0 and $myrow['invoice_status'] != 'Undo'){
           $Invoice_status='Completed'; 
         }
@@ -330,7 +323,7 @@ $OrderStagesDropdown.= '<option value='.$os["stages_id"].'>'.$os["stages"].'</op
 $OrderStagesDropdown.= '</select>';     
    
    /* 16062014 Check Order Stage Change history by Stan */
-$reportparam= json_encode(array('transid'=>$myrow['id'],'invoiceno'=>$myrow['sales_ref_num']));
+$reportparam= json_encode(array('transid'=>$myrow['id'],'invoiceno'=>$myrow['sales_ref_num'], 'orderno'=>$myrow['order_']));
 $HistoryButton='<button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStageHistory_'.$myrow['id'].'" value=\'' . $reportparam . '\' disabled >History</button>';
    /* End of Logic */
    /*Show a table of the Invoices without modified */
@@ -342,6 +335,7 @@ $HistoryButton='<button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStage
 					<td>' . $FormatedOrderDate . '</td>
 					<td>' . $myrow['name'] . '</td>';
 		if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
+                        echo '<td class=number>'.$DisplayInvoiceValue . '</td>';
 			echo '<td class=number>'.$DisplayBalance . '</td>';
 		}
                 echo  '<td><span>'.$OrderStagesDropdown.'</span><span> '.$HistoryButton.'</span></td>

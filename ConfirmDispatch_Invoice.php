@@ -12,7 +12,7 @@ include('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
 include('includes/FreightCalculation.inc');
 include('includes/GetSalesTransGLCodes.inc');
-$Order_Stage=0; 
+$Order_Stage=1; 
 
 if (!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 	/* This page can only be called with an order number for invoicing*/
@@ -756,10 +756,15 @@ invoices can have a zero amount but there must be a quantity to invoice */
 /* 160602014 Logic to determine order should be released by Stan */
         $CustomerSearch=new CustomerTransSearchModel($db,$_SESSION['Items']->DebtorNo,$_SESSION['PastDueDays1'],$_SESSION['PastDueDays2']); 
         $CustomerRecord=$CustomerSearch->SearchCustomerOverdueResult();
-        if($_SESSION['Items']->PaymentTerms>1 and $CustomerRecord['balance']<$_SESSION['Items']->CreditAvailable and ($CustomerRecord['due']-$CustomerRecord['overdue1'])<1
-        and ($CustomerRecord['overdue1']-$CustomerRecord['overdue2'])<1 and $CustomerRecord['overdue2']<1){
-        $Order_Stage=1; 
-       }
+        if($_SESSION['Items']->PaymentTerms>1){
+            if($CustomerRecord['balance']<$_SESSION['Items']->CreditAvailable and ($CustomerRecord['due']-$CustomerRecord['overdue1'])<1
+               and ($CustomerRecord['overdue1']-$CustomerRecord['overdue2'])<1 and $CustomerRecord['overdue2']<1){
+                $Order_Stage=2; 
+            }
+            else{
+                $Order_Stage=6;
+            }
+        }
 /* end of logic */       
 /*Now insert the DebtorTrans */
 

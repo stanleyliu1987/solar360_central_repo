@@ -23,15 +23,22 @@ class EmailAuditLogModel{
                                                      emailfromaddress,
                                                      emailtoaddress,
                                                      emailccaddress,
-                                                     emailbccaddress)
+                                                     emailbccaddress,userid)
                                      VALUES ('" . $emaillogbean->senddate ."',
                                             '" . $emaillogbean->sendstatus ."',
                                             '" . $emaillogbean->ordernumber ."',
                                             '" . $emaillogbean->emailtemplateid."',
                                             '" . $emaillogbean->emailfromaddress."',
                                             '" . $emaillogbean->emailtoaddress."',
-                                            '" . $emaillogbean->emailccaddress."', '" . $emaillogbean->emailbccaddress."')",
+                                            '" . $emaillogbean->emailccaddress."', '" . $emaillogbean->emailbccaddress."', '" . $emaillogbean->userid."')",
                                             $this->db, $ErrMsg);
           return $SaveEmailAuditLog;
+    }
+    
+    /* Retrieve Email Audit Log Details by Invoice Number */
+    function SelectEmailAuditLogByOrderNumber($ordernumber) {
+        $ErrMsg = _('The email audit log details could not be retrieved by the SQL because');
+        return DB_query("SELECT userid, senddate FROM emailauditlog WHERE ordernumber='".$ordernumber."'", $this->db, $ErrMsg);
+    
     }
 }

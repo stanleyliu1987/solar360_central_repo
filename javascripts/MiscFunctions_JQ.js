@@ -19,7 +19,7 @@ $(document).ready(function(){
   $( "button[name^='OrderStageHistory_']" ).click(function(event) {
     event.stopPropagation();  
     var params = jQuery.parseJSON($(this).val());
-    window.open("ReportOrderStageHistory.php?transfk="+params.transid+"&invoiceno="+params.invoiceno,"newwindow","height=700,width=950,left=150,top=0, \n\
+    window.open("ReportOrderStageHistory.php?transfk="+params.transid+"&invoiceno="+params.invoiceno+"&orderno="+params.orderno,"newwindow","height=700,width=950,left=150,top=0, \n\
     toolbar=no,menubar=no,scrollbars=yes,resizable=no, location=no,status=no");
     return false;
   });

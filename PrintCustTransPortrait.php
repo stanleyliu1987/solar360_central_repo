@@ -700,6 +700,7 @@ If (isset($PrintPDF)
                 $emaillogbean->emailtoaddress=$_POST['EmailAddr']<>''?$_POST['EmailAddr']:'';
                 $emaillogbean->emailccaddress=$_POST['EmailAddrCC']<>''?$_POST['EmailAddrCC']:'';
                 $emaillogbean->emailbccaddress=$_POST['EmailAddrBCC']<>''?$_POST['EmailAddrBCC']:'';
+                $emaillogbean->userid=$_SESSION['UserID']<>''?$_SESSION['UserID']:'';
                 $emaillog->SaveEmailAuditLog($emaillogbean);
                 /* End of record the audit log */
 		unlink($FileName); //delete the temporary file
