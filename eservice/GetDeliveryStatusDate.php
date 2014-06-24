@@ -33,7 +33,7 @@ $intervaldays = round((strtotime($formatdate)-strtotime($paymentdate))/86400);
 
 /* 0. Update Invoice Delivery Status, 05052014 By Stan update delivery status of each invoice*/
 $sqlupdateInvoiceDelStatus="UPDATE debtortrans
-			    SET delivery_status='".$_GET['Invdelstatus']."' 
+			    SET order_stages='".$_GET['Invdelstatus']."' 
 			    WHERE id = '".$_GET['InvoiceId']."'";
 $ErrMsg =_('The invoice delivery status could not be updated');
 $resultInvDelStatusUpdate=mysql_query($sqlupdateInvoiceDelStatus); 

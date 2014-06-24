@@ -273,7 +273,7 @@ if (isset($_POST['CancelOrder'])) {
             /* Update invoice details to null, and invoice tax to 0 */
             $SQL = "UPDATE debtortrans, debtortranstaxes SET debtortranstaxes.taxamount=0,
                                        debtortrans.mod_flag=2,
-                                       debtortrans.order_stages=4,
+                                       debtortrans.order_stages=5,
                                        debtortrans.settled=0,
                                        debtortrans.ovamount =0,
                                        debtortrans.ovgst =0,
