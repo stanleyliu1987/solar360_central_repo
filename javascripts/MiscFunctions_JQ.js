@@ -2,6 +2,7 @@
 $(document).ready(function(){
   $("button[name^='OrderStageHistory_']").removeAttr('disabled');
   $("input[name^='OrderComment_']").removeAttr('disabled');
+  $("input[name^='PORemark_']").removeAttr('disabled');
 
   $( "#ChooseEmailTemplate" ).change(function() { 
   $.post("custom/ajax/EmailTemplateDetails.php",
@@ -38,7 +39,34 @@ $(document).ready(function(){
        alert('Order Comments Updated Failed!');
      }
     });
-  }) 
+  })
+  
+  $("#StockLocation").change(function() {
+    $.post("custom/ajax/POStockLocationUpdate.php",
+  {
+    PO_OrderNo:$("#PO_OrderNo").val(),
+    StockLocation:$(this).val()
+  },
+  function(data,status){
+     if(status!='success'){ 
+       alert('PO Stock Location Updated Failed!');
+     }
+    });    
+});
+
+  $("input[name^='PORemark_']").blur(function(event){
+ event.stopPropagation();  
+ $.post("custom/ajax/PORemarksUpdate.php",
+  {
+    PO_OrderNo:this.id.substring(9),
+    PORemark:$(this).val() 
+  },
+  function(data,status){
+     if(status!='success'){ 
+       alert('PO Remark Updated Failed!');
+     }
+    });
+  })
 });
 
   function ChangeOrderStages(transID){

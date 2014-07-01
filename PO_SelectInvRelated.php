@@ -29,8 +29,14 @@ if (isset($_GET['SelectedSupplier'])){
 	$SelectedSupplier=trim($_POST['SelectedSupplier']);
 }
 
+if (isset($_GET['InvoiceNo'])){
+	$InvoiceNo=trim($_GET['InvoiceNo']);
+} elseif (isset($_POST['InvoiceNo'])){
+	$InvoiceNo=trim($_POST['InvoiceNo']);
+}
 echo '<form action="' . $_SERVER['PHP_SELF'] . '" method=post>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
+echo '<input type="hidden" name="InvoiceNo" value="' . $InvoiceNo . '" />';
 
 
 if (isset($_POST['ResetPart'])){
@@ -199,7 +205,7 @@ while ($myrow1 = DB_fetch_array($result1)) {
 	}
 }
 echo '</select>';
-echo '<td><font size=1>' . _('Enter text extracts in the') . '<b>' . _('description') . '</b>:</font></td>';
+echo '<td><font size=1>' . _('Enter text extracts in the') . '<b>' . _(' description') . '</b>:</font></td>';
 echo '<td><input type="Text" name="Keywords" size=20 maxlength=25></td></tr><tr><td></td>';
 echo '<td><font size<b>' . _('OR') . '</b></font><font size=1>' .  _('Enter extract of the') .  '<b>' .  _('Stock Code') . '</b>:</font></td>';
 echo '<td><input type="Text" name="StockCode" size=15 maxlength=18></td></tr></table><br>';
@@ -273,7 +279,9 @@ else {
 	}elseif ($_POST['Status']=='Cancelled'){
 		$StatusCriteria = " AND purchorders.status='Cancelled' ";
 	}
-
+/* 01072014 Add more Criteria to purchase order list */
+        $InvoiceCriteria= " AND purchorders.ref_salesorder='".$InvoiceNo."'";
+        
 	if (isset($OrderNumber) && $OrderNumber !='') {
 		$SQL = "SELECT purchorders.orderno,
                                purchorders.ref_number,
@@ -283,6 +291,7 @@ else {
 				purchorders.status,
 				purchorders.requisitionno,
 				purchorders.allowprint,
+                                purchorders.remarks,
 				suppliers.currcode,
                                 suppliers.taxref,
 				SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
@@ -292,6 +301,7 @@ else {
 			ON purchorders.supplierno = suppliers.supplierid
 			WHERE purchorderdetails.completed=0
 			AND purchorders.orderno='". $OrderNumber ."'
+                            " . $InvoiceCriteria . "  
 			GROUP BY purchorders.orderno,
 				suppliers.suppname,
 				purchorders.orddate,
@@ -322,6 +332,7 @@ else {
 						purchorders.initiator,
 						purchorders.requisitionno,
 						purchorders.allowprint,
+                                                purchorders.remarks,
 						suppliers.currcode,
                                                 suppliers.taxref,
 						SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
@@ -334,6 +345,7 @@ else {
 					AND purchorders.supplierno='" . $SelectedSupplier ."'
 					" . $StockLocationCriteria . "
 					" . $StatusCriteria . "
+                                        " . $InvoiceCriteria . "    
 					GROUP BY purchorders.orderno,
 						purchorders.realorderno,
 						suppliers.suppname,
@@ -354,6 +366,7 @@ else {
 						purchorders.initiator,
 						purchorders.requisitionno,
 						purchorders.allowprint,
+                                                purchorders.remarks,
 						suppliers.currcode,
                                                 suppliers.taxref,
 						SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
@@ -365,6 +378,7 @@ else {
 					AND purchorders.supplierno='" . $SelectedSupplier ."'
 					" . $StockLocationCriteria . "
 					" . $StatusCriteria . "
+                                        " . $InvoiceCriteria . "      
 					GROUP BY purchorders.orderno,
 						purchorders.realorderno,
 						suppliers.suppname,
@@ -388,6 +402,7 @@ else {
 						purchorders.initiator,
 						purchorders.requisitionno,
 						purchorders.allowprint,
+                                                purchorders.remarks,
 						suppliers.currcode,
                                                 suppliers.taxref,
 						SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
@@ -397,8 +412,9 @@ else {
 					ON  purchorders.supplierno = suppliers.supplierid
 					WHERE purchorderdetails.completed=0
 					AND purchorderdetails.itemcode='". $SelectedStockItem ."'
-					" . $StockLocationCriteria . " 
+					" . $StockLocationCriteria . "
 					" . $StatusCriteria . "
+                                        " . $InvoiceCriteria . "      
 					GROUP BY purchorders.orderno,
 						purchorders.realorderno,
 						suppliers.suppname,
@@ -420,6 +436,7 @@ else {
 						purchorders.initiator,
 						purchorders.requisitionno,
 						purchorders.allowprint,
+                                                purchorders.remarks,
 						suppliers.currcode,
                                                 suppliers.taxref,
 						SUM(purchorderdetails.unitprice*purchorderdetails.quantityord) AS ordervalue
@@ -430,6 +447,7 @@ else {
 					WHERE purchorderdetails.completed=0
 					" . $StockLocationCriteria . "
 					" . $StatusCriteria . "
+                                        " . $InvoiceCriteria . "      
 					GROUP BY purchorders.orderno,
 						purchorders.realorderno,
 						suppliers.suppname,
@@ -460,7 +478,6 @@ else {
                         '</th><th>'._('RCTI').
 			'</th><th>' . _('Initiated by') .
 			'</th><th>' . _('Supplier') .
-			'</th><th>' . _('Currency') .
 			'</th>';
 	if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
 		echo '<th>' . _('Order Total') .'</th>';
@@ -469,6 +486,7 @@ else {
 				<th>' . _('Modify') . '</th>
 				<th>' . _('Print') . '</th>
 				<th>' . _('Receive') . '</th>
+                                <th>' . _('Remarks') . '</th>    
 				</tr>';
 	$j = 1;
 	$k=0; //row colour counter
@@ -484,13 +502,13 @@ else {
 
 		$ModifyPage = $rootpath . '/PO_Header.php?' . SID . '&ModifyOrderNumber=' . $myrow['orderno'];
 		if ($myrow['status'] == 'Printed') {
-			$ReceiveOrder = '<a href="'.$rootpath . '/GoodsReceived.php?' . SID . '&PONumber=' . $myrow['orderno'].'">'.
+			$ReceiveOrder = '<a href="'.$rootpath . '/GoodsReceived.php?' . SID . '&PONumber=' . $myrow['orderno'].'" target="_blank">'.
 				_('Receive').'</a>';
 		} else {
 			$ReceiveOrder = _('Receive');
 		}
 		if ($myrow['status'] == 'Authorised' AND $myrow['allowprint'] == 1){
-			$PrintPurchOrder = '<a href="' . $rootpath . '/PO_PDFPurchOrder.php?' . SID . '&OrderNo=' . $myrow['orderno'] . '">' . _('Print Now') . '</a>';
+			$PrintPurchOrder = '<a href="' . $rootpath . '/PO_PDFPurchOrder.php?' . SID . '&OrderNo=' . $myrow['orderno'] . '" target="_blank">' . _('Print Now') . '</a>';
 		} elseif ($myrow['status'] == 'Authorisied' AND $myrow['allowprint'] == 0) {
 			$PrintPurchOrder = _('Printed');
 		} elseif ($myrow['status'] == 'Printed'){
@@ -503,7 +521,7 @@ else {
 		
 		$FormatedOrderDate = ConvertSQLDate($myrow['orddate']);
 		$FormatedOrderValue = number_format($myrow['ordervalue'],2);
-
+                $PORemarks='<input type="text" name="PORemark_'.$myrow['orderno'].'" id="PORemark_'.$myrow['orderno'].'" value="'.$myrow['remarks'].'" disabled> ';
 		echo '<td>' . $myrow['ref_number'] . '</td>
 					<td>' . $FormatedOrderDate . '</td>
                                         <td><a target="_blank" href="PO_PDFPurchOrder.php?&OrderNo='.$myrow['orderno'].'&realorderno=&ViewingOnly=2&PDocket=OK">' . _('PDF ') . '<img src="' .$rootpath. '/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>';
@@ -515,17 +533,17 @@ else{
 echo '<td></td>';    
 }
 		echo		       '<td>' . $myrow['initiator'] . '</td>
-					<td>' . $myrow['suppname'] . '</td>
-					<td>' . $myrow['currcode'] . '</td>';
+					<td>' . $myrow['suppname'] . '</td>';
                 
            
 		if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
 			echo '<td class=number>'.$FormatedOrderValue . '</td>';
 		}
 			echo '<td>' . _($myrow['status']) . '</td>
-						<td><a href="'.$ModifyPage.'">' . _('Modify') . '</a></td>
+						<td><a href="'.$ModifyPage.'" target="_blank">' . _('Modify') . '</a></td>
 						<td>' . $PrintPurchOrder  . '</td>
 						<td>' . $ReceiveOrder . '</td>
+                                                <td>' . $PORemarks . '</td>    
 						</tr>';
 	//end of page full new headings if
 	}
