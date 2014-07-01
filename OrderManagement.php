@@ -252,7 +252,8 @@ echo '</table><br />';
 	$TableHeader.=  '<th>' . _('Balance') .'</th>';
 	}
 	$TableHeader.=  '<th>' . _('Order Stages') . '</th>
-	                 <th>' . _('Invoice Status') . '</th></tr>';
+	                 <th>' . _('Invoice Status') . '</th>
+                         <th>' . _('Comments') . '</th></tr>';
         echo $TableHeader;
 	$j = 1;
 	$k=0; 
@@ -330,7 +331,8 @@ $HistoryButton='<button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStage
         $FormatedOrderDate = ConvertSQLDate($myrow['trandate']);
 	$FormatedOrderValue = number_format($myrow['ordervalue'],2);
         /* 12062014 Replace Invoice no with pdf download link by Stan*/
-        $RowInvoicePDFLink ='<a href="'.$rootpath.'/'.$PrintCustomerTransactionScript.'?FromTransNo='.$myrow['transno'].'&InvOrCredit=Invoice&PrintPDF=True"><img src="'.$rootpath.'/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '">'  . $myrow['sales_ref_num'] .  '</a>';     
+        $RowInvoicePDFLink ='<a href="'.$rootpath.'/'.$PrintCustomerTransactionScript.'?FromTransNo='.$myrow['transno'].'&InvOrCredit=Invoice&PrintPDF=True"><img src="'.$rootpath.'/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '">'  . $myrow['sales_ref_num'] .  '</a>';   
+        $OrderComments='<input type="text" name="OrderComment_'.$myrow['id'].'" id="OrderComment_'.$myrow['id'].'" value="'.$myrow['order_comments'].'" disabled> ';
 		echo '<td>' . $RowInvoicePDFLink . '</td>
 					<td>' . $FormatedOrderDate . '</td>
 					<td>' . $myrow['name'] . '</td>';
@@ -339,7 +341,8 @@ $HistoryButton='<button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStage
 			echo '<td class=number>'.$DisplayBalance . '</td>';
 		}
                 echo  '<td><span>'.$OrderStagesDropdown.'</span><span> '.$HistoryButton.'</span></td>
-                       <td>'.$Invoice_status.'</td>';
+                       <td>'.$Invoice_status.'</td>
+                       <td>'.$OrderComments.'</td>';
 
         unset($tempAP);
         $j++;

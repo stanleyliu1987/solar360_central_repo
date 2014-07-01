@@ -124,6 +124,7 @@ if(isset($_GET['InvDelStatus']) and $_GET['InvDelStatus']=='yes'){
 
 echo '<form name="form1" action="' . $_SERVER['PHP_SELF'] . '" method=post>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
+echo '<input type="hidden" name="UserID" id="UserID" value="' . $_SESSION['UserID'] . '" />';
 echo '<a href="' . $rootpath . '/index.php">' . _('Back to Main Menu') . '</a>';
 
 /*Display Invoice Number*/
@@ -864,7 +865,7 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
     
    /*Select Whole Invoice Delivery Status */
 
-    $InvDelStatusSQL="select stages_id,stages from order_stages";
+    $InvDelStatusSQL="select stages_id,stages from order_stages where stages_id<5";
     
     $ErrMsg = _('No Invoice Delivery Status Exist were returned by the SQL because');
 

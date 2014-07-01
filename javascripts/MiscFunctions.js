@@ -343,7 +343,7 @@ xmlhttp.onreadystatechange=function()
    
   }
 xmlhttp.open("GET","eservice/GetDeliveryStatusDate.php?consignmentId="+conValue+"&paymentdate="+paymentdateformat+"&porefnumber="+porefnumber+"&delservice="+delservice+"&pocomment="+poComment
-+"&delstatus="+delstatus+"&deldate="+deldate+"&Invdelstatus="+Invdelstatus+"&InvoiceId="+Invid,true);
++"&delstatus="+delstatus+"&deldate="+deldate+"&Invdelstatus="+Invdelstatus+"&InvoiceId="+Invid+"&UserID="+$("#UserID").val(),true);
 xmlhttp.send();
 }
 

@@ -1,6 +1,8 @@
 /* 19052014 Dynamic Front End Development By Stan */
 $(document).ready(function(){
   $("button[name^='OrderStageHistory_']").removeAttr('disabled');
+  $("input[name^='OrderComment_']").removeAttr('disabled');
+
   $( "#ChooseEmailTemplate" ).change(function() { 
   $.post("custom/ajax/EmailTemplateDetails.php",
   {
@@ -23,6 +25,20 @@ $(document).ready(function(){
     toolbar=no,menubar=no,scrollbars=yes,resizable=no, location=no,status=no");
     return false;
   });
+  
+  $("input[name^='OrderComment_']").blur(function(event){
+ event.stopPropagation();  
+ $.post("custom/ajax/OrderCommentsUpdate.php",
+  {
+    TransID:this.id.substring(13),
+    OrderComments:$(this).val() 
+  },
+  function(data,status){
+     if(status!='success'){ 
+       alert('Order Comments Updated Failed!');
+     }
+    });
+  }) 
 });
 
   function ChangeOrderStages(transID){
