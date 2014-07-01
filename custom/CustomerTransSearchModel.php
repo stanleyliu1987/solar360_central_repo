@@ -42,7 +42,8 @@ class CustomerTransSearchModel{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -80,7 +81,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -114,7 +116,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -148,7 +151,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -183,7 +187,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -221,7 +226,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -256,7 +262,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -292,7 +299,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -326,7 +334,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -361,7 +370,8 @@ else{
                                         debtortrans.sales_ref_num,
                                         invoice_status.status as invoice_status,
                                         order_stages.stages as order_stages,
-                                        debtortrans.order_stages
+                                        debtortrans.order_stages,
+                                        debtortrans.order_comments
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
