@@ -195,7 +195,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag <>2
+                                AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
                                 ".$SortFilter;
 	
@@ -243,7 +243,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag <>2
+                                AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
                                 AND debtortrans.order_stages='".$_POST['OrderType']."'
                                 ".$SortFilter;
@@ -300,7 +300,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag <>2
+                                AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
                                 group by debtortrans.order_
                                 ".$SortFilter;
@@ -351,7 +351,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag <>2
+                                AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
                                ".$SortFilter;
                 }
@@ -401,7 +401,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag <>2
+                                AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
                                 ".$SortFilter;
                 }
@@ -451,7 +451,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag <>2
+                                AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages   
                                 ".$SortFilter;
              
@@ -566,7 +566,7 @@ echo '<br />';
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
-                                AND debtortrans.mod_flag <>2
+                                AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
                                 ".$SortFilter;
 

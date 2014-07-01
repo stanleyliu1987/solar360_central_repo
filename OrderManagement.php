@@ -41,7 +41,15 @@ if (isset($_GET['RelaseOrderNumber']) and $_GET['RelaseOrderNumber']!='') {
        
 	$ErrMsg =_('The invoice detail lines could not be released because');
 	$RelseInvResult=DB_query($SQL,$db,$ErrMsg,true);
-
+/* 01072014 Insert Initial Status of each order into order stages messages table By Stan*/
+        $orderstage=new OrderStagesMessageModel($db);
+        $orderstagebean=new OrderStagesMessageBean();
+        $orderstagebean->changedatetime=date('Y-m-d H:i:s');
+        $orderstagebean->debtortranid=ConvertTranToID($_GET['RelaseOrderNumber'],$db,$rootpath,$file);
+        $orderstagebean->orderstagechange=1;
+        $orderstagebean->userid=$_SESSION['UserID'];
+        $orderstage->SaveOrderStagesMessage($orderstagebean);         
+/* Insert the tax totals for each tax authority where tax was charged on the invoice */
     /**
      * Update the Related PO status to Pending
      */       
