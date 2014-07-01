@@ -633,7 +633,7 @@ if ($_SESSION['RequireSupplierSelection'] ==1
 
 	echo '<form name="form1" action="' . $_SERVER['PHP_SELF'] . '?identifier=' . $identifier . '" method="post">';
 	echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
-
+        echo '<input type="hidden" id="PO_OrderNo" name="PO_OrderNo" value="' . $_SESSION['PO'.$identifier]->OrderNo .'" />';
 	echo '<p class="page_title_text">
 			<img src="'.$rootpath.'/css/'.$theme.'/images/supplier.png" title="' . _('Purchase Order') . '" alt="">
 			' .str_replace("%", " ", $_SESSION['PO'.$identifier]->SupplierName)  . ' - ' . _('All amounts stated in') . '
@@ -774,7 +774,17 @@ if ($_SESSION['RequireSupplierSelection'] ==1
 			<td><input type="hidden" name="Version" size="16" maxlength="15" value="' . $_POST['Version'] . '" />' . $_POST['Version'] . '</td></tr>';
 	echo '<tr><td>' . _('Revised') . ':</td>
 			<td><input type="hidden" name="Revised" size="11" maxlength="15" value="' . 	date($_SESSION['DefaultDateFormat']) . '" />' . date($_SESSION['DefaultDateFormat']) . '</td></tr>';
-
+	echo '<tr><td>' . _('Into Stock Location') . ':</td><td><select name="StockLocation" id="StockLocation">';
+	$sql = "SELECT loccode, locationname FROM locations";
+	$resultStkLocs = DB_query($sql,$db);
+	while ($myrow=DB_fetch_array($resultStkLocs)){
+			if ($myrow['loccode'] == $_SESSION['PO'.$identifier]->Location){
+				echo '<option selected value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+			} else {
+				echo '<option value="' . $myrow['loccode'] . '">' . $myrow['locationname'] . '</option>';
+			}
+	}
+        echo '</td></tr>';
 	echo '<tr><td>' . _('Delivery Date') . ':</td>
 			<td><input type="text" class="date" alt="' .$_SESSION['DefaultDateFormat'] .'" name="DeliveryDate" size="11" value="' . $_POST['DeliveryDate'] . '" /></td></tr>';
 

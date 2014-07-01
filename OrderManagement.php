@@ -334,6 +334,7 @@ $OrderStagesDropdown.= '</select>';
    /* 16062014 Check Order Stage Change history by Stan */
 $reportparam= json_encode(array('transid'=>$myrow['id'],'invoiceno'=>$myrow['sales_ref_num'], 'orderno'=>$myrow['order_']));
 $HistoryButton='<button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStageHistory_'.$myrow['id'].'" value=\'' . $reportparam . '\' disabled >History</button>';
+$RelatedPOButton='<a href="'.$rootpath.'/PO_SelectInvRelated.php?InvoiceNo='.$myrow['order_'].'" target="_blank">PO(s)</a>';
    /* End of Logic */
    /*Show a table of the Invoices without modified */
         $FormatedOrderDate = ConvertSQLDate($myrow['trandate']);
@@ -348,7 +349,7 @@ $HistoryButton='<button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStage
                         echo '<td class=number>'.$DisplayInvoiceValue . '</td>';
 			echo '<td class=number>'.$DisplayBalance . '</td>';
 		}
-                echo  '<td><span>'.$OrderStagesDropdown.'</span><span> '.$HistoryButton.'</span></td>
+                echo  '<td><span>'.$OrderStagesDropdown.'</span><span> '.$HistoryButton.'</span><span> '.$RelatedPOButton.'</span></td>
                        <td>'.$Invoice_status.'</td>
                        <td>'.$OrderComments.'</td>';
 
