@@ -269,7 +269,10 @@ if (isset($_POST['CancelOrder'])) {
         $SQL = DB_Txn_Begin($db);
 
         if ($_SESSION['ExistingOrder'] != 0) {
-
+            
+            /* 01072014 Retrieve invoice ID */
+            $invoiceid=ConvertTranToID($_SESSION['ExistingOrder'],$db,$rootpath,$file);
+           /* end of logic */
             /* Update invoice details to null, and invoice tax to 0 */
             $SQL = "UPDATE debtortrans, debtortranstaxes SET debtortranstaxes.taxamount=0,
                                        debtortrans.mod_flag=2,
@@ -284,7 +287,15 @@ if (isset($_POST['CancelOrder'])) {
                                        debtortrans.transno ='" . $_SESSION['ExistingOrder'] . "' and debtortrans.type=10";
             $ErrMsg = _('The invoice detail lines could not be deleted because');
             $DelResult = DB_query($SQL, $db, $ErrMsg, true);
-
+/* 01072014 Insert Initial Status of each order into order stages messages table By Stan*/
+        $orderstage=new OrderStagesMessageModel($db);
+        $orderstagebean=new OrderStagesMessageBean();
+        $orderstagebean->changedatetime=date('Y-m-d H:i:s');
+        $orderstagebean->debtortranid=$invoiceid;
+        $orderstagebean->orderstagechange=5;
+        $orderstagebean->userid=$_SESSION['UserID'];
+        $orderstage->SaveOrderStagesMessage($orderstagebean);         
+/* Insert the tax totals for each tax authority where tax was charged on the invoice */
             foreach ($_SESSION['Items' . $identifier]->LineItems as $OrderLine) {
 
                 $SQL = "UPDATE locstock SET quantity=quantity-(SELECT sum(qty) FROM stockmoves 
@@ -391,10 +402,6 @@ if (isset($_POST['CancelOrder'])) {
             }
 
             /* If custmoer has been allocated, re-allocate the amount */
-            $InvoiceIDResult = DB_query("SELECT id FROM debtortrans WHERE debtortrans.transno ='" . $_SESSION['ExistingOrder'] . "' and debtortrans.type=10", $db);
-            $myrow = DB_fetch_row($InvoiceIDResult);
-            $invoiceid = $myrow[0];
-            
             $ReceiptResult = DB_query("SELECT transid_allocfrom, amt FROM custallocns WHERE custallocns.transid_allocto ='" . $invoiceid . "'", $db);
             while ($receipt = DB_fetch_array($ReceiptResult, $db)) {
                 

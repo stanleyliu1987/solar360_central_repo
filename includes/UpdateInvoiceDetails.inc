@@ -15,6 +15,7 @@ else{
 }
 
  $WebSalesOrderNo=ConvertTranToInv($_SESSION['Items'.$identifier]->OrderNo,$db,$rootpath,$file);
+ $invoiceid=ConvertTranToID($_SESSION['Items'.$identifier]->OrderNo,$db,$rootpath,$file);
  
  /*
   * Initialize Purchorderdetails quantity
@@ -1831,11 +1832,19 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
          
          
         if($CancelQuan==0){
-            $SQL = "Update debtortrans set mod_flag=2 where transno ='" . $_SESSION['ExistingOrder'] . "' and type=10";
+            $SQL = "Update debtortrans set mod_flag=2,debtortrans.order_stages=5 where transno ='" . $_SESSION['ExistingOrder'] . "' and type=10";
                                     
 	    $ErrMsg =_('The invoice detail lines could not be deleted because');
 	    $DelResult=DB_query($SQL,$db,$ErrMsg);
-
+/* 01072014 Insert Initial Status of each order into order stages messages table By Stan*/
+        $orderstage=new OrderStagesMessageModel($db);
+        $orderstagebean=new OrderStagesMessageBean();
+        $orderstagebean->changedatetime=date('Y-m-d H:i:s');
+        $orderstagebean->debtortranid=$invoiceid;
+        $orderstagebean->orderstagechange=5;
+        $orderstagebean->userid=$_SESSION['UserID'];
+        $orderstage->SaveOrderStagesMessage($orderstagebean);         
+/* Insert the tax totals for each tax authority where tax was charged on the invoice */
             $_SESSION['ExistingOrder']=0;
         }
         

@@ -353,6 +353,25 @@ function WoRealRequirements($db, $WO, $LocCode, $StockID, $Qty=1, $ParentID="") 
       }
    }
    
+/* Convert Transaction Number into System ID */
+ function ConvertTranToID($transno,$db,$rootpath,$file){
+          $SQL = "SELECT id FROM debtortrans WHERE type=10
+						 AND transno ='" . $transno . "'";
+          $ErrMsg =  _('The order id cannot be retrieved because');
+	  $DbgMsg =  _('The SQL statement that was used and failed was');
+	  $GetInvIDResult = DB_query($SQL,$db,$ErrMsg,$DbgMsg);
+          $myrow = DB_fetch_array($GetInvIDResult);
+      
+     if($myrow[0]==0){
+          prnMsg ('No Transaction NO Matched, Update failed');
+          echo '<meta http-equiv="Refresh" content="2; url=' . $rootpath . '/'.$file.'">';
+          exit;
+      }
+      else{
+          return $myrow[0];
+      }
+   }   
+   
  /* Convert Invoice Number into Transaction Number */
  function ConvertTranToInv($tranNO,$db,$rootpath,$file){
           $SQL = "SELECT order_ FROM debtortrans WHERE type=10
