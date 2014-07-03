@@ -485,6 +485,7 @@ else {
 	echo '<th>' . _('Status') . '</th>
 				<th>' . _('Modify') . '</th>
 				<th>' . _('Print') . '</th>
+                                <th>' . _('Email') . '</th>
 				<th>' . _('Receive') . '</th>
                                 <th>' . _('Remarks') . '</th>    
 				</tr>';
@@ -522,6 +523,7 @@ else {
 		$FormatedOrderDate = ConvertSQLDate($myrow['orddate']);
 		$FormatedOrderValue = number_format($myrow['ordervalue'],2);
                 $PORemarks='<input type="text" name="PORemark_'.$myrow['orderno'].'" id="PORemark_'.$myrow['orderno'].'" value="'.$myrow['remarks'].'" disabled> ';
+                $EmailLink='<a href="'.$rootpath.'/EmailSuppPO.php?OrderNo='.$myrow['orderno'].'" target="_blank">' . _('Email') . ' <img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Purchase Order') . '"></a>';
 		echo '<td>' . $myrow['ref_number'] . '</td>
 					<td>' . $FormatedOrderDate . '</td>
                                         <td><a target="_blank" href="PO_PDFPurchOrder.php?&OrderNo='.$myrow['orderno'].'&realorderno=&ViewingOnly=2&PDocket=OK">' . _('PDF ') . '<img src="' .$rootpath. '/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>';
@@ -542,8 +544,9 @@ echo '<td></td>';
 			echo '<td>' . _($myrow['status']) . '</td>
 						<td><a href="'.$ModifyPage.'" target="_blank">' . _('Modify') . '</a></td>
 						<td>' . $PrintPurchOrder  . '</td>
+                                                <td>' . $EmailLink . '</td>     
 						<td>' . $ReceiveOrder . '</td>
-                                                <td>' . $PORemarks . '</td>    
+                                                <td>' . $PORemarks . '</td>  
 						</tr>';
 	//end of page full new headings if
 	}
