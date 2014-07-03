@@ -474,9 +474,23 @@ echo '<br /><table class="selection"><tr>';
 
 echo '<td><font size=1>' . _('Enter a partial') . '<b>' . _(' Customer Code') . '</b>:</font></td>';
 echo '<td><input type="Text" id="CustCode" name="CustCode" size=20 maxlength=25 value="'.$CustomerCode.'" /></td>';
+echo '<td><font size=3><b>' . _('OR') . '</b></font><font size=1>' .  _(' A partial') .  '<b>' .  _(' Customer Name') . '</b>:</font></td>';
+echo '<td><input type="Text" id="CustName" name="CustName" value="'.$CustomerName.'" /></td></tr>';
 
-echo '<td><font size=3><b>' . _('OR') . '</b></font><font size=1>' . _(' Choose a ') . '<b>' . _(' Order Type') . '</b>:</font></td>';
+echo '<tr><td><font size=3><b>' . _('OR') . '</b></font><font size=1>' . _(' A partial') . '<b>' . _(' Customer Branch Name') . '</b>:</font></td>';
+echo '<td><input type="Text" id="CustBranch" name="CustBranch" size=20 maxlength=25 value="'.$CustomerBranch.'" /></td>';   
+echo '<td><font size=3><b>' . _('OR') . '</b></font><font size=1>' . _(' Choose a ') . '<b>' . _(' Filter Function') . '</b>:</font></td>';
+echo '<td><select name="FilterType" id="FilterType" onchange="ChangeOrderTypeDefault(\''._('OrderType').'\');">';
+echo '<option value="NoFilter">' . _('Choose a Filter') . '</option>';
+if ($_POST['FilterType'] == "NoPOEmptyTrackInfo") {
+echo '<option value="NoPOEmptyTrackInfo" selected>' . _('A. Non-Cancelled PO Without Tracking Info') . '</option>';
+}
+else{
+echo '<option value="NoPOEmptyTrackInfo">' . _('A. Non-Cancelled PO Without Tracking Info') . '</option>';    
+}
+echo '</select></td></tr>';
 
+echo '<tr><td><font size=3><b>' . _('OR') . '</b></font><font size=1>' . _(' Choose a ') . '<b>' . _(' Order Stage') . '</b>:</font></td>';
 $resultStatus = DB_query('SELECT stages_id, stages FROM order_stages', $db);
 echo '<td><select name="OrderType" id="OrderType" onchange="ChangeOrderTypeDefault(\''._('FilterType').'\');">';
 echo '<option  value="ALL">' . _('Any') . '</option>';
@@ -489,25 +503,6 @@ echo '<option  value="ALL">' . _('Any') . '</option>';
 		} //end while loop
 		
 echo '</select></td></tr>';
-
-echo '<tr><td><font size=3><b>' . _('OR') . '</b></font><font size=1>' .  _(' A partial') .  '<b>' .  _(' Customer Name') . '</b>:</font></td>';
-echo '<td><input type="Text" id="CustName" name="CustName" value="'.$CustomerName.'" /></td>';
-    
-echo '<td><font size=3><b>' . _('OR') . '</b></font><font size=1>' . _(' Choose a ') . '<b>' . _(' Filter Function') . '</b>:</font></td>';
-
-
-echo '<td><select name="FilterType" id="FilterType" onchange="ChangeOrderTypeDefault(\''._('OrderType').'\');">';
-echo '<option value="NoFilter">' . _('Choose a Filter') . '</option>';
-if ($_POST['FilterType'] == "NoPOEmptyTrackInfo") {
-echo '<option value="NoPOEmptyTrackInfo" selected>' . _('A. Non-Cancelled PO Without Tracking Info') . '</option>';
-}
-else{
-echo '<option value="NoPOEmptyTrackInfo">' . _('A. Non-Cancelled PO Without Tracking Info') . '</option>';    
-}
-echo '</select></td></tr>';
-
-echo '<td><font size=3><b>' . _('OR') . '</b></font><font size=1>' . _(' A partial') . '<b>' . _(' Customer Branch Name') . '</b>:</font></td>';
-echo '<td><input type="Text" id="CustBranch" name="CustBranch" size=20 maxlength=25 value="'.$CustomerBranch.'" /></td>';
 
 echo '<table><tr><td><input type=submit name="SearchNow" value="' . _('Search Now') . '">';
 echo '<input type=submit name="updatereport" value="' . _('Update Reports') . '">';
