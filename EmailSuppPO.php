@@ -23,7 +23,7 @@ echo '<form action="PO_EmailFunction.php" method=post enctype="multipart/form-da
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 echo '<input type=hidden name="OrderNo" value="' . $OrderNo . '">';
 
-$SQL = "SELECT suw.email from purchorders as puo left join supplierwarehouse as suw on (puo.supplierno=suw.supplierid and
+$SQL = "SELECT suw.email, suw.alt1email, suw.alt2email, suw.alt3email from purchorders as puo left join supplierwarehouse as suw on (puo.supplierno=suw.supplierid and
         puo.supwarehouseno=suw.warehousecode) WHERE puo.orderno='".$OrderNo."'";
 
 $ErrMsg = _('There was a problem retrieving the supplier warehouse contact details');
@@ -31,11 +31,21 @@ $SupWarehouseResult=DB_query($SQL,$db,$ErrMsg);
 
 if (DB_num_rows($SupWarehouseResult)>0){
 	$EmailAddrRow = DB_fetch_array($SupWarehouseResult);
-	$EmailAddress = $EmailAddrRow['email'];        
+	$EmailAddress = $EmailAddrRow['email'];
+        if(isset($EmailAddrRow['alt1email']) and $EmailAddrRow['alt1email']!=''){
+        $EmailCCAddress = $EmailAddrRow['alt1email'];   
+        }
+        if(isset($EmailAddrRow['alt2email']) and $EmailAddrRow['alt2email']!=''){
+        $EmailCCAddress .= ', '.$EmailAddrRow['alt2email'];   
+        }
+        if(isset($EmailAddrRow['alt3email']) and $EmailAddrRow['alt3email']!=''){
+        $EmailCCAddress .= ', '.$EmailAddrRow['alt3email'];   
+        }
 
          
 } else {
 	$EmailAddress ='';
+        $EmailCCAddress ='';
 }
 /* 15052014 Logic to Retrieve Customer Record details, duplicate with code in CustomerInquiry.php */
 $SQL = "SELECT pur.ref_number,sup.suppname, pur.ref_salesorder from purchorders as pur left join suppliers as sup on pur.supplierno = sup.supplierid 
