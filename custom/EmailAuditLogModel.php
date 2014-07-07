@@ -38,7 +38,15 @@ class EmailAuditLogModel{
     /* Retrieve Email Audit Log Details by Invoice Number */
     function SelectEmailAuditLogByOrderNumber($ordernumber) {
         $ErrMsg = _('The email audit log details could not be retrieved by the SQL because');
-        return DB_query("SELECT userid, senddate FROM emailauditlog WHERE ordernumber='".$ordernumber."'", $this->db, $ErrMsg);
+        return DB_query("SELECT userid, senddate,emailtemplateid FROM emailauditlog WHERE ordernumber='".$ordernumber."'", $this->db, $ErrMsg);
     
+    }
+    
+    function RetrieveEmailAuditLogType($emailtemplateid){
+        $ErrMsg = _('The email audit log type could not be retrieved by the SQL because');
+        $result = DB_query("SELECT sys.typename FROM emailtemplates emt left join systypes as sys on sys.typeid=emt.emailtype
+                         WHERE emailtemp_id='".$emailtemplateid."'", $this->db, $ErrMsg);  
+        $typelist=  DB_fetch_array($result);
+        return $typelist['typename'];
     }
 }

@@ -67,6 +67,30 @@ $(document).ready(function(){
      }
     });
   })
+  $("#POCheckbox").change(function() {
+    if(this.checked) { 
+         $("#POEmailSubject").val($("#POEmailSubject").val()+ " PO");
+    }
+    else{
+        $("#POEmailSubject").val($("#POEmailSubject").val().replace(" PO", ""));
+    }
+});
+  $("#DDCheckbox").change(function() {
+    if(this.checked) { 
+         $("#POEmailSubject").val($("#POEmailSubject").val()+ " DD");
+    }
+    else{
+        $("#POEmailSubject").val($("#POEmailSubject").val().replace(" DD", ""));
+    }
+});
+  $("#RCTICheckbox").change(function() {
+    if(this.checked) { 
+         $("#POEmailSubject").val($("#POEmailSubject").val()+ " RCTI");
+    }
+    else{
+        $("#POEmailSubject").val($("#POEmailSubject").val().replace(" RCTI", ""));
+    }
+});
 });
 
   function ChangeOrderStages(transID){

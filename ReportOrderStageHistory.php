@@ -28,7 +28,8 @@ while ($myrow=DB_fetch_array($OrderStageMessagResult)){
 }
 /* Retrieve Email audit log message*/
 while ($myrow=  DB_fetch_array($EmailAuditLogResult)){
-    $StatusArray[]= array('Status'=>"Email",'UserID'=>$myrow['userid'],'ChangeDate'=>$myrow['senddate']);
+    $Emailtype = $EmailLog->RetrieveEmailAuditLogType($myrow['emailtemplateid']);
+    $StatusArray[]= array('Status'=>$Emailtype." Email",'UserID'=>$myrow['userid'],'ChangeDate'=>$myrow['senddate']);
 }
 usort($StatusArray, function($a, $b) {return strtotime($b['ChangeDate']) - strtotime($a['ChangeDate']);});
 /* Output the result of Status Array */
