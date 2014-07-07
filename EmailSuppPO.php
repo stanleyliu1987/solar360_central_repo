@@ -19,41 +19,23 @@ $InvoiceNumber=$_POST['InvoiceNumber'];
 }
 $title=_('Email') . ' ' . $TransactionType . ' ' . _('Number') . ' ' . $InvoiceNumber;
 include ('includes/header.inc');
-echo '<form action="PO_EmailFunction.php" method=post>';
+echo '<form action="PO_EmailFunction.php" method=post enctype="multipart/form-data">';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 echo '<input type=hidden name="OrderNo" value="' . $OrderNo . '">';
 
-$SQL = "SELECT custbranch.email, debtortrans.debtorno, debtortrans.order_, altemail1, altemail2, altemail3,act_prim,act_alt1,act_alt2,act_alt3
-		FROM custbranch INNER JOIN debtortrans ON custbranch.debtorno= debtortrans.debtorno
-		AND custbranch.branchcode=debtortrans.branchcode
-                LEFT JOIN custbranchemails ON custbranch.debtorno= custbranchemails.debtorno
-		AND custbranch.branchcode=custbranchemails.branchcode
-	WHERE debtortrans.type=10 
-	AND debtortrans.order_='" .$InvoiceNumber . "'";
+$SQL = "SELECT suw.email from purchorders as puo left join supplierwarehouse as suw on (puo.supplierno=suw.supplierid and
+        puo.supwarehouseno=suw.warehousecode) WHERE puo.orderno='".$OrderNo."'";
 
-$ErrMsg = _('There was a problem retrieving the contact details for the customer');
-$ContactResult=DB_query($SQL,$db,$ErrMsg);
+$ErrMsg = _('There was a problem retrieving the supplier warehouse contact details');
+$SupWarehouseResult=DB_query($SQL,$db,$ErrMsg);
 
-if (DB_num_rows($ContactResult)>0){
-	$EmailAddrRow = DB_fetch_array($ContactResult);
-	$CustomerID = $EmailAddrRow['debtorno'];        
-        if($EmailAddrRow['act_prim']==1 and isset($EmailAddrRow['email'])){
-        $EmailAddress = $EmailAddrRow['email'];    
-        }
-        if($EmailAddrRow['act_alt1']==1 and isset($EmailAddrRow['altemail1'])){
-        $EmailCCAddress = $EmailAddrRow['altemail1'];   
-        }
-        if($EmailAddrRow['act_alt2']==1 and isset($EmailAddrRow['altemail2'])){
-        $EmailCCAddress .= ', '.$EmailAddrRow['altemail2'];   
-        }
-        if($EmailAddrRow['act_alt3']==1 and isset($EmailAddrRow['altemail3'])){
-        $EmailCCAddress .= ', '.$EmailAddrRow['altemail3'];   
-        }
+if (DB_num_rows($SupWarehouseResult)>0){
+	$EmailAddrRow = DB_fetch_array($SupWarehouseResult);
+	$EmailAddress = $EmailAddrRow['email'];        
+
          
 } else {
 	$EmailAddress ='';
-        $CustomerID='';
-        $EmailCCAddress='';
 }
 /* 15052014 Logic to Retrieve Customer Record details, duplicate with code in CustomerInquiry.php */
 $SQL = "SELECT pur.ref_number,sup.suppname, pur.ref_salesorder from purchorders as pur left join suppliers as sup on pur.supplierno = sup.supplierid 
@@ -69,7 +51,7 @@ $SQL ="SELECT pod.itemcode, pod.itemdescription from purchorderdetails as pod wh
 $PO_DET_Result = DB_query($SQL,$db,$ErrMsg);
 if (DB_num_rows($PO_DET_Result)>0){
 while ($pod = DB_fetch_array($PO_DET_Result)) {
-$POD_Lines.= $pod['itemcode']. ' ('. $pod['itemdescription'].')<p>';
+$POD_Lines.= $pod['itemcode']. ' ('. $pod['itemdescription'].')<br/>';
 }
 }
 /* End of retrieving */
@@ -97,6 +79,7 @@ while ($myrow = DB_fetch_array($templates)) {
 echo '<option value='.$myrow["emailtemp_id"].'>'.$myrow["templatename"].'</option>';
 }
 echo '</select></td></tr>';
+echo '<tr><td>'._('Attachments:').'<input type="file" name="ConsignmentPDF[]" multiple /></td></tr>';
 /* 150502014 Email Content Panel */
 echo '<tr><td>'  . _('To Address') . ':</td>
 	<td><input type="text" name="EmailAddr" maxlength=60 size=60 value="' . $EmailAddress . '"></td></tr>';
