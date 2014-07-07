@@ -15,7 +15,7 @@ include ('includes/htmlMimeMail.php');
        $OrderNo=$_POST['OrderNo'];
     }
     $mail = new htmlMimeMail();
-    if(isset($_POST['Supp_PDFAttach'])){           
+    if(isset($_POST['Supp_PDFAttach'])){          
         foreach($_POST['Supp_PDFAttach'] as $tp){ 
             if($tp=="PO"){
               $type= "PO_PDFAttach";
@@ -29,13 +29,14 @@ include ('includes/htmlMimeMail.php');
               $Attachment = $mail->getFile($DD_PDFLink);
               $mail->addAttachment($Attachment, $DD_PDFLink, 'application/pdf');
             }
-            else{
+            elseif($tp=="RCTI"){
               $type= "RCTI_PDFAttach"; 
               $RCTI_PDFLink=Generate_SuppPDF($OrderNo, $type, $db);
               $Attachment = $mail->getFile($RCTI_PDFLink);
               $mail->addAttachment($Attachment, $RCTI_PDFLink, 'application/pdf');
             } 
         }
+    }
                 /* Send Email Function */
                 $mail->setHtml(str_replace(array("\r","\n",'\r','\n'),'',htmlspecialchars_decode($_POST['EmailMessage'])));
                 $mail->setHtmlCharset("UTF-8");
@@ -45,23 +46,24 @@ include ('includes/htmlMimeMail.php');
                 $mail->setBcc($_POST['EmailAddrBCC']);
 		$Success = $mail->send(array($_POST['EmailAddr']),'smtp');
                 /* Record Email Audit Log details */
-//                $emaillog=new EmailAuditLogModel($db);
-//                $emaillogbean=new EmailAuditLogBean();
-//                $emaillogbean->senddate=date('Y-m-d H:i:s');
-//                $emaillogbean->sendstatus=$result;
-//                $emaillogbean->ordernumber=$_POST['InvoiceNumber']<>''?$_POST['InvoiceNumber']:'';
-//                $emaillogbean->emailtemplateid=$_POST['ChooseEmailTemplate']<>''?$_POST['ChooseEmailTemplate']:'';
-//                $emaillogbean->emailfromaddress=$_SESSION['CompanyRecord']['email']<>''?$_SESSION['CompanyRecord']['email']:'';
-//                $emaillogbean->emailtoaddress=$_POST['EmailAddr']<>''?$_POST['EmailAddr']:'';
-//                $emaillogbean->emailccaddress=$_POST['EmailAddrCC']<>''?$_POST['EmailAddrCC']:'';
-//                $emaillogbean->emailbccaddress=$_POST['EmailAddrBCC']<>''?$_POST['EmailAddrBCC']:'';
-//                $emaillogbean->userid=$_SESSION['UserID']<>''?$_SESSION['UserID']:'';
-//                $emaillog->SaveEmailAuditLog($emaillogbean);
+                $emaillog=new EmailAuditLogModel($db);
+                $emaillogbean=new EmailAuditLogBean();
+                $emaillogbean->senddate=date('Y-m-d H:i:s');
+                $emaillogbean->sendstatus=$Success;
+                $emaillogbean->ordernumber=$_POST['InvoiceNumber']<>''?$_POST['InvoiceNumber']:'';
+                $emaillogbean->emailtemplateid=$_POST['ChooseEmailTemplate']<>''?$_POST['ChooseEmailTemplate']:'';
+                $emaillogbean->emailfromaddress=$_SESSION['CompanyRecord']['email']<>''?$_SESSION['CompanyRecord']['email']:'';
+                $emaillogbean->emailtoaddress=$_POST['EmailAddr']<>''?$_POST['EmailAddr']:'';
+                $emaillogbean->emailccaddress=$_POST['EmailAddrCC']<>''?$_POST['EmailAddrCC']:'';
+                $emaillogbean->emailbccaddress=$_POST['EmailAddrBCC']<>''?$_POST['EmailAddrBCC']:'';
+                $emaillogbean->userid=$_SESSION['UserID']<>''?$_SESSION['UserID']:'';
+                $emaillog->SaveEmailAuditLog($emaillogbean);
                 /* End of record the audit log */
+                if(isset($_POST['Supp_PDFAttach'])){ 
 		unlink($PO_PDFLink);
                 unlink($DD_PDFLink); 
                 unlink($RCTI_PDFLink); //delete the temporary file
-                
+                }
                 if ($Success==1){
 			$title = _('Email a Purchase Order');
 			include('includes/header.inc');
@@ -74,7 +76,6 @@ include ('includes/htmlMimeMail.php');
 			echo '<div class="centre"><br /><br /><br />';
 			prnMsg( _('Emailing Purchase order'). ' ' . $OrderNo.' ' . _('to') .' ' . $_POST['EmailAddr'] . ' ' . _('failed'), 'error');
 		}
-    }
     
 function Generate_SuppPDF($OrderNo, $type ,$db){ 
 $title = _('Print Purchase Order Number').' '. $OrderNo;
@@ -82,7 +83,7 @@ $title = _('Print Purchase Order Number').' '. $OrderNo;
     if($type=="DD_PDFAttach"){
         $MakePDFDocket= True;
     }
-    elseif($type=="RCTI_PDFAttach"){
+    elseif($type=="RCTI_PDFAttach"){ 
         $MakePDFRCTI=True;
     }
     else{
@@ -342,9 +343,9 @@ $title = _('Print Purchase Order Number').' '. $OrderNo;
             else{
                 $PdfFileName = 'PO_' . $POHeader['ref_number'];
             }
-            $pdf->Output( $_SESSION['reports_dir'] . '/' .$PdfFileName.  '.pdf', 'F'); 
+            $pdf->Output($PdfFileName.  '.pdf', 'F'); 
             $pdf->__destruct();
-            return $_SESSION['reports_dir'] . '/' .$PdfFileName.'.pdf';
+            return $PdfFileName.'.pdf';
 } /* There was enough info to either print or email the purchase order */
 
 

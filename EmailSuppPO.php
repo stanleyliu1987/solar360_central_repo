@@ -11,9 +11,13 @@ $OrderNo=$_GET['OrderNo'];
 elseif(isset($_POST['OrderNo']) and $_POST['OrderNo']!='') {
 $OrderNo=$_POST['OrderNo'];
 }
-$title=_('Email') . ' ' . $TransactionType . ' ' . _('Number') . ' ' . $_GET['FromTransNo'];
-
-
+if (isset($_GET['InvoiceNumber']) and $_GET['InvoiceNumber']!=''){
+$InvoiceNumber=$_GET['InvoiceNumber'];
+} 
+elseif(isset($_POST['InvoiceNumber']) and $_POST['InvoiceNumber']!='') {
+$InvoiceNumber=$_POST['InvoiceNumber'];
+}
+$title=_('Email') . ' ' . $TransactionType . ' ' . _('Number') . ' ' . $InvoiceNumber;
 include ('includes/header.inc');
 echo '<form action="PO_EmailFunction.php" method=post>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
@@ -24,16 +28,15 @@ $SQL = "SELECT custbranch.email, debtortrans.debtorno, debtortrans.order_, altem
 		AND custbranch.branchcode=debtortrans.branchcode
                 LEFT JOIN custbranchemails ON custbranch.debtorno= custbranchemails.debtorno
 		AND custbranch.branchcode=custbranchemails.branchcode
-	WHERE debtortrans.type='" . $TypeCode . "' 
-	AND debtortrans.transno='" .$_GET['FromTransNo'] . "'";
+	WHERE debtortrans.type=10 
+	AND debtortrans.order_='" .$InvoiceNumber . "'";
 
 $ErrMsg = _('There was a problem retrieving the contact details for the customer');
 $ContactResult=DB_query($SQL,$db,$ErrMsg);
 
 if (DB_num_rows($ContactResult)>0){
 	$EmailAddrRow = DB_fetch_array($ContactResult);
-	$CustomerID = $EmailAddrRow['debtorno'];
-        $InvoiceNumber= $EmailAddrRow['order_'];
+	$CustomerID = $EmailAddrRow['debtorno'];        
         if($EmailAddrRow['act_prim']==1 and isset($EmailAddrRow['email'])){
         $EmailAddress = $EmailAddrRow['email'];    
         }
@@ -50,17 +53,16 @@ if (DB_num_rows($ContactResult)>0){
 } else {
 	$EmailAddress ='';
         $CustomerID='';
-        $InvoiceNumber='';
         $EmailCCAddress='';
 }
 /* 15052014 Logic to Retrieve Customer Record details, duplicate with code in CustomerInquiry.php */
-$SQL = "SELECT pur.ref_number,sup.suppname from purchorders as pur left join suppliers as sup on pur.supplierno = sup.supplierid 
+$SQL = "SELECT pur.ref_number,sup.suppname, pur.ref_salesorder from purchorders as pur left join suppliers as sup on pur.supplierno = sup.supplierid 
         where pur.orderno='". $OrderNo."'";
 
 $ErrMsg = _('The PO details could not be retrieved by the SQL because');
 $PO_SUPP_Result = DB_query($SQL,$db,$ErrMsg);
 $PO_SUPP_Record = DB_fetch_array($PO_SUPP_Result);
-$EmailSubject="Order ".$PO_SUPP_Record['ref_number']." (PO/DD/CN)";
+$EmailSubject="Order ".$PO_SUPP_Record['ref_salesorder'];
 /* End of logic */
 /* Retrive PO item details */
 $SQL ="SELECT pod.itemcode, pod.itemdescription from purchorderdetails as pod where pod.orderno='". $OrderNo."'";
@@ -79,9 +81,9 @@ echo '<div>
 	 _('Stock Items') . ': ' . $POD_Lines . '</p></div>';
 
 /* 03072014 Checkbox for PO/DD/RCTI */
-echo '<div align=center>'. _('PO Number:') . '<input type="checkbox" name="Supp_PDFAttach[]" value="PO">
-           '. _('Delivery Docket:') . '<input type="checkbox" name="Supp_PDFAttach[]" value="DD"> 
-           '. _('RCTI:') . '<input type="checkbox" name="Supp_PDFAttach[]" value="RCTI"> 
+echo '<div align=center>'. _('Purchase Order:') . '<input type="checkbox" id="POCheckbox" name="Supp_PDFAttach[]" value="PO">
+           '. _('Delivery Docket:') . '<input type="checkbox" id="DDCheckbox" name="Supp_PDFAttach[]" value="DD"> 
+           '. _('RCTI:') . '<input type="checkbox" id="RCTICheckbox" name="Supp_PDFAttach[]" value="RCTI"> 
       </div>';
 /* 15052014 Logic to Retrieve Email Templates Options */
 $TemplateSQL= "SELECT * FROM emailtemplates where emailtype=18";
@@ -103,11 +105,11 @@ echo '<tr><td>' . _('CC') . ':</td>
 echo '<tr><td>' . _('BCC') . ':</td>
 	<td><input type="text" name="EmailAddrBCC" maxlength=60 size=60></td></tr>';
 echo '<tr><td>'. _('Subject') .':</td>
-	<td><input type="Text" name="EmailSubject" value="'. $EmailSubject .'" size=86 maxlength=100></td></tr>';
+	<td><input type="Text" name="EmailSubject" value="'. $EmailSubject .'" size=86 maxlength=100 id="POEmailSubject"></td></tr>';
 echo '<tr><td>'. _('Email Message') .':</td>
 	<td><textarea id="EmailMessage" name="EmailMessage">'.$_POST['EmailMessage'].'</textarea></td></tr>';
 echo '<script>generate_wysiwyg("EmailMessage");</script></table>'; 
-
+echo '<input type=hidden name="InvoiceNumber" value="' . $InvoiceNumber . '">';
 echo '<br><div class="centre"><input type=submit name="DoIt" value="' . _('Send') . '">';
 echo '</div></div></form>';
 include ('includes/footer.inc');
