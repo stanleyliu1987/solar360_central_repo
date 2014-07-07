@@ -119,7 +119,10 @@ if (isset($_POST['submit'])) {
 						     faxno ='" . $_POST['FaxNo'] . "',
 						     contactname='" . $_POST['ContactName'] . "',
 						     email= '" . $_POST['Email'] . "',
-					             comment ='" . $_POST['Comment'] . "'
+					             comment ='" . $_POST['Comment'] . "',
+                                                     alt1email= '".  $_POST['Alt1Email'] . "',  
+                                                     alt2email= '".  $_POST['Alt2Email'] . "',  
+                                                     alt3email= '".  $_POST['Alt3Email'] . "'    
 			WHERE warehousecode = '".$SelectedWarehouse."' AND supplierid='".$SuppCode."'";
 
 		$msg = $_POST['WhName'] . ' '._('warehouse has been updated.');
@@ -143,7 +146,10 @@ if (isset($_POST['submit'])) {
                                                 email,
                                                 comment,
                                                 lat,
-                                                lng
+                                                lng,
+                                                alt1email,
+                                                alt2email,
+                                                alt3email
 						)
 				VALUES ('" . $_POST['WarehouseCode'] . "',
 					'" . $SuppCode . "',
@@ -160,7 +166,10 @@ if (isset($_POST['submit'])) {
 					'" . $_POST['Email'] . "',
                                         '" . $_POST['Comment'] . "',
 					'" . $latitude . "',
-					'" . $longitude . "'
+					'" . $longitude . "',
+                                        '" . $_POST['Alt1Email'] . "',
+                                        '" . $_POST['Alt2Email'] . "',
+                                        '" . $_POST['Alt3Email'] . "'   
 					)";
 	}
 	echo '<br />';
@@ -188,6 +197,9 @@ if (isset($_POST['submit'])) {
 		unset($_POST['ContactName']);
 		unset($_POST['Email']);
 		unset($_POST['Comment']);
+                unset($_POST['Alt1Email']);
+                unset($_POST['Alt2Email']);
+                unset($_POST['Alt3Email']);
 		unset($SelectedWarehouse);
     }
 } else if (isset($_GET['delete'])) {
@@ -228,7 +240,10 @@ if (!isset($SelectedWarehouse)){
                        faxno,
                        contactname,
                        email,
-                       comment 
+                       comment,
+                       alt1email,
+                       alt2email,
+                       alt3email
                        FROM  supplierwarehouse where supplierid='".$SuppCode."'";
 
 	$result = DB_query($sql,$db);
@@ -346,7 +361,10 @@ if (!isset($_GET['delete'])) {
                                faxno,
                                contactname,
                                email,
-                               comment
+                               comment,
+                               alt1email,
+                               alt2email,
+                               alt3email
 			FROM supplierwarehouse
 			WHERE warehousecode='".$SelectedWarehouse."'
 			AND supplierid='".$SuppCode."'";
@@ -369,6 +387,9 @@ if (!isset($_GET['delete'])) {
 			$_POST['FaxNo'] =$myrow['faxno'];
 			$_POST['Email'] =$myrow['email'];
                         $_POST['Comment']=$myrow['comment'];
+                        $_POST['Alt1Email'] =$myrow['alt1email'];
+                        $_POST['Alt2Email'] =$myrow['alt2email'];
+                        $_POST['Alt3Email'] =$myrow['alt3email'];
 		
 		}
 
@@ -468,6 +489,22 @@ if (!isset($_GET['delete'])) {
 	echo '<tr><td>'.(($_POST['Email']) ? '<a href="Mailto:'.$_POST['Email'].'">'._('Email').':</a>' : _('Email').':').'</td>';
       //only display email link if there is an email address
 	echo '<td><input tabindex=18 type="text" name="Email" size=56 maxlength=55 value="'. $_POST['Email'].'"></td></tr>';
+        
+        if (!isset($_POST['Alt1Email'])) {$_POST['Alt1Email']='';}
+	echo '<tr><td>'.(($_POST['Alt1Email']) ? '<a href="Mailto:'.$_POST['Alt1Email'].'">'._('Alternate Email Address1').':</a>' : _('Alternate Email Address1').':').'</td>';
+      //only display email link if there is an email address
+	echo '<td><input tabindex=18 type="text" name="Alt1Email" size=56 maxlength=55 value="'. $_POST['Alt1Email'].'"></td></tr>';
+        
+        if (!isset($_POST['Alt2Email'])) {$_POST['Alt2Email']='';}
+	echo '<tr><td>'.(($_POST['Alt2Email']) ? '<a href="Mailto:'.$_POST['Alt2Email'].'">'._('Alternate Email Address2').':</a>' : _('Alternate Email Address2').':').'</td>';
+      //only display email link if there is an email address
+	echo '<td><input tabindex=18 type="text" name="Alt2Email" size=56 maxlength=55 value="'. $_POST['Alt2Email'].'"></td></tr>';
+        
+        if (!isset($_POST['Alt3Email'])) {$_POST['Alt3Email']='';}
+	echo '<tr><td>'.(($_POST['Alt3Email']) ? '<a href="Mailto:'.$_POST['Alt3Email'].'">'._('Alternate Email Address3').':</a>' : _('Alternate Email Address3').':').'</td>';
+      //only display email link if there is an email address
+	echo '<td><input tabindex=18 type="text" name="Alt3Email" size=56 maxlength=55 value="'. $_POST['Alt3Email'].'"></td></tr>';
+        
 	echo '<tr><td>'._('Comment').':</td>';
 	if (!isset($_POST['Comment'])) {$_POST['Comment']='';}
 	echo '<td><input tabindex=10 type="text" name="Comment" size=56 value="'. $_POST['Comment'].'"></td></tr>';
