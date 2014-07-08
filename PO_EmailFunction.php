@@ -36,13 +36,13 @@ include ('includes/htmlMimeMail.php');
               $mail->addAttachment($Attachment, $RCTI_PDFLink, 'application/pdf');
             } 
         }
-    }
-    if(isset($_FILES['ConsignmentPDF']['name'])){
-         for ($i = 0; $i < count($_FILES['ConsignmentPDF']['name']); $i++) { 
+    }     
+         for ($i = 0; $i < count($_FILES['ConsignmentPDF']['name']); $i++) {  
+              if(is_uploaded_file($_FILES['ConsignmentPDF']['tmp_name'][$i])){
                 $Attachment = $mail->getFile($_FILES['ConsignmentPDF']['tmp_name'][$i]);
                 $mail->addAttachment($Attachment, $_FILES['ConsignmentPDF']['name'][$i], 'application/pdf');
+              }
           }
-    }
                 /* Send Email Function */
                 $mail->setHtml(str_replace(array("\r","\n",'\r','\n'),'',htmlspecialchars_decode($_POST['EmailMessage'])));
                 $mail->setHtmlCharset("UTF-8");
