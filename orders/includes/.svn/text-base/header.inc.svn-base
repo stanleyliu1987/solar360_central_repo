@@ -1,0 +1,35 @@
+<?php
+/* $Id: header.inc 4565 2011-05-13 10:50:42Z daintree $ */
+
+	// Titles and screen header
+	//  $rootpath
+	//  $title - should be defined in the page this file is included with
+               clearBrowserCache();
+	
+		header('Content-type: text/html; charset=utf-8');
+	        $meta='<meta http-equiv="Content-Type" content="application/html; charset=utf-8" />';
+	
+function clearBrowserCache() {
+    header("Pragma: no-cache");
+    header("Cache: no-cache");
+    header("Cache-Control: no-cache, must-revalidate");
+    header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+}
+	
+?>
+
+        <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+			"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+	<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Online Order Track</title>
+	<link rel="shortcut icon" href="<?php echo $rootpath;?>/favicon.ico" />
+	<link rel="icon" href="<?php echo $rootpath;?>/favicon.ico" />
+        <?php echo $meta;?>
+	<link href="<?php echo $rootpath;?>/css/ui-lightness/jquery-ui-1.8.21.custom.css" rel="stylesheet" type="text/css" />
+        <link href="<?php echo $rootpath;?>/css/default.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="<?php echo $rootpath;?>/javascripts/jquery-1.7.2.js"></script>
+	<script type="text/javascript" src = "<?php echo $rootpath;?>/javascripts/MiscFunctions.js"></script>
+        <script type="text/javascript" src = "<?php echo $rootpath;?>/javascripts/jquery-ui-1.8.21.custom.min.js"></script>
+	</head>
+
+	<body>
