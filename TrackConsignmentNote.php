@@ -178,6 +178,7 @@ if(isset($_GET['filtertype'])){
 					custbranch.brpostaddr5,
 					custbranch.brpostaddr6,
 					custbranch.phoneno,
+                                        custbranch.email,
                                         custbranch.contactname,
 					custbranch.brname,
 					debtortrans.debtorno,
@@ -226,6 +227,7 @@ if(isset($_GET['filtertype'])){
 					custbranch.brpostaddr5,
 					custbranch.brpostaddr6,
 					custbranch.phoneno,
+                                        custbranch.email,
                                         custbranch.contactname,
 					custbranch.brname,
 					debtortrans.debtorno,
@@ -275,6 +277,7 @@ if(isset($_GET['filtertype'])){
 					custbranch.brpostaddr5,
 					custbranch.brpostaddr6,
 					custbranch.phoneno,
+                                        custbranch.email,
                                         custbranch.contactname,
 					custbranch.brname,
 					debtortrans.debtorno,
@@ -333,6 +336,7 @@ if(isset($_GET['filtertype'])){
 					custbranch.brpostaddr5,
 					custbranch.brpostaddr6,
 					custbranch.phoneno,
+                                        custbranch.email,
                                         custbranch.contactname,
 					custbranch.brname,
 					debtortrans.debtorno,
@@ -383,6 +387,7 @@ if(isset($_GET['filtertype'])){
 					custbranch.brpostaddr5,
 					custbranch.brpostaddr6,
 					custbranch.phoneno,
+                                        custbranch.email,
                                         custbranch.contactname,
 					custbranch.brname,
 					debtortrans.debtorno,
@@ -433,6 +438,7 @@ if(isset($_GET['filtertype'])){
 					custbranch.brpostaddr5,
 					custbranch.brpostaddr6,
 					custbranch.phoneno,
+                                        custbranch.email,
                                         custbranch.contactname,
 					custbranch.brname,
 					debtortrans.debtorno,
@@ -543,6 +549,7 @@ echo '<br />';
 					custbranch.brpostaddr5,
 					custbranch.brpostaddr6,
 					custbranch.phoneno,
+                                        custbranch.email,
                                         custbranch.contactname,
 					custbranch.brname,
 					debtortrans.debtorno,
@@ -896,14 +903,14 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
     
     if($myrow['sales_ref_num']==''){
      $RowInvoicePDFLink='Empty Invoice #';   
-     $RowSearchConsignmentButton=  '<input type="button"  value="Update Status"   onclick="getDelStatusDate(\''.substr($POListRow,0,-1).'\',\''.$i.'\',\''.$myrow['id'].'\');"/>';   
+     $RowSearchConsignmentButton=  '<input type="button"  value="Update Status"   onclick="getDelStatusDate(\''.substr($POListRow,0,-1).'\',\''.$i.'\',\''.$myrow['id'].'\');"/>';
     }
      else{
      $RowInvoicePDFLink ='<a href="'.$rootpath.'/'.$PrintCustomerTransactionScript.'?FromTransNo='.$myrow['transno'].'&InvOrCredit=Invoice&PrintPDF=True"><img src="'.$rootpath.'/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '">'  . $myrow['sales_ref_num'] .  '</a>'; 
      $RowSearchConsignmentButton=  '<input type="button" value="Update Status" onclick="getDelStatusDate(\''.substr($POListRow,0,-1).'\',\''.$Offset.'\',\''.$i.'\',\''.$myrow['id'].'\');"/>'; 
      $RowDeliveryStatus='<select id="InvDelStatus_'.$i.'">'.$InvDelStatusoptions.'</select>';
      }
-     
+     $RowEmailClientSD= '<a href="'.$rootpath.'/EmailClientSD.php?CustEmail='.$myrow['email'].'&InvoiceNumber='.$myrow['sales_ref_num'].'" target="_blank">' . _('Email') . ' <img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Stock Delivery Details') . '"></a>';
      $UpdateMessage='<p id="msgsuccess_'.$i.'"></p>';
    /* Add suppliement add to each row for making alternating line to the end*/  
      while($j<=$MaxNumPo){
@@ -942,6 +949,7 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
                        ' .  $phonenumber .'<br/>    
                        ' .  $RowInvoicePDFLink . '<br/><br/>
                        '.   $RowSearchConsignmentButton.'<br/><br />
+                       '.   $RowEmailClientSD.'<br/><br/>
                        '.   $RowDeliveryStatus .'    
                        '.   $UpdateMessage.' </td>   
 	 <td>' . $FormatedOrderDate. '</td>
