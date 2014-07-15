@@ -1,0 +1,23 @@
+<?php
+
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+   /*
+    * Clear up directory graphs
+    */     
+function clearupGraphinDir($dir){ 
+    $mydir = opendir($dir);
+    while(false !== ($file = readdir($mydir))) {
+        if($file != "." && $file != "..") {
+            chmod($dir.$file, 0777);
+            if(!is_dir($dir.$file)) {
+               unlink($dir.$file) or DIE("couldn't delete $dir$file<br />");
+            }
+   
+       }
+    }
+     }
+?>

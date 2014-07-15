@@ -1,0 +1,48 @@
+<?php
+
+/* $Revision: 1.7 $ */
+// User configurable variables
+//---------------------------------------------------
+
+//DefaultLanguage to use for the login screen and the setup of new users - the users language selection will override
+$DefaultLanguage ='en_GB.utf8';
+
+// Whether to display the demo login and password or not on the login screen
+$allow_demo_mode = False;
+
+//  Connection information for the database
+// $host is the computer ip address or name where the database is located
+// assuming that the web server is also the sql server
+define('DB_HOST','erp.solar360.com.au');
+// assuming that the web server is also the sql server
+define('DB_USER', 'solarorder');
+// assuming that the web server is also the sql server
+define('DB_PASSWORD','solar36001');
+// The timezone of the business - this allows the possibility of having;
+putenv('TZ=Australia/Melbourne');
+$AllowCompanySelectionBox = true;
+define('DB_DATABASE','solar360');
+// assuming database port
+define('DB_PORT',3306);
+// assuming seesion time
+define('SessionLifeTime',3600);
+// assuming maximum execution time
+define('MaximumExecutionTime', 120);
+// assuming password cryption method
+define('CryptFunction','sha1');
+// assuming clock time
+define('DefaultClock', 12);
+
+
+$rootpath = dirname($_SERVER['PHP_SELF']);
+if (isset($DirectoryLevelsDeep)){
+   for ($i=0;$i<$DirectoryLevelsDeep;$i++){
+$rootpath = substr($rootpath,0, strrpos($rootpath,'/'));
+} }
+if ($rootpath == '/' OR $rootpath == '\\') {;
+$rootpath = '';
+}
+
+
+
+?>
