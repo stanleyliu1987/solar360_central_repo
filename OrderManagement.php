@@ -341,7 +341,7 @@ $RelatedPOButton='<a href="'.$rootpath.'/PO_SelectInvRelated.php?InvoiceNo='.$my
 	$FormatedOrderValue = number_format($myrow['ordervalue'],2);
         /* 12062014 Replace Invoice no with pdf download link by Stan*/
         $RowInvoicePDFLink ='<a href="'.$rootpath.'/'.$PrintCustomerTransactionScript.'?FromTransNo='.$myrow['transno'].'&InvOrCredit=Invoice&PrintPDF=True"><img src="'.$rootpath.'/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '">'  . $myrow['sales_ref_num'] .  '</a>';   
-        $OrderComments='<input type="text" name="OrderComment_'.$myrow['id'].'" id="OrderComment_'.$myrow['id'].'" value="'.$myrow['order_comments'].'" disabled> ';
+        $OrderComments='<textarea name="OrderComment_'.$myrow['id'].'" id="OrderComment_'.$myrow['id'].'"  disabled>'.$myrow['order_comments'] .'</textarea>';
 		echo '<td>' . $RowInvoicePDFLink . '</td>
 					<td>' . $FormatedOrderDate . '</td>
 					<td>' . $myrow['name'] . '</td>';

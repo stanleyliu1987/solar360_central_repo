@@ -1,7 +1,7 @@
 /* 19052014 Dynamic Front End Development By Stan */
 $(document).ready(function(){
   $("button[name^='OrderStageHistory_']").removeAttr('disabled');
-  $("input[name^='OrderComment_']").removeAttr('disabled');
+  $("textarea[name^='OrderComment_']").removeAttr('disabled');
   $("input[name^='PORemark_']").removeAttr('disabled');
 
   $( "#ChooseEmailTemplate" ).change(function() { 
@@ -27,7 +27,7 @@ $(document).ready(function(){
     return false;
   });
   
-  $("input[name^='OrderComment_']").blur(function(event){
+  $("textarea[name^='OrderComment_']").blur(function(event){
  event.stopPropagation();  
  $.post("custom/ajax/OrderCommentsUpdate.php",
   {
