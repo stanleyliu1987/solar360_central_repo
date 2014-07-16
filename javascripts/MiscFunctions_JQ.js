@@ -3,6 +3,7 @@ $(document).ready(function(){
   $("button[name^='OrderStageHistory_']").removeAttr('disabled');
   $("textarea[name^='OrderComment_']").removeAttr('disabled');
   $("input[name^='PORemark_']").removeAttr('disabled');
+  $("select[name^='OrderStagesList_']").removeAttr('disabled');
 
   $( "#ChooseEmailTemplate" ).change(function() { 
   $.post("custom/ajax/EmailTemplateDetails.php",
