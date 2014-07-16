@@ -70,7 +70,7 @@ $SearchOrderNumber=substr(trim($InvoiceNumber),1,strpos(trim($InvoiceNumber),'-'
 $SearchEmailString = '%' . str_replace(' ', '%', str_replace("  "," ",strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($CustEmail))))) . '%';
 $sql="Select * from onlineordertracking where email like '".$SearchEmailString."' and  order_='".$SearchOrderNumber."'";
 $result=DB_query($sql,$db,'','',false,false);
- $_POST['EmailMessage']= '<p class="MsoNormal">Dear [Customer],</p><br/><p class="MsoNormal">Please find below all the tracking information for your order.</p>';
+ $_POST['EmailMessage']= '<p class="MsoNormal">Dear [Customer],</p><br/><p class="MsoNormal">Please find below all the tracking information for the Invoice '.$InvoiceNumber.':</p>';
        if($result==0){
        $_POST['EmailMessage'].='No matched record retrieved, Please try to input correct invoice number and email address';
        }
@@ -115,13 +115,13 @@ $result=DB_query($sql,$db,'','',false,false);
              $FormatShipname=explode(' ', $ShipperRecord['shippername'], 2);
              $freightCompany='<a href="'.$ShipperRecord['shipperwebsite'].'" target="_blank">'.$FormatShipname[1].'</a>';
             /* End of Customization */
-             $_POST['EmailMessage'].='<td>'.$myrow['itemcode'].'</td>
+             $_POST['EmailMessage'].='<td align="center">'.$myrow['itemcode'].'</td>
 		      <td>'.$myrow['itemdescription'].'</td>
-		      <td>'.$myrow['quantityord'].'</td>
-		      <td>'.$myrow['consignment_id'].'</td>
-                      <td>'.$freightCompany.'</td>
-                      <td>'.ConvertSQLDate($myrow['del_est_date']).'</td>
-		      <td>'.$myrow['status'].'</td></tr>';
+		      <td align="center">'.$myrow['quantityord'].'</td>
+		      <td align="center">'.$myrow['consignment_id'].'</td>
+                      <td align="center">'.$freightCompany.'</td>
+                      <td align="center">'.ConvertSQLDate($myrow['del_est_date']).'</td>
+		      <td align="center">'.$myrow['status'].'</td></tr>';
 
             
         }
@@ -148,9 +148,9 @@ $result=DB_query($sql,$db,'','',false,false);
 	      <tr><td>' . $myrowSA['deladd1']. '
               ' . $myrowSA['deladd2']. ' ' . $myrowSA['deladd3']. ' ' . $myrowSA['deladd4']. '</td></tr></table><br>';
 }
-$_POST['EmailMessage'].= '<br/><p class="MsoNormal">Please feel free to contact us for further information</p>';
+$_POST['EmailMessage'].= '<br/><p class="MsoNormal">Please feel free to contact us for further information.</p>';
 /* 16072014 Hard Code Signature */
-$_POST['EmailMessage'].=  '<p class="MsoNormal"><b><span lang="EN-US" style="font-size:9.0pt;font-family:Arial,sans-serif; font-variant:small-caps;color:navy;mso-ansi-language:EN-US">&nbsp;</span></b></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size:9.0pt;font-family:Arial,sans-serif; font-variant:small-caps;color:navy;mso-ansi-language:EN-US">&nbsp;</span></b></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size:9.0pt;font-family:Arial,sans-serif; font-variant:small-caps;color:navy;mso-ansi-language:EN-US">Eric Khera <o:p></o:p></span></b></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Chief Operating Officer</span></p><p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;"><img src="http://erp.solar360.com.au/wysiwyg/uploads/Solar360_erp_sign.jpg" border="0" alt="" hspace="" vspace="" style="width: 80px;"><br></span></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Solar Wholesale and Supply Chain<o:p></o:p></span></b></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Solar360 Pty Ltd | Level, 18, 499 St. Kilda Road Melbourne 3004<br> Tel: 1300 600 360<o:p></o:p></span></p> <p class="MsoNormal"><u><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif; color:blue;mso-ansi-language:EN-US"><a href="http://www.solar360.com.au">www.solar360.com.au</a></span></u><span lang="EN-US" style="color:#1F497D;mso-ansi-language:EN-US"><o:p></o:p></span></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif;">Join us on Facebook:</span><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif;color:#1F497D; mso-ansi-language:EN-US"> <a href="http://facebook.com/solar360instalr" target="_blank">http://facebook.com/solar360instalr</a></span></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size:22.0pt;font-family: Webdings;color:green;mso-ansi-language:EN-US">P </span></b><b><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif;color:green;mso-ansi-language: EN-US">Respect the environment: think before you print</span></b></p>';
+$_POST['EmailMessage'].=  '<p class="MsoNormal"><b><span lang="EN-US" style="font-size:9.0pt;font-family:Arial,sans-serif; font-variant:small-caps;color:navy;mso-ansi-language:EN-US">&nbsp;</span></b></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size:9.0pt;font-family:Arial,sans-serif; font-variant:small-caps;color:navy;mso-ansi-language:EN-US">Regards, <o:p></o:p></span></b></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Customer Service Team</span></p><p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;"><img src="http://erp.solar360.com.au/wysiwyg/uploads/Solar360_erp_sign.jpg" border="0" alt="" hspace="" vspace="" style="width: 80px;"><br></span></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Solar Wholesale and Supply Chain<o:p></o:p></span></b></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Solar360 Pty Ltd | Level, 18, 499 St. Kilda Road Melbourne 3004<br> Tel: 1300 600 360<o:p></o:p></span></p> <p class="MsoNormal"><u><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif; color:blue;mso-ansi-language:EN-US"><a href="http://www.solar360.com.au">www.solar360.com.au</a></span></u><span lang="EN-US" style="color:#1F497D;mso-ansi-language:EN-US"><o:p></o:p></span></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif;">Join us on Facebook:</span><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif;color:#1F497D; mso-ansi-language:EN-US"> <a href="http://facebook.com/solar360instalr" target="_blank">http://facebook.com/solar360instalr</a></span></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size:22.0pt;font-family: Webdings;color:green;mso-ansi-language:EN-US">P </span></b><b><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif;color:green;mso-ansi-language: EN-US">Respect the environment: think before you print</span></b></p>';
 /* End of retrieving */
 echo '<div>
       <p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/customer.png" title="' .
