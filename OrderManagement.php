@@ -322,7 +322,7 @@ while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['Displ
 $OrderStagesSQL= "SELECT * FROM order_stages";
 $orderstageslist = DB_query($OrderStagesSQL,$db);
 /* End of logic */      
-$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['id'].'" name="OrderStagesList_'.$myrow['id'].'" onchange="ChangeOrderStages(\''.$myrow['id'].'\');">';
+$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['id'].'" name="OrderStagesList_'.$myrow['id'].'" onchange="ChangeOrderStages(\''.$myrow['id'].'\');" disabled>';
 while ($os = DB_fetch_array($orderstageslist)) {
 if($os["stages_id"]==$myrow['order_stages'])    
 $OrderStagesDropdown.= '<option value='.$os["stages_id"].' selected>'.$os["stages"].'</option>';
