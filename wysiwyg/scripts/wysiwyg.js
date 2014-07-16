@@ -2697,7 +2697,7 @@ var WYSIWYG_Table = {
 		//alert("ENABLE: ELM = " + node.tagName + "; STYLE = " + style);
 		WYSIWYG_Core.removeAttribute(node, "prevstyle");
 		WYSIWYG_Core.setAttribute(node, "prevstyle", style);
-		WYSIWYG_Core.setAttribute(node, "style", " border-collapse: collapse; font-size:10px;");
+		WYSIWYG_Core.setAttribute(node, "style", " border-collapse: collapse; font-size:12px; text-align: left;");
 	},
 	
 	/**

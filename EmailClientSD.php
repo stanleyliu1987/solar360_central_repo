@@ -17,43 +17,52 @@ $InvoiceNumber=$_GET['InvoiceNumber'];
 elseif(isset($_POST['InvoiceNumber']) and $_POST['InvoiceNumber']!='') {
 $InvoiceNumber=$_POST['InvoiceNumber'];
 }
+if (isset($_GET['debtorno']) and $_GET['debtorno']!=''){
+$debtorno=$_GET['debtorno'];
+} 
+elseif(isset($_POST['debtorno']) and $_POST['debtorno']!='') {
+$debtorno=$_POST['debtorno'];
+}
+if (isset($_GET['branchcode']) and $_GET['branchcode']!=''){
+$branchcode=$_GET['branchcode'];
+} 
+elseif(isset($_POST['branchcode']) and $_POST['branchcode']!='') {
+$branchcode=$_POST['branchcode'];
+}
 $title=_('Email') . ' ' . $TransactionType . ' ' . _('Number') . ' ' . $InvoiceNumber;
 include ('includes/header.inc');
 echo '<form action="SD_EmailFunction.php" method=post enctype="multipart/form-data">';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 echo '<input type=hidden name="CustEmail" value="' . $CustEmail . '">';
 echo '<input type=hidden name="InvoiceNumber" value="' . $InvoiceNumber . '">';
+echo '<input type=hidden name="debtorno" value="' . $debtorno . '">';
+echo '<input type=hidden name="branchcode" value="' . $branchcode . '">';
 
-$SQL = "SELECT suw.email, suw.alt1email, suw.alt2email, suw.alt3email from purchorders as puo left join supplierwarehouse as suw on (puo.supplierno=suw.supplierid and
-        puo.supwarehouseno=suw.warehousecode) WHERE puo.orderno='".$OrderNo."'";
-$ErrMsg = _('There was a problem retrieving the supplier warehouse contact details');
-$SupWarehouseResult=DB_query($SQL,$db,$ErrMsg);
+/* 16072014 By Stan Retrieve Customer CC address */
+$SQL = "SELECT  altemail1, altemail2, altemail3,act_prim,act_alt1,act_alt2,act_alt3
+	FROM custbranchemails WHERE branchcode='" . $branchcode . "' 
+	AND debtorno='" .$debtorno . "'";
 
-if (DB_num_rows($SupWarehouseResult)>0){
-	$EmailAddrRow = DB_fetch_array($SupWarehouseResult);
-	$EmailAddress = $EmailAddrRow['email'];
-        if(isset($EmailAddrRow['alt1email']) and $EmailAddrRow['alt1email']!=''){
-        $EmailCCAddress = $EmailAddrRow['alt1email'];   
-        }
-        if(isset($EmailAddrRow['alt2email']) and $EmailAddrRow['alt2email']!=''){
-        $EmailCCAddress .= ', '.$EmailAddrRow['alt2email'];   
-        }
-        if(isset($EmailAddrRow['alt3email']) and $EmailAddrRow['alt3email']!=''){
-        $EmailCCAddress .= ', '.$EmailAddrRow['alt3email'];   
-        }
+$ErrMsg = _('There was a problem retrieving the email details for the customer');
+$ContactResult=DB_query($SQL,$db,$ErrMsg);
 
+if (DB_num_rows($ContactResult)>0){
+	$EmailAddrRow = DB_fetch_array($ContactResult);
+        if($EmailAddrRow['act_alt1']==1 and isset($EmailAddrRow['altemail1'])){
+        $EmailCCAddress = $EmailAddrRow['altemail1'];   
+        }
+        if($EmailAddrRow['act_alt2']==1 and isset($EmailAddrRow['altemail2'])){
+        $EmailCCAddress .= ', '.$EmailAddrRow['altemail2'];   
+        }
+        if($EmailAddrRow['act_alt3']==1 and isset($EmailAddrRow['altemail3'])){
+        $EmailCCAddress .= ', '.$EmailAddrRow['altemail3'];   
+        }
          
 } else {
-	$EmailAddress ='';
-        $EmailCCAddress ='';
+        $EmailCCAddress='';
 }
 /* 15052014 Logic to Retrieve Customer Record details, duplicate with code in CustomerInquiry.php */
-$EmailSubject="Order ".$InvoiceNumber. " Tracking Email";
-/* End of logic */
-
-/* 15052014 Logic to Retrieve Email Templates Options */
-$TemplateSQL= "SELECT * FROM emailtemplates where emailtype=18";
-$templates = DB_query($TemplateSQL,$db);
+$EmailSubject="Invoice ".$InvoiceNumber. " Tracking Information";
 /* End of logic */
 
 /* 15072014 Retrieve Email Message */
@@ -61,84 +70,19 @@ $SearchOrderNumber=substr(trim($InvoiceNumber),1,strpos(trim($InvoiceNumber),'-'
 $SearchEmailString = '%' . str_replace(' ', '%', str_replace("  "," ",strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($CustEmail))))) . '%';
 $sql="Select * from onlineordertracking where email like '".$SearchEmailString."' and  order_='".$SearchOrderNumber."'";
 $result=DB_query($sql,$db,'','',false,false);
+ $_POST['EmailMessage']= '<p class="MsoNormal">Dear [Customer],</p><br/><p class="MsoNormal">Please find below all the tracking information for your order.</p>';
        if($result==0){
-       $_POST['EmailMessage']='No matched record retrieved, Please try to input correct invoice number and email address';
+       $_POST['EmailMessage'].='No matched record retrieved, Please try to input correct invoice number and email address';
        }
-       else{ 
-      /*
-       * Retrieve Transaction Date, Invoice Balancem and Delivery Status
-       */ 
-       $sqlTD = "SELECT id,
-                        trandate,
-                        debtorno,
-                        ((ovamount+ovgst+ovfreight)-alloc) as balancedue,
-                        stage
-                 FROM debtortransview  WHERE order_='".$InvoiceNumber."'";
-      
-       $resultTD = DB_query($sqlTD,$db);
-       $myrowOS = DB_fetch_array($resultTD);
-       /*
-        * Retrieve Payment Date
-        */
-       $sqlPDate ="SELECT MIN(custallocns.datealloc) as paymentdate
-				FROM custallocns
-				WHERE custallocns.transid_allocto='" . $myrowOS['id'] ."'";
-        
-        $resultPD=DB_query($sqlPDate,$db);
-        if(DB_num_rows($resultPD)==1){
-       	$myrowPD = DB_fetch_array($resultPD);
-        $PaymentDate=$myrowPD['paymentdate'];
-       }
-       
-       /*
-        * Retrieve Total Balance
-        */
-       $sqlTB = "SELECT SUM(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount- debtortrans.alloc) AS balance
-                FROM    debtorsmaster,
-     			paymentterms,
-     			holdreasons,
-     			currencies,
-     			debtortrans
-                WHERE  debtorsmaster.paymentterms = paymentterms.termsindicator
-     		AND debtorsmaster.currcode = currencies.currabrev
-     		AND debtorsmaster.holdreason = holdreasons.reasoncode
-     		AND debtorsmaster.debtorno = '" . $myrowOS['debtorno'] . "'
-     		AND debtorsmaster.debtorno = debtortrans.debtorno
-		GROUP BY debtorsmaster.name,
-			currencies.currency,
-			paymentterms.terms,
-			paymentterms.daysbeforedue,
-			paymentterms.dayinfollowingmonth,
-			debtorsmaster.creditlimit,
-			holdreasons.dissallowinvoices,
-			holdreasons.reasondescription";
-      $ErrMsg = _('The customer details could not be retrieved by the SQL because');
-      $CustomerResult = DB_query($sqlTB,$db,$ErrMsg);
-      $CustomerRecord = DB_fetch_array($CustomerResult);
-      
-      if($myrowOS['balancedue']<0.01 and $myrowOS['balancedue']>(-0.01)){
-          $myrowOS['balancedue']=0;
-      }
-      if($CustomerRecord['balance']<0.01 and $CustomerRecord['balance'] >(-0.01)){
-          $CustomerRecord['balance']=0;
-      }
-      $_POST['EmailMessage']= '<table class="SD_table_top">
-      
-	     <tr><td>' . _('Invoice Number: ') . ' ' . strtoupper($_POST['InvoiceNumber'])  . '</td></tr>
-             <tr><td>' . _('Date: ') . ' ' . ConvertSQLDate($myrowOS['trandate'])  . '</td></tr>
-             <tr><td>' ._('Invoice Payment Date: ').' '.ConvertSQLDate($PaymentDate).'</td></tr>      
-             <tr><td>' ._('Invoice Balance Outstanding: ').' $'.number_format($myrowOS['balancedue'],2).'</td></tr>
-             <tr><td>' ._('Invoice Status: ').' '.$myrowOS['stage'].'</td></tr> 
-             <tr><td></td><td class="accountbalance" width=20%>' ._('Your Account Balance<sup>1</sup> : ').' $'.number_format($CustomerRecord['balance'],2).'</td></tr>     </table><br/>';
-     
-      $_POST['EmailMessage'].= '<table class="SD_table_middle">
-             <tr><th>' . _('Part Number') . '</th>
-	     <th width="40%">' . _('Description') . '</th>
-	     <th>' . _('Quantity') . '</th>
-	     <th>' . _('Con Note Number') . '</th>
-             <th>' . _('Freight Company Type') . '</th>    
-	     <th>' . _('Estimated / Delivery Date') . '</th>
-             <th>' . _('Comments') . '</th>    </tr>';
+       else{        
+     $_POST['EmailMessage'].= '<br/><table class="SD_table_middle">
+             <tr><th width="15%">' . _('Part Number') . '</th>
+	     <th width="20%">' . _('Description') . '</th>
+	     <th width="10%">' . _('Quantity') . '</th>
+	     <th width="10%">' . _('Con Note Number') . '</th>
+             <th width="15%">' . _('Freight Company Type') . '</th>    
+	     <th width="20%">' . _('Estimated / Delivery Date') . '</th>
+             <th width="10%">' . _('Comments') . '</th>    </tr>';
        
         $k=0;	//row colour counter 
         while ($myrow=DB_fetch_array($result)){ 
@@ -173,11 +117,11 @@ $result=DB_query($sql,$db,'','',false,false);
             /* End of Customization */
              $_POST['EmailMessage'].='<td>'.$myrow['itemcode'].'</td>
 		      <td>'.$myrow['itemdescription'].'</td>
-		      <td class=number>'.$myrow['quantityord'].'</td>
-		      <td class=number>'.$myrow['consignment_id'].'</td>
-                      <td align=center>'.$freightCompany.'</td>
-                      <td class=number>'.ConvertSQLDate($myrow['del_est_date']).'</td>
-		      <td class=number>'.$myrow['status'].'</td></tr>';
+		      <td>'.$myrow['quantityord'].'</td>
+		      <td>'.$myrow['consignment_id'].'</td>
+                      <td>'.$freightCompany.'</td>
+                      <td>'.ConvertSQLDate($myrow['del_est_date']).'</td>
+		      <td>'.$myrow['status'].'</td></tr>';
 
             
         }
@@ -204,19 +148,15 @@ $result=DB_query($sql,$db,'','',false,false);
 	      <tr><td>' . $myrowSA['deladd1']. '
               ' . $myrowSA['deladd2']. ' ' . $myrowSA['deladd3']. ' ' . $myrowSA['deladd4']. '</td></tr></table><br>';
 }
+$_POST['EmailMessage'].= '<br/><p class="MsoNormal">Please feel free to contact us for further information</p>';
+/* 16072014 Hard Code Signature */
+$_POST['EmailMessage'].=  '<p class="MsoNormal"><b><span lang="EN-US" style="font-size:9.0pt;font-family:Arial,sans-serif; font-variant:small-caps;color:navy;mso-ansi-language:EN-US">&nbsp;</span></b></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size:9.0pt;font-family:Arial,sans-serif; font-variant:small-caps;color:navy;mso-ansi-language:EN-US">&nbsp;</span></b></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size:9.0pt;font-family:Arial,sans-serif; font-variant:small-caps;color:navy;mso-ansi-language:EN-US">Eric Khera <o:p></o:p></span></b></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Chief Operating Officer</span></p><p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;"><img src="http://erp.solar360.com.au/wysiwyg/uploads/Solar360_erp_sign.jpg" border="0" alt="" hspace="" vspace="" style="width: 80px;"><br></span></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Solar Wholesale and Supply Chain<o:p></o:p></span></b></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif; font-variant: small-caps;">Solar360 Pty Ltd | Level, 18, 499 St. Kilda Road Melbourne 3004<br> Tel: 1300 600 360<o:p></o:p></span></p> <p class="MsoNormal"><u><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif; color:blue;mso-ansi-language:EN-US"><a href="http://www.solar360.com.au">www.solar360.com.au</a></span></u><span lang="EN-US" style="color:#1F497D;mso-ansi-language:EN-US"><o:p></o:p></span></p> <p class="MsoNormal"><span lang="EN-US" style="font-size: 8pt; font-family: Arial, sans-serif;">Join us on Facebook:</span><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif;color:#1F497D; mso-ansi-language:EN-US"> <a href="http://facebook.com/solar360instalr" target="_blank">http://facebook.com/solar360instalr</a></span></p> <p class="MsoNormal"><b><span lang="EN-US" style="font-size:22.0pt;font-family: Webdings;color:green;mso-ansi-language:EN-US">P </span></b><b><span lang="EN-US" style="font-size:8.0pt;font-family:Arial,sans-serif;color:green;mso-ansi-language: EN-US">Respect the environment: think before you print</span></b></p>';
 /* End of retrieving */
 echo '<div>
       <p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/customer.png" title="' .
 	_('ClientStockDelivery') . '" alt="" />' . ' ' . _('Invoice Number') . ' : ' . $InvoiceNumber . '<br /></div>';
 /*15052014 Bottom Panel and Choose different templates */
-echo '<br><div><table><tr><td>'._('Choose a Template:').'<select id="ChooseEmailTemplate" name="ChooseEmailTemplate">';
-echo '<option selected>Please Choose a Template</option>';
-while ($myrow = DB_fetch_array($templates)) {
-echo '<option value='.$myrow["emailtemp_id"].'>'.$myrow["templatename"].'</option>';
-}
-echo '</select></td></tr>';
-/* 150502014 Email Content Panel */
-echo '<tr><td>'  . _('To Address') . ':</td>
+echo '<br><div><table><tr><td>'  . _('To Address') . ':</td>
 	<td><input type="text" name="EmailAddr" maxlength=60 size=60 value="' . $CustEmail . '"></td></tr>';
 echo '<tr><td>' . _('CC') . ':</td>
 	<td><input type="text" name="EmailAddrCC" maxlength=60 size=60 value="' . $EmailCCAddress . '"></td></tr>';

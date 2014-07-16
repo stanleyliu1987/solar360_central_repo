@@ -910,7 +910,7 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
      $RowSearchConsignmentButton=  '<input type="button" value="Update Status" onclick="getDelStatusDate(\''.substr($POListRow,0,-1).'\',\''.$Offset.'\',\''.$i.'\',\''.$myrow['id'].'\');"/>'; 
      $RowDeliveryStatus='<select id="InvDelStatus_'.$i.'">'.$InvDelStatusoptions.'</select>';
      }
-     $RowEmailClientSD= '<a href="'.$rootpath.'/EmailClientSD.php?CustEmail='.$myrow['email'].'&InvoiceNumber='.$myrow['sales_ref_num'].'" target="_blank">' . _('Email') . ' <img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Stock Delivery Details') . '"></a>';
+     $RowEmailClientSD= '<a href="'.$rootpath.'/EmailClientSD.php?CustEmail='.$myrow['email'].'&InvoiceNumber='.$myrow['sales_ref_num'].'&debtorno='.$myrow['debtorno'].'&branchcode='.$myrow['branchcode'].'" target="_blank">' . _('Email') . ' <img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Stock Delivery Details') . '"></a>';
      $UpdateMessage='<p id="msgsuccess_'.$i.'"></p>';
    /* Add suppliement add to each row for making alternating line to the end*/  
      while($j<=$MaxNumPo){
