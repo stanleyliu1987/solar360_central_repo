@@ -135,7 +135,7 @@ $result=DB_query($sql,$db,'','',false,false);
 				deladd3,
 				deladd4
 				FROM salesorders
-				WHERE orderno='".$InvoiceNumber."'";
+				WHERE orderno='".$SearchOrderNumber."'";
 		
 
        $resultShipAddress=DB_query($sqlShipAddress,$db);
