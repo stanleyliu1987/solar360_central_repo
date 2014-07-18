@@ -91,10 +91,10 @@ $title = _('Print Purchase Order Number').' '. $OrderNo;
     }
     elseif($type=="RCTI_PDFAttach"){ 
         $MakePDFRCTI=True;
+        $_POST['ShowAmounts']='Yes'; 
     }
     else{
-     $MakePDFDocket=false;
-     $MakePDFRCTI=false;   
+     $_POST['ShowAmounts']='Yes';  
     }
  /* Check related Invoice existed or not */
         $sqlCheckInvoice = "SELECT * FROM purchorders  WHERE orderno='" . $OrderNo ."' AND ref_salesorder <> '' ";
