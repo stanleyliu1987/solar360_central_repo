@@ -304,7 +304,7 @@ while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['Displ
        	$myrowAP = DB_fetch_array($resultAP);
         $tempAP=$myrowAP['alloc'];
        }
-      $DisplayBalance=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount']+myrrow['ovdiscount']-$tempAP,2);
+      $DisplayBalance=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount']+$myrow['ovdiscount']-$tempAP,2);
       $DisplayInvoiceValue=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount']+$myrow['ovdiscount'],2);
       if(DB_num_rows($POExistList)!=0 and DB_num_rows($FinishPOList)==0 and $myrow['invoice_status'] != 'Undo'){
           $Invoice_status='Completed'; 

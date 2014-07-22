@@ -68,7 +68,7 @@ $EmailSubject="Invoice ".$InvoiceNumber. " Tracking Information";
 /* 15072014 Retrieve Email Message */
 $SearchOrderNumber=substr(trim($InvoiceNumber),1,strpos(trim($InvoiceNumber),'-')-1);
 $SearchEmailString = '%' . str_replace(' ', '%', str_replace("  "," ",strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($CustEmail))))) . '%';
-$sql="Select * from onlineordertracking where email like '".$SearchEmailString."' and  order_='".$SearchOrderNumber."'";
+$sql="Select * from onlineordertracking AS ont LEFT JOIN stockmoves AS stm ON (ont.transno=stm.transno AND ont.itemcode=stm.stockid) where ont.email like '".$SearchEmailString."' and  ont.order_='".$SearchOrderNumber."'";
 $result=DB_query($sql,$db,'','',false,false);
  $_POST['EmailMessage']= '<p class="MsoNormal">Dear [Customer],</p><br/><p class="MsoNormal">Please find below all the tracking information for the Invoice '.$InvoiceNumber.':</p>';
        if($result==0){
@@ -94,16 +94,11 @@ $result=DB_query($sql,$db,'','',false,false);
 			$RowStarter = '<tr class="OddTableRows">';
 			 $k=1;
 		}
-                
-            if($myrow['status']!='BackOrder'){
-               $myrow['status']=''; 
-            } 
             
             if($myrow['itemcode']=='S360-0000'){
                $myrow['consignment_id']='';
                $myrow['delivery_options']='';
                $myrow['del_est_date']='00/00/0000';
-               $myrow['status']='';
             }
 
 	     $_POST['EmailMessage'].= $RowStarter;
@@ -121,7 +116,7 @@ $result=DB_query($sql,$db,'','',false,false);
 		      <td align="center">'.$myrow['consignment_id'].'</td>
                       <td align="center">'.$freightCompany.'</td>
                       <td align="center">'.ConvertSQLDate($myrow['del_est_date']).'</td>
-		      <td align="center">'.$myrow['status'].'</td></tr>';
+		      <td align="center">'.$myrow['narrative'].'</td></tr>';
 
             
         }
