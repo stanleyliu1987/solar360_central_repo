@@ -38,14 +38,6 @@ class OrderSummaryModel {
         return DB_fetch_assoc($sumcreditholdinvoice);
     }
 
-    /* Select Cancelled Invoice Summary Details -- by Stan 21072014 */
-
-    function SelectSumCancelledInvoice() {
-        $ErrMsg = _('The summary of cancelled invoice could not be retrieved by the SQL because');
-        $sumcancelledinvoice = DB_query("SELECT COUNT(*) AS total_number, SUM(invoice_value) AS total_value FROM cancelled_invoices_report", $this->db, $ErrMsg);
-        return DB_fetch_assoc($sumcancelledinvoice);
-    }
-
     /* Select Release Stock Invoice Summary Details -- by Stan 21072014 */
 
     function SelectSumReleaseStockInvoice() {
@@ -69,7 +61,14 @@ class OrderSummaryModel {
         $sumbackorderinvoice = DB_query("SELECT COUNT(*) AS total_number FROM back_orders_report", $this->db, $ErrMsg);
         return DB_fetch_assoc($sumbackorderinvoice);
     }
+    
+    /* Select BackOrder Stock Invoice Summary Details -- by Stan 21072014 */
 
+    function SelectSumDeliveryIssues() {
+        $ErrMsg = _('The summary of delivery issues stock invoice could not be retrieved by the SQL because');
+        $sumdelissueinvoice = DB_query("SELECT COUNT(*) AS total_number FROM delivery_issues_report", $this->db, $ErrMsg);
+        return DB_fetch_assoc($sumdelissueinvoice);
+    }
     /* Select Daily Sales Summary Details -- by Stan 21072014 */
 
     function SelectSumDailySales() {
