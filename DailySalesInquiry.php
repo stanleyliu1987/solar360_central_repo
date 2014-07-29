@@ -101,7 +101,9 @@ echo'<tr>
 	<th>' . _('Wednesday') . '</th>
 	<th>' . _('Thursday') . '</th>
 	<th>' . _('Friday') . '</th>
-	<th>' . _('Saturday') . '</th></tr>';
+	<th>' . _('Saturday') . '</th>
+        <th>' . _('Total') . '</th>
+        <th>' . _('Average') . '</th></tr>';
 
 $CumulativeTotalSales = 0;
 $CumulativeTotalCost = 0;
@@ -151,14 +153,33 @@ $LastDayOfMonth = DayOfMonthFromSQLDate($EndDateSQL);
 for ($i=1;$i<=$LastDayOfMonth;$i++){
 		$ColumnCounter++;
 		if(isset($DaySalesArray[$i])) {
-			echo '<td class="number" style="outline: 1px solid gray;">' . number_format($DaySalesArray[$i]->Sales,0) . '<br />'.number_format($DaySalesArray[$i]->OrderNum,0).'<br />' .  number_format($DaySalesArray[$i]->GPPercent*100,1) . '%</td>';
+                        $TotalWeekSalesValue +=$DaySalesArray[$i]->Sales;
+                        $TotalWeekSalesNo +=$DaySalesArray[$i]->OrderNum;
+                        $TotalMonthSalesNo +=$DaySalesArray[$i]->OrderNum;
+                        $BillDaysforWeek +=1;
+			echo '<td class="number" style="outline: 1px solid gray;">' . number_format($DaySalesArray[$i]->Sales,2) . '<br />'.number_format($DaySalesArray[$i]->OrderNum,0).'<br />' .  number_format($DaySalesArray[$i]->GPPercent*100,2) . '%</td>';
 		} else {
-			echo '<td class="number" style="outline: 1px solid gray;">' . number_format(0,0) . '<br />'.number_format(0,0) .'<br />' .  number_format(0,1) . '%</td>';
-		}
-		if ($ColumnCounter==7){
+                        $TotalWeekSalesValue +=0;
+                        $TotalWeekSalesNo +=0;
+                        $TotalMonthSalesNo +=0;
+			echo '<td class="number" style="outline: 1px solid gray;">' . number_format(0,2) . '<br />'.number_format(0,0) .'<br />' .  number_format(0,2) . '%</td>';
+		} 
+                if($i==$LastDayOfMonth and $ColumnCounter<7){
+                    for ($r=$ColumnCounter; $r<7; $r++){
+                        echo '<td></td>';
+                    }
+                    echo '<td class="number">'.number_format($TotalWeekSalesValue,2).'<br />'.number_format($TotalWeekSalesNo,0).'</td>';
+                    echo '<td class="number">'.number_format($TotalWeekSalesValue/$BillDaysforWeek,2).'<br />'.number_format($TotalWeekSalesNo/$BillDaysforWeek,0).'</td>';
+                }
+		if ($ColumnCounter==7){ 
+                        echo '<td class="number">'.number_format($TotalWeekSalesValue,2).'<br />'.number_format($TotalWeekSalesNo,0).'</td>';
+                        echo '<td class="number">'.number_format($TotalWeekSalesValue/$BillDaysforWeek,2).'<br />'.number_format($TotalWeekSalesNo/$BillDaysforWeek,0).'</td>';
 			echo '</tr><tr>';
                         for ($j=1;$j<=7;$j++){
-							       echo '<th>' . $DayNumber. '</th>';
+                            if($DayNumber<=$LastDayOfMonth){
+			    echo '<th>' . $DayNumber. '</th>';
+                            }
+                            
                             $DayNumber++;
                             if($DayNumber>$LastDayOfMonth){
                                    break;
@@ -166,6 +187,10 @@ for ($i=1;$i<=$LastDayOfMonth;$i++){
                         }
                         echo '</tr><tr>';
 			$ColumnCounter=0;
+                        $TotalWeekSalesValue=0;
+                        $TotalWeekSalesNo=0; 
+                        $BillDaysforWeek=0;
+                        
 		}
 
 
@@ -182,7 +207,8 @@ if ($CumulativeTotalSales !=0){
 	$AverageDailySales = 0;
 }
 
-echo '<th colspan=7>' . _('Total Sales for month') . ': ' . number_format($CumulativeTotalSales,0) . ' ' . _('GP%') . ': ' . number_format($AverageGPPercent,1) . '% ' . _('Avg Daily Sales') . ': ' . number_format($AverageDailySales,0) . '</th></tr>';
+echo '<th colspan=7>' . _('Total Sales for month') . ': ' . number_format($CumulativeTotalSales,0) . ' ' . _('GP%') . ': ' . number_format($AverageGPPercent,1) . '% ' . _('Avg Daily Sales') . ': ' . number_format($AverageDailySales,0) . '</th>'.
+     '<th colspan=2> '._('Total Sales No.') . ': '.number_format($TotalMonthSalesNo,0) . ' '._('Avg Sales No.') . ': '.number_format($TotalMonthSalesNo/$BilledDays,0) .'</th></tr>';
 
 echo '</table>';
 
