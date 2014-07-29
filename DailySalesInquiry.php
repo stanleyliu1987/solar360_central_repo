@@ -102,8 +102,8 @@ echo'<tr>
 	<th>' . _('Thursday') . '</th>
 	<th>' . _('Friday') . '</th>
 	<th>' . _('Saturday') . '</th>
-        <th>' . _('Total') . '</th>
-        <th>' . _('Average') . '</th></tr>';
+        <th>' . _('Total P/W') . '</th>
+        <th>' . _('Average P/W') . '</th></tr>';
 
 $CumulativeTotalSales = 0;
 $CumulativeTotalCost = 0;
