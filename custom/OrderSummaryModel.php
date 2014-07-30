@@ -42,7 +42,7 @@ class OrderSummaryModel {
 
     function SelectSumReleaseStockInvoice() {
         $ErrMsg = _('The summary of Release stock invoice could not be retrieved by the SQL because');
-        $sumreleaseinvoice = DB_query("SELECT COUNT(*) AS total_number FROM release_stock_report", $this->db, $ErrMsg);
+        $sumreleaseinvoice = DB_query("SELECT COUNT(DISTINCT invoice_number) AS total_number FROM release_stock_report", $this->db, $ErrMsg);
         return DB_fetch_assoc($sumreleaseinvoice);
     }
 
@@ -50,7 +50,7 @@ class OrderSummaryModel {
 
     function SelectSumDispatchStockInvoice() {
         $ErrMsg = _('The summary of Dispatch stock invoice could not be retrieved by the SQL because');
-        $sumdispatchinvoice = DB_query("SELECT COUNT(*) AS total_number FROM dispatch_stock_report", $this->db, $ErrMsg);
+        $sumdispatchinvoice = DB_query("SELECT COUNT(DISTINCT invoice_number) AS total_number FROM dispatch_stock_report", $this->db, $ErrMsg);
         return DB_fetch_assoc($sumdispatchinvoice);
     }
 
@@ -58,7 +58,7 @@ class OrderSummaryModel {
 
     function SelectSumBackOrderInvoice() {
         $ErrMsg = _('The summary of BackOrder stock invoice could not be retrieved by the SQL because');
-        $sumbackorderinvoice = DB_query("SELECT COUNT(*) AS total_number FROM back_orders_report", $this->db, $ErrMsg);
+        $sumbackorderinvoice = DB_query("SELECT COUNT(DISTINCT invoice_number) AS total_number FROM back_orders_report", $this->db, $ErrMsg);
         return DB_fetch_assoc($sumbackorderinvoice);
     }
     
@@ -66,7 +66,7 @@ class OrderSummaryModel {
 
     function SelectSumDeliveryIssues() {
         $ErrMsg = _('The summary of delivery issues stock invoice could not be retrieved by the SQL because');
-        $sumdelissueinvoice = DB_query("SELECT COUNT(*) AS total_number FROM delivery_issues_report", $this->db, $ErrMsg);
+        $sumdelissueinvoice = DB_query("SELECT COUNT(DISTINCT invoice_number) AS total_number FROM delivery_issues_report", $this->db, $ErrMsg);
         return DB_fetch_assoc($sumdelissueinvoice);
     }
     /* Select Daily Sales Summary Details -- by Stan 21072014 */
