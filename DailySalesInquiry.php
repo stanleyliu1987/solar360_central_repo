@@ -4,7 +4,10 @@
 
 include('includes/session.inc');
 $title = _('Daily Sales Inquiry');
-include('includes/header.inc');
+if(isset($_GET['notop']) and $_GET['notop']==1)
+{include('includes/header_no_top_menu.inc');  }
+else
+{include('includes/header.inc'); }
 include('includes/DefineCartClass.php');
 
 echo '<p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/transactions.png" title="' . _('Daily Sales') . '" alt="" />' . ' ' . _('Daily Sales') . '</p>';
