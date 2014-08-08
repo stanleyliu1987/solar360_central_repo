@@ -29,8 +29,11 @@
 	echo '<link href="' . $rootpath . '/css/'. $_SESSION['Theme'] .'/default.css" rel="stylesheet" type="text/css" />';
         echo '<link href="' . $rootpath . '/css/custom/default.css" rel="stylesheet" type="text/css" />';
         echo '<link href="' . $rootpath . '/css/sorttable/tablesortstyle.css" rel="stylesheet" type="text/css" />';
+        echo '<link href="' . $rootpath . '/css/custom/dynamic_reports.css" rel="stylesheet" type="text/css" media="screen" charset="utf-8" />';
+
        // echo '<link rel="stylesheet" href="' . $rootpath . '/wysiwyg/docs/style.css" type="text/css">';
         echo '<script type="text/javascript" src="'.$rootpath.'/javascripts/jquery-1.7.2.js"></script>';
+        echo '<script type="text/javascript" src="'.$rootpath.'/javascripts/startstop-slider.js"></script>';
 
         echo '<script type="text/javascript" src="'.$rootpath.'/javascripts/jquery.tablesorter.js"></script>';
         echo '<script type="text/javascript" src="'.$rootpath.'/javascripts/jquery.tablesorter.pager.js"></script>';

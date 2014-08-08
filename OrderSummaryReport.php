@@ -3,7 +3,11 @@
 /* $Id: OrderSummaryReport.php 4572 2011-05-23 10:14:06Z stan$*/
 $title = _('Order Summary Report');
 include('includes/session.inc');
-include('includes/header.inc');
+if(isset($_GET['notop']) and $_GET['notop']==1)
+{include('includes/header_no_top_menu.inc');  }
+else
+{include('includes/header.inc'); }
+
 include('includes/SQL_CommonFunctions.inc');
 
 $OrderSummary = new OrderSummaryModel($db);

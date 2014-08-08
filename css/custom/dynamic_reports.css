@@ -1,0 +1,20 @@
+
+#page-wrap						{ width: 960px; margin: 0 auto;  }
+
+#slider							{ overflow: hidden; position: relative;  }
+								  
+                                /* DEFAULT is for three panels in width, adjust as needed
+                                   This only matters if JS is OFF, otherwise JS sets this. */								  
+#mover							{ width: 2880px; position: relative; }
+
+.slide							{ padding: 40px 30px; width: 900px; float: left; position: relative; }
+
+#slider-stopper					{ position: absolute; left: 32px; background: #ac0000; color: white;
+						  padding: 3px 18px; font-size: 12px; text-transform: uppercase;}
+
+iframe { width: 900px;
+         height:1050px;
+         border: none; overflow:hidden;}
+
+
+
