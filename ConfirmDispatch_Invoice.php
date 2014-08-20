@@ -767,6 +767,12 @@ invoices can have a zero amount but there must be a quantity to invoice */
         }
 /* end of logic */       
 /*Now insert the DebtorTrans */
+        
+        /*20082014 by Stan Retrieve Web Customer Comments */
+        
+        $SQLComment="Select comments from import_csv_salesorders where Number='".$_SESSION['ProcessingOrder']."' group by Number";
+        $ResultComment = DB_query($SQLComment,$db);
+        $CommentRow = DB_fetch_row($ResultComment);
 
 	$SQL = "INSERT INTO debtortrans (	transno,
 									type,
@@ -786,7 +792,8 @@ invoices can have a zero amount but there must be a quantity to invoice */
 									shipvia,
 									consignment,
                                                                         sales_ref_num,
-                                                                        order_stages)
+                                                                        order_stages,
+                                                                        order_comments)
 								VALUES (
 									'". $InvoiceNo . "',
 									10,
@@ -805,7 +812,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 									'" . $_POST['InvoiceText'] . "',
 									'" . $_SESSION['Items']->ShipVia . "',
 									'"  . $_POST['Consignment'] . "',	
-                                                                        '". 'W'.$_SESSION['ProcessingOrder'].'-' .$InvoiceNo ."','".$Order_Stage."')";
+                                                                        '". 'W'.$_SESSION['ProcessingOrder'].'-' .$InvoiceNo ."','".$Order_Stage."','".$CommentRow[0]."')";
 
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The debtor transaction record could not be inserted because');
 	$DbgMsg = _('The following SQL to insert the debtor transaction record was used');

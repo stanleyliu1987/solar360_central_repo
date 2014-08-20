@@ -1098,10 +1098,12 @@ if (count($_SESSION['Items' . $identifier]->LineItems) > 0) { /* only show order
         $freGST = 10;
         $ovFreight = $myrowTR['ovfreight'];
         $tempAP = $myrowTR['alloc'];
+        $Trandate= ConvertSQLDate($myrowTR['trandate']);
     } else {
         $freGST = $_POST['FreGST'];
         $ovFreight = $_POST['Freight'];
         $tempAP = $_POST['tempAP'];
+        $Trandate= $_POST['DispatchDate'];
     }
 
     /* Overwrite new calculated total freight */
@@ -1134,7 +1136,8 @@ if (count($_SESSION['Items' . $identifier]->LineItems) > 0) { /* only show order
 
     echo '<table  class=selection>
      <tr><td><b>' . _('Customer Code') . ':<b></td><td><input type=text value="' . $_SESSION['Items' . $identifier]->DebtorNo . '" name=debtorno> <b>Branch Code: <input type=text value=' . $_SESSION['Items' . $identifier]->Branch . ' name=branchno>
-     <tr><td><b>' . _('Customer Reference: ') . '</b></td><td><input type=text size=45 maxlength=40 name="customerref" value="' . $_SESSION['Items' . $identifier]->CustRef . '"></td></tr>
+     <tr><td><b>' . _('Customer Reference') . ':</b></td><td><input type=text size=45 maxlength=40 name="customerref" value="' . $_SESSION['Items' . $identifier]->CustRef . '"></td></tr>
+     <tr><td><b>' ._('Date On Invoice'). ':</b></td><td><input  type="text" maxlength="10" size="15" name="DispatchDate" value="'.$Trandate.'" id="datepicker" alt="'.$_SESSION['DefaultDateFormat'].'" class="date"></td></tr>
      <tr><td><b>' . _('Deliver Address: ') . '</b></td></tr>
      <tr><td>' . _('Deliver To:') . '</td><td><input type=text size=45 maxlength=40 name="DelTo" value="' . $_SESSION['Items' . $identifier]->DeliverTo . '"></td></tr>
      <tr><td>' . _('Street:') . '</td><td><input type=text size=45 maxlength=40 name="DelAdd1" value="' . $_SESSION['Items' . $identifier]->DelAdd1 . '"></td></tr>

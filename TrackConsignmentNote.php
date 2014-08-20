@@ -187,17 +187,26 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
                                         order_stages.stages,
-                                        order_stages.stages_id
+                                        order_stages.stages_id,
+                                        salesorders.deliverto,
+					salesorders.deladd1,
+					salesorders.deladd2,
+					salesorders.deladd3,
+					salesorders.deladd4,
+					salesorders.deladd5,
+					salesorders.deladd6                                        
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        order_stages
+                                        order_stages,
+                                        salesorders
 				WHERE  debtortrans.type=10
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
+                                AND debtortrans.order_ = salesorders.orderno
                                 ".$SortFilter;
 	
 		if(strlen($_POST['OrderType']) > 0 AND $_POST['OrderType']!='ALL')  {
@@ -236,11 +245,19 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
                                         order_stages.stages,
-                                        order_stages.stages_id
+                                        order_stages.stages_id,
+                                        salesorders.deliverto,
+					salesorders.deladd1,
+					salesorders.deladd2,
+					salesorders.deladd3,
+					salesorders.deladd4,
+					salesorders.deladd5,
+					salesorders.deladd6
 				FROM    debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        order_stages
+                                        order_stages,
+                                        salesorders
 				WHERE  debtortrans.type=10
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
@@ -248,6 +265,7 @@ if(isset($_GET['filtertype'])){
                                 AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
                                 AND debtortrans.order_stages='".$_POST['OrderType']."'
+                                AND debtortrans.order_ = salesorders.orderno
                                 ".$SortFilter;
                 }
                 elseif(strlen($_POST['FilterType']) > 0 AND $_POST['FilterType']!='NoFilter'){
@@ -286,12 +304,20 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
                                         order_stages.stages,
-                                        order_stages.stages_id
+                                        order_stages.stages_id,
+                                        salesorders.deliverto,
+					salesorders.deladd1,
+					salesorders.deladd2,
+					salesorders.deladd3,
+					salesorders.deladd4,
+					salesorders.deladd5,
+					salesorders.deladd6
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
                                         order_stages,
-                                        purchorders
+                                        purchorders,
+                                        salesorders
 				WHERE debtortrans.order_=purchorders.ref_salesorder
                                 AND purchorders.status <> 'Cancelled'
                                 AND purchorders.consignment_id=''
@@ -305,6 +331,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
+                                AND debtortrans.order_ = salesorders.orderno
                                 group by debtortrans.order_
                                 ".$SortFilter;
                 }
@@ -345,11 +372,19 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
                                         order_stages.stages,
-                                        order_stages.stages_id
+                                        order_stages.stages_id,
+                                        salesorders.deliverto,
+					salesorders.deladd1,
+					salesorders.deladd2,
+					salesorders.deladd3,
+					salesorders.deladd4,
+					salesorders.deladd5,
+					salesorders.deladd6
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        order_stages
+                                        order_stages,
+                                        salesorders
 				WHERE  debtortrans.type=10
 				AND  debtortrans.debtorno " . LIKE . " '" . $SearchCode ."'
 				AND debtortrans.debtorno=debtorsmaster.debtorno
@@ -357,6 +392,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
+                                AND  debtortrans.order_ = salesorders.orderno
                                ".$SortFilter;
                 }
                 elseif(strlen($CustomerName) > 0){
@@ -396,11 +432,19 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
                                         order_stages.stages,
-                                        order_stages.stages_id
+                                        order_stages.stages_id,
+                                        salesorders.deliverto,
+					salesorders.deladd1,
+					salesorders.deladd2,
+					salesorders.deladd3,
+					salesorders.deladd4,
+					salesorders.deladd5,
+					salesorders.deladd6
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        order_stages
+                                        order_stages,
+                                        salesorders
 				WHERE  debtortrans.type=10
                                 AND debtorsmaster.name " . LIKE . " '" . $SearchName ."'
 				AND debtortrans.debtorno=debtorsmaster.debtorno
@@ -408,6 +452,7 @@ if(isset($_GET['filtertype'])){
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
+                                AND  debtortrans.order_ = salesorders.orderno
                                 ".$SortFilter;
                 }
                elseif(strlen($CustomerBranch) > 0){ 
@@ -447,18 +492,27 @@ if(isset($_GET['filtertype'])){
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
                                         order_stages.stages,
-                                        order_stages.stages_id
+                                        order_stages.stages_id,
+                                        salesorders.deliverto,
+					salesorders.deladd1,
+					salesorders.deladd2,
+					salesorders.deladd3,
+					salesorders.deladd4,
+					salesorders.deladd5,
+					salesorders.deladd6
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        order_stages
+                                        order_stages,
+                                        salesorders
 				WHERE  debtortrans.type=10
                                 AND custbranch.brname " . LIKE . " '" . $SearchBranchName ."'
 				AND debtortrans.debtorno=debtorsmaster.debtorno
 				AND debtortrans.debtorno=custbranch.debtorno
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.order_stages <5
-                                AND order_stages.stages_id=debtortrans.order_stages   
+                                AND order_stages.stages_id=debtortrans.order_stages  
+                                AND  debtortrans.order_ = salesorders.orderno
                                 ".$SortFilter;
              
                 }
@@ -558,11 +612,19 @@ echo '<br />';
                                         debtortrans.paymentdate,
                                         debtortrans.maxdays,
                                         order_stages.stages,
-                                        order_stages.stages_id
+                                        order_stages.stages_id,
+                                        salesorders.deliverto,
+					salesorders.deladd1,
+					salesorders.deladd2,
+					salesorders.deladd3,
+					salesorders.deladd4,
+					salesorders.deladd5,
+					salesorders.deladd6
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
-                                        order_stages
+                                        order_stages,
+                                        salesorders
 				WHERE  debtortrans.type=10
                                 AND debtortrans.transno='" . $OrderNumber . "'
 				AND debtortrans.debtorno=debtorsmaster.debtorno
@@ -570,6 +632,7 @@ echo '<br />';
 				AND debtortrans.branchcode=custbranch.branchcode
                                 AND debtortrans.order_stages <5
                                 AND order_stages.stages_id=debtortrans.order_stages
+                                AND  debtortrans.order_ = salesorders.orderno
                                 ".$SortFilter;
 
        
@@ -887,19 +950,20 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
      */
       $customername=$myrow['name'].'/'.$myrow['contactname'];
       $phonenumber=$myrow['phoneno'];
-      
-    if($myrow['invaddrbranch']==0){
+
+      /*20082014 Replace Delivery Address with Shipping Address */
+//    if($myrow['invaddrbranch']==0){
        
-        $address1=$myrow['address1'];
-        $address2=$myrow['address2'].' '.$myrow['address3'].' '.$myrow['address4'].' '.$myrow['address5'].' '.$myrow['address6'];
-     
-    }
-    else{
-     
-        $address1=$myrow['brpostaddr1'];
-        $address2=$myrow['brpostaddr2'].' '.$myrow['brpostaddr3'].' '.$myrow['brpostaddr4'].' '.$myrow['brpostaddr5'].' '.$myrow['brpostaddr6'];
-   
-    }
+        $address1=$myrow['deladd1'];
+        $address2=$myrow['deladd2'].' '.$myrow['deladd3'].' '.$myrow['deladd4'].' '.$myrow['deladd5'].' '.$myrow['deladd6'];
+//     
+//    }
+//    else{
+//     
+//        $address1=$myrow['brpostaddr1'];
+//        $address2=$myrow['brpostaddr2'].' '.$myrow['brpostaddr3'].' '.$myrow['brpostaddr4'].' '.$myrow['brpostaddr5'].' '.$myrow['brpostaddr6'];
+//   
+//    }
     
     if($myrow['sales_ref_num']==''){
      $RowInvoicePDFLink='Empty Invoice #';   

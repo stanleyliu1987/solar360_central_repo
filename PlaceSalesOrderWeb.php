@@ -344,7 +344,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         '". strtoupper(str_replace("'", '', trim($customername)))."',
                                         '". strtoupper(str_replace("'", '', trim($branchname)))."',
                                         '". $CSVSOImport['yourreference']."',
-                                        '". $CSVSOImport['comments']."',
+                                        '',
                                         '". $CSVSOImport['datepurchased']."',     
                                         1,
                                         1,

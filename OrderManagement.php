@@ -261,6 +261,7 @@ echo '</table><br />';
 	}
 	$TableHeader.=  '<th>' . _('Order Stages') . '</th>
 	                 <th>' . _('Invoice Status') . '</th>
+                         <th>' . _('Email') . '</th>    
                          <th>' . _('Comments') . '</th></tr>';
         echo $TableHeader;
 	$j = 1;
@@ -341,7 +342,8 @@ $RelatedPOButton='<a href="'.$rootpath.'/PO_SelectInvRelated.php?InvoiceNo='.$my
 	$FormatedOrderValue = number_format($myrow['ordervalue'],2);
         /* 12062014 Replace Invoice no with pdf download link by Stan*/
         $RowInvoicePDFLink ='<a href="'.$rootpath.'/'.$PrintCustomerTransactionScript.'?FromTransNo='.$myrow['transno'].'&InvOrCredit=Invoice&PrintPDF=True"><img src="'.$rootpath.'/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '">'  . $myrow['sales_ref_num'] .  '</a>';   
-        $OrderComments='<textarea name="OrderComment_'.$myrow['id'].'" id="OrderComment_'.$myrow['id'].'"  disabled>'.$myrow['order_comments'] .'</textarea>';
+        $RowInvoiceEmailLink='<a target="_blank" href="'.$rootpath.'/EmailCustTrans.php?FromTransNo='.$myrow['transno'].'&InvOrCredit=Invoice">' . _('Email ') . '<img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the invoice') . '"></a>';
+        $OrderComments='<textarea rows="4" cols="40" name="OrderComment_'.$myrow['id'].'" id="OrderComment_'.$myrow['id'].'"  disabled>'.$myrow['order_comments'] .'</textarea>';
 		echo '<td>' . $RowInvoicePDFLink . '</td>
 					<td>' . $FormatedOrderDate . '</td>
 					<td>' . $myrow['name'] . '</td>';
@@ -351,6 +353,7 @@ $RelatedPOButton='<a href="'.$rootpath.'/PO_SelectInvRelated.php?InvoiceNo='.$my
 		}
                 echo  '<td><span>'.$OrderStagesDropdown.'</span><span> '.$HistoryButton.'</span><span> '.$RelatedPOButton.'</span></td>
                        <td>'.$Invoice_status.'</td>
+                       <td>'.$RowInvoiceEmailLink.'</td>
                        <td>'.$OrderComments.'</td>';
 
         unset($tempAP);
