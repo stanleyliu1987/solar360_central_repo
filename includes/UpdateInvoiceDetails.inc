@@ -143,6 +143,7 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
 			SET 
                             debtorno='".$debtorno."',
                             branchcode='".$branchno."',
+                            trandate='".FormatDateForSQL($_POST['DispatchDate'])."',
                             ovamount ='".$_SESSION['Items'.$identifier]->total."',
                             ovgst ='".$ovgst."',
                             ovfreight='". $_POST['Freight'] ."',

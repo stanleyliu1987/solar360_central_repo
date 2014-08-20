@@ -21,6 +21,7 @@ $DeliveryIssuesInvoice = $OrderSummary->SelectSumDeliveryIssues();
 $DailySales= $OrderSummary->SelectSumDailySales();
 echo '<a href="' . $rootpath . '/index.php">' . _('Back to Main Menu') . '</a>';
 echo '<p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/transactions.png" title="' . _('Summary Overview') . '" alt="" />' . ' ' . _('Order Summary Overview') . '</p>';
+echo '<p class="page_title_text"><a href="' . $rootpath . '/DynamicReport.php" target="_blank">' . ' ' . _('Dynamic Report Slides') . '</a></p>';
 echo '<form action="' . $_SERVER['PHP_SELF'] . '" method="post">';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 
