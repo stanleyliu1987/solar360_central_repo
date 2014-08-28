@@ -429,7 +429,18 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
             
         /* Add warehouse Name */
            $pdf->addText($FormDesign->Warehouse->x,  $FormDesign->Warehouse->y,$FormDesign->Warehouse->FontSize, $WarehouseName, 'left');
-                
+        /* Set up Signature Text 28082014 */
+           if(isset($MakePDFDocket)){
+           /* Draw Lines first */
+           $pdf->line($FormDesign->DeliveryLine->Hline1 ->x1,$FormDesign->DeliveryLine->Hline1->y1,$FormDesign->DeliveryLine->Hline1->x2,$FormDesign->DeliveryLine->Hline1->y2);
+           $pdf->line($FormDesign->DeliveryLine->Hline2->x1,$FormDesign->DeliveryLine->Hline2->y1,$FormDesign->DeliveryLine->Hline2->x2,$FormDesign->DeliveryLine->Hline2->y2);
+           $pdf->line($FormDesign->DeliveryLine->Vline1->x1,$FormDesign->DeliveryLine->Vline1->y1,$FormDesign->DeliveryLine->Vline1->x2,$FormDesign->DeliveryLine->Vline1->y2);
+           /* Draw Text second */    
+           $pdf->addText($FormDesign->Pickedby->Name->x, $FormDesign->Pickedby->Name->y, $FormDesign->Pickedby->Name->FontSize, _('Picked By:') );   
+           $pdf->addText($FormDesign->Pickedby->Signature->x, $FormDesign->Pickedby->Signature->y, $FormDesign->Pickedby->Signature->FontSize, _('Signature:') );  
+           $pdf->addText($FormDesign->Driver->Name->x, $FormDesign->Driver->Name->y, $FormDesign->Driver->Name->FontSize, _('Driver Name:') );
+           $pdf->addText($FormDesign->Driver->Signature->x, $FormDesign->Driver->Signature->y, $FormDesign->Driver->Signature->FontSize, _('Signature:') );  
+           }
 	/* check to see enough space left to print the 4 lines for the totals/footer */
                 
                 $YPos -= $line_height;

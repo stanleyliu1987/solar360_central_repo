@@ -270,9 +270,53 @@
         <Warehouse type="MultiLineText" name="Warehouse" id="Warehouse">
 		<FontSize>10</FontSize>
 		<Length>250</Length>
-		<x>80</x>
-		<y>240</y>
+		<x>60</x>
+		<y>300</y>
 	</Warehouse>
+        <DeliveryLine type="MultiLineText" name="Pickedby" id="Pickedby">
+        	<Hline1 type="SimpleText" name="Hline1" id="Hline1">
+		<x1>40</x1>
+		<y1>280</y1>
+	        <x2>565</x2>
+		<y2>280</y2>
+		</Hline1>
+		<Hline2 type="SimpleText" name="Hline2" id="Hline2">
+		<x1>40</x1>
+		<y1>230</y1>
+	        <x2>565</x2>
+		<y2>230</y2>
+		</Hline2>
+		<Vline1 type="SimpleText" name="Vline1" id="Vline1">
+		<x1>300</x1>
+		<y1>280</y1>
+	        <x2>300</x2>
+		<y2>180</y2>	
+		</Vline1>
+        </DeliveryLine>
+        <Pickedby type="MultiLineText" name="Pickedby" id="Pickedby">
+	        <Name type="SimpleText" name="Heading 1" id="Heading1">
+		    <FontSize>12</FontSize>
+		    <x>45</x>
+		    <y>270</y>
+		</Name>
+		<Signature type="SimpleText" name="Heading 2" id="Heading2">
+		    <FontSize>12</FontSize>
+		    <x>310</x>
+		    <y>270</y>
+		</Signature>
+	</Pickedby>
+        <Driver type="MultiLineText" name="Drivername" id="Drivername">
+		<Name type="SimpleText" name="Heading 1" id="Heading1">
+		    <FontSize>12</FontSize>
+		    <x>45</x>
+		    <y>220</y>
+		</Name>
+		<Signature type="SimpleText" name="Heading 2" id="Heading2">
+		    <FontSize>12</FontSize>
+		    <x>310</x>
+		    <y>220</y>
+		</Signature>
+	</Driver>
         
 	<Currency type="SimpleText" name="Currency text" id="Currency">
 		<FontSize>8</FontSize>
