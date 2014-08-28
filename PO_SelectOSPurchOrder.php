@@ -149,17 +149,17 @@ if (!isset($OrderNumber) or $OrderNumber=='' ){
 	}
 
  	echo '</select> ' . _('Order Status:') .' <select name="Status">';
-        if(!isset($_POST['Status']) OR $_POST['Status']=='ALL'){
-            echo '<option selected value="ALL">' . _('ALL') . '</option>';
-        }
-        else{
-            echo '<option value="ALL">' . _('ALL') . '</option>';
-        }       
-        if ($_POST['Status']=='Pending_Authorised'){
+        if (!isset($_POST['Status']) and $_POST['Status']=='Pending_Authorised'){
 		echo '<option selected value="Pending_Authorised">' . _('Pending and Authorised') . '</option>';
 	} else {
 		echo '<option value="Pending_Authorised">' . _('Pending and Authorised') . '</option>';
 	}
+        if($_POST['Status']=='ALL'){
+            echo '<option selected value="ALL">' . _('ALL') . '</option>';
+        }
+        else{
+            echo '<option value="ALL">' . _('ALL') . '</option>';
+        } 
 	if ($_POST['Status']=='Pending'){
 		echo '<option selected value="Pending">' . _('Pending') . '</option>';
 	} else {
@@ -264,12 +264,14 @@ if (isset($StockItemsResult)) {
 else {
 
 	//figure out the SQL required from the inputs available
-        if(!isset($_POST['Status']) OR $_POST['Status']=="ALL"){        
+
+	if (!isset($_POST['Status']) OR $_POST['Status']=='Pending_Authorised'){
+		$StatusCriteria = " AND (purchorders.status='Pending' OR purchorders.status='Authorised' OR purchorders.status='Printed' OR purchorders.status='BackOrder') ";
+	}        
+        elseif($_POST['Status']=="ALL"){        
                 $StockLocationCriteria= ""; 
         }
-	elseif (!isset($_POST['Status']) OR $_POST['Status']=='Pending_Authorised'){
-		$StatusCriteria = " AND (purchorders.status='Pending' OR purchorders.status='Authorised' OR purchorders.status='Printed' OR purchorders.status='BackOrder') ";
-	}elseif ($_POST['Status']=='Authorised'){
+        elseif ($_POST['Status']=='Authorised'){
 		$StatusCriteria = " AND (purchorders.status='Authorised' OR purchorders.status='Printed')";
 	}elseif ($_POST['Status']=='Pending'){
 		$StatusCriteria = " AND purchorders.status='Pending' ";
