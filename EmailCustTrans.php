@@ -78,6 +78,7 @@ if (DB_num_rows($ContactResult)>0){
 }
 /* 15052014 Logic to Retrieve Customer Record details, duplicate with code in CustomerInquiry.php */
 $SQL = "SELECT debtorsmaster.name,
+    debtorsmaster.debtorno,
 		currencies.currency,
 		currencies.decimalplaces,
 		paymentterms.terms,
@@ -136,7 +137,7 @@ if (DB_num_rows($CustomerResult)==0){
 
 	$NIL_BALANCE = True;
 
-	$SQL = "SELECT debtorsmaster.name, 
+	$SQL = "SELECT debtorsmaster.name, debtorsmaster.debtorno,
 					currencies.currency,
 					currencies.decimalplaces,
 					paymentterms.terms,
@@ -168,7 +169,7 @@ if ($NIL_BALANCE==True){
 }
 $EmailSubject="Invoice For ".$CustomerRecord['name']." (Order: ".$InvoiceNumber.")";
 /* End of logic */
-
+echo '<input type=hidden name="CustomerNumber" value="' . $CustomerRecord['debtorno'] . '">';
 /* 15052014 Top Panel Content */
 echo '<div>
       <p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/customer.png" title="' .
@@ -189,7 +190,8 @@ echo '<tr><td class=number>' . number_format($CustomerRecord['balance'],$Custome
 	<td class=number>' . number_format(($CustomerRecord['overdue1']-$CustomerRecord['overdue2']) ,$CustomerRecord['decimalplaces']) . '</td>
 	<td class=number>' . number_format($CustomerRecord['overdue2'],$CustomerRecord['decimalplaces']) . '</td>
 	</tr></table></div>';
-
+/* 28082014 Checkbox for Customer Statement */
+echo '<div align=center>'. _('Customer Statement:') . '<input type="checkbox" id="CS_Checkbox" name="CS_PDFAttach" value="CS"></div>';
 /* 15052014 Logic to Retrieve Email Templates Options */
 $TemplateSQL= "SELECT * FROM emailtemplates where emailtype=10";
 $templates = DB_query($TemplateSQL,$db);
