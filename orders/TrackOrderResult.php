@@ -75,13 +75,59 @@
       if($CustomerRecord['balance']<0.01 and $CustomerRecord['balance'] >(-0.01)){
           $CustomerRecord['balance']=0;
       }
+      
+      
+      /* 1. Check if credit hold stage exists in a customer stage history 29082014*/
+      $sqlcheckCredit="Select count(*) as total from order_stages_messages where debtortran_fk='".$myrowOS['id']."' and order_stage_change=6";
+      $resultCheckCredit = DB_query($sqlcheckCredit,$db);
+      $myrowCheckCredit = DB_fetch_array($resultCheckCredit);
+      $imagealign="right";
+      /* 2. Show the stage image banner according to updated stage and credit hold or not 29082014*/
+      if($myrowCheckCredit['total']>0){
+      if($myrowOS['stage']=='Credit Hold' or $myrowOS['stage']=='Open'){
+          $statusImage='<img src="image/stage/Order_stage_credithold.jpg" width="600" height="120">';
+      }
+      elseif($myrowOS['stage']=='Release Order'){
+          $statusImage='<img src="image/stage/Order_stage_credit_release.jpg" width="600" height="120">';
+      }
+      elseif($myrowOS['stage']=='Dispatch Stock'){
+          $statusImage='<img src="image/stage/Order_stage_credit_dispatch.jpg" width="600" height="120">';
+      }
+      elseif($myrowOS['stage']=='Delivered'){
+          $statusImage='<img src="image/stage/Order_stage_credit_delivered.jpg" width="600" height="120">';
+      }
+      else{
+          $statusImage= 'Invoice Status: '.$myrowOS['stage'];
+          $imagealign="left";
+      }
+      }
+      else{
+      if($myrowOS['stage']=='Open'){
+          $statusImage='<img src="image/stage/Order_stage_open.jpg" width="600" height="120">';
+      }
+      elseif($myrowOS['stage']=='Release Order'){
+          $statusImage='<img src="image/stage/Order_stage_release.jpg" width="600" height="120">';
+      }
+      elseif($myrowOS['stage']=='Dispatch Stock'){
+          $statusImage='<img src="image/stage/Order_stage_dispatch_stock.jpg" width="600" height="120">';
+      }
+      elseif($myrowOS['stage']=='Delivered'){
+          $statusImage='<img src="image/stage/Order_stage_credit_delivered.jpg" width="600" height="120">';
+      }
+      else{
+          $statusImage= 'Invoice Status: '.$myrowOS['stage'];
+          $imagealign="left";
+      }
+      }
+      
+
        echo '<table class="tabletop">
       
 	     <tr><td>' . _('Invoice Number: ') . ' ' . strtoupper($_POST['InvoiceNumber'])  . '</td></tr>
              <tr><td>' . _('Date: ') . ' ' . ConvertSQLDate($myrowOS['trandate'])  . '</td></tr>
              <tr><td>' ._('Invoice Payment Date: ').' '.ConvertSQLDate($PaymentDate).'</td></tr>      
              <tr><td>' ._('Invoice Balance Outstanding: ').' $'.number_format($myrowOS['balancedue'],2).'</td></tr>
-             <tr><td>' ._('Invoice Status: ').' '.$myrowOS['stage'].'</td></tr> 
+             <tr><td align='.$imagealign.'>' .$statusImage.'</img></td></tr>
              <tr><td></td><td class="accountbalance" width=20%>' ._('Your Account Balance<sup>1</sup> : ').' $'.number_format($CustomerRecord['balance'],2).'</td></tr>     </table>';
        
        echo '<table class="table1">
