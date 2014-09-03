@@ -85,7 +85,8 @@ $sql = "SELECT 	trandate,
 				AND stockmoves.branchcode=custbranch.branchcode
 			WHERE (stockmoves.type=10 or stockmoves.type=11)
 			AND trandate>='" . $StartDateSQL . "'
-			AND trandate<='" . $EndDateSQL . "'";
+			AND trandate<='" . $EndDateSQL . "'
+                        AND TYPE=10";
 
 if ($_POST['Salesperson']!='All') {
 	$sql .= " AND custbranch.salesman='" . $_POST['Salesperson'] . "'";

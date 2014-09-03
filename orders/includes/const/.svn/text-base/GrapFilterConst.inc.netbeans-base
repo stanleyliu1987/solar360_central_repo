@@ -1,7 +1,0 @@
-<?php
-
-$DateRangeArray =array('daily','weekly','monthly','yearly');
-
-$GraphContentArray= array('AC','yield','voltage','tempature');
-
-?>
