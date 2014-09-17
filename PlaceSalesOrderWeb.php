@@ -306,6 +306,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                 $customername=$CSVSOImport['billingcompany']==null ? $CSVSOImport['billingname'] : $CSVSOImport['billingcompany'];
                 $branchname=$CSVSOImport['billingcompany']==null ? $CSVSOImport['billingname'] : $CSVSOImport['billingcompany'];
                 $deliveryname=$CSVSOImport['deliverycompany']==null ? $CSVSOImport['deliveryname'] : $CSVSOImport['deliverycompany'];
+                $deliveryname= str_replace("'",'',strtoupper( preg_replace("/&amp;/", ' and ', stripslashes(trim($deliveryname))))); 
                 
        /** Check customer exist or not acoording to customername, branchname and branch email**/  
                 $ExistCustomerName=CheckCustomerNameExist($customername,$branchname,$CSVSOImport['billingemail'],$db);
@@ -352,7 +353,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         '". strtoupper(str_replace("'", '', $CSVSOImport['deliverysuburb']))."',
                                         '". strtoupper(str_replace("'", '', $CSVSOImport['deliverystate']))."',
                                         '". strtoupper(str_replace("'", '', $CSVSOImport['deliverypostcode']))."',
-                                        '". $CSVSOImport['billingphone']."',
+                                        '". $CSVSOImport['deliveryphone']."',
                                         '". $CSVSOImport['billingemail']."',
                                         '". strtoupper(str_replace("'", '', $deliveryname))."', 
                                         1,
@@ -716,17 +717,15 @@ function ConvertSalesOrderCode($SalesOrderWebCode,$db){
 
 function CheckCustomerCodeExist($Customername,$Branchname, $BillingEmail, $db){
 
-$CustomerMatchName = strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($Customername)));
-
-$BranchMatchName =strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($Branchname)));
-
+$CustomerMatchName= strtoupper(str_replace("'",'',strtoupper( preg_replace("/&amp;/", ' and ', stripslashes(trim($Customername)))))); 
+$BranchMatchName= strtoupper(str_replace("'",'',strtoupper( preg_replace("/&amp;/", ' and ', stripslashes(trim($Branchname))))));
 $EmailMatchName = strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($BillingEmail)));
 
 
 //insert wildcard characters in spaces
-$SearchCustString = '%' . str_replace(' ', '%', str_replace("  "," ",$CustomerMatchName)) . '%';
-$SearchBranString = '%' . str_replace(' ', '%', str_replace("  "," ",$BranchMatchName)) . '%';
-$SearchEmailString = '%' . str_replace(' ', '%', str_replace("  "," ",$BillingEmail)) . '%';
+$SearchCustString =  str_replace(' ', '%', str_replace("  "," ",$CustomerMatchName)) . '%';
+$SearchBranString =  str_replace(' ', '%', str_replace("  "," ",$BranchMatchName)) . '%';
+$SearchEmailString = str_replace(' ', '%', str_replace("  "," ",$EmailMatchName)) . '%';
 
 $CustomerSQL = "SELECT debtorsmaster.debtorno, custbranch.branchcode FROM custbranch
 						LEFT JOIN debtorsmaster
@@ -750,16 +749,14 @@ $CustomerSQL = "SELECT debtorsmaster.debtorno, custbranch.branchcode FROM custbr
 
 function CheckCustomerNameExist($Customername,$Branchname,$BillingEmail,$db){
 
-$CustomerMatchName = strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($Customername)));
-
-$BranchMatchName =strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($Branchname)));
-
+$CustomerMatchName= strtoupper(str_replace("'",'',strtoupper( preg_replace("/&amp;/", ' and ', stripslashes(trim($Customername)))))); 
+$BranchMatchName= strtoupper(str_replace("'",'',strtoupper( preg_replace("/&amp;/", ' and ', stripslashes(trim($Branchname))))));
 $EmailMatchName = strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($BillingEmail)));
 
 //insert wildcard characters in spaces
-$SearchCustString = '%' . str_replace(' ', '%', str_replace("  "," ",$CustomerMatchName)) . '%';
-$SearchBranString = '%' . str_replace(' ', '%', str_replace("  "," ",$BranchMatchName)) . '%';
-$SearchEmailString = '%' . str_replace(' ', '%', str_replace("  "," ",$EmailMatchName)) . '%';
+$SearchCustString =  str_replace(' ', '%', str_replace("  "," ",$CustomerMatchName)) . '%';
+$SearchBranString =  str_replace(' ', '%', str_replace("  "," ",$BranchMatchName)) . '%';
+$SearchEmailString = str_replace(' ', '%', str_replace("  "," ",$EmailMatchName)) . '%';
 
 $CustomerSQL = "SELECT debtorsmaster.name, custbranch.brname FROM custbranch
 						LEFT JOIN debtorsmaster

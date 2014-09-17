@@ -413,7 +413,7 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 				unset($OrderNo);
 			}
 		}
-            if(!isset($MakePDFDocket)){	    
+        //   if(!isset($MakePDFDocket)){	    
                 /*Now the Comments split over two lines if necessary */
                 $CommentPart = explode("<br />",  nl2br($POHeader['comments']));
                 // $LeftOvers = $pdf->addTextWrap($FormDesign->Comments->x,  $YPos,$FormDesign->Comments->Length,$FormDesign->Comments->FontSize, $CommentPart[0], 'left');
@@ -425,7 +425,7 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
                    }
                    $YPos -= $line_height;
             }    
-            }
+       //     }
             
         /* Add warehouse Name */
            $pdf->addText($FormDesign->Warehouse->x,  $FormDesign->Warehouse->y,$FormDesign->Warehouse->FontSize, $WarehouseName, 'left');
