@@ -254,12 +254,13 @@ echo '</table><br />';
 	echo '<table cellpadding=2  width=97% class=selection>';
 	$TableHeader= '<tr><th>' . _('Invoice #') .
 			'</th><th>' . _('Invoice Date') .'</th>'.
-			'<th>' . _('Customer') .'</th>';
+			'<th width="16%">' . _('Customer') .'</th>';
 	if (in_array($PricesSecurity, $_SESSION['AllowedPageSecurityTokens']) OR !isset($PricesSecurity)) {
         $TableHeader.=  '<th>' . _('Invoice Value') .'</th>';    
 	$TableHeader.=  '<th>' . _('Balance') .'</th>';
 	}
 	$TableHeader.=  '<th>' . _('Order Stages') . '</th>
+                         <th>' . _('Storage (Y/N?)') . '</th>
 	                 <th>' . _('Invoice Status') . '</th>
                          <th>' . _('Email') . '</th>    
                          <th>' . _('Comments') . '</th></tr>';
@@ -282,7 +283,15 @@ while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['Displ
 
     $FinishPOList = DB_query($SQLPOCount,$db,$ErrMsg);
     
-    
+    /*18092014 by Stan Check Storage Product exist in order*/
+    $ExistStorage=$CustomerSearch->CheckStorageProduct($myrow['order_']); 
+    if($ExistStorage>0){
+     $StorageTag='Y';   
+    }
+    else{
+     $StorageTag='N';    
+    }
+    /* End of loigc*/
  /*alternate bgcolour of row for highlighting */           
      if ($k==1){ 
 			echo '<tr class="EvenTableRows">';
@@ -330,8 +339,8 @@ $OrderStagesDropdown.= '<option value='.$os["stages_id"].' selected>'.$os["stage
 else
 $OrderStagesDropdown.= '<option value='.$os["stages_id"].'>'.$os["stages"].'</option>';    
 }
-$OrderStagesDropdown.= '</select>';     
-   
+$OrderStagesDropdown.= '</select>';    
+
    /* 16062014 Check Order Stage Change history by Stan */
 $reportparam= json_encode(array('transid'=>$myrow['id'],'invoiceno'=>$myrow['sales_ref_num'], 'orderno'=>$myrow['order_']));
 $HistoryButton='<button id="OrderStageHistory_'.$myrow['id'].'" name="OrderStageHistory_'.$myrow['id'].'" value=\'' . $reportparam . '\' disabled >History</button>';
@@ -352,6 +361,7 @@ $RelatedPOButton='<a href="'.$rootpath.'/PO_SelectInvRelated.php?InvoiceNo='.$my
 			echo '<td class=number>'.$DisplayBalance . '</td>';
 		}
                 echo  '<td><span>'.$OrderStagesDropdown.'</span><span> '.$HistoryButton.'</span><span> '.$RelatedPOButton.'</span></td>
+                       <td>'.$StorageTag.'</td>
                        <td>'.$Invoice_status.'</td>
                        <td>'.$RowInvoiceEmailLink.'</td>
                        <td>'.$OrderComments.'</td>';
