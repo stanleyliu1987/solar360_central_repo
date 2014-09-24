@@ -685,7 +685,7 @@ elseif (isset($_POST['Invoicelist'])){
         }
         
      array_multisort($InvNoSequence, SORT_ASC, $InvoiceResult);
-
+     DB_data_seek($InvoiceResult,0);
      
      While ($InvoiceList = DB_fetch_array($InvoiceResult,$db)){
                  
@@ -960,7 +960,7 @@ else{
         }
         
      array_multisort($CreditNoSequence, SORT_ASC, $CreditnoteResult);
-
+DB_data_seek($CreditnoteResult,0);
      
      While ($CreditnoteList = DB_fetch_array($CreditnoteResult,$db)){
                  
@@ -1210,7 +1210,7 @@ elseif (isset($_POST['POlist'])){
         }
         
      array_multisort($PONoSequence, SORT_ASC, $POResult);
-
+     DB_data_seek($POResult,0);
 	While ($POList = DB_fetch_array($POResult,$db)){
            
             /**
@@ -1347,7 +1347,7 @@ elseif (isset($_POST['POlist'])){
         }
         
      array_multisort($PONoSequence, SORT_ASC, $POResult);
-
+     DB_data_seek($POResult,0);
 	While ($POList = DB_fetch_array($POResult,$db)){
            
             /**
@@ -1524,7 +1524,7 @@ elseif (isset($_POST['POlist'])){
         }
         
      array_multisort($PONoSequence, SORT_ASC, $POResult);
-
+     DB_data_seek($POResult,0);
      While ($POList = DB_fetch_array($POResult,$db)){
            
             /**
