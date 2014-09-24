@@ -236,7 +236,10 @@ if (isset($_POST['submit'])) {
 		prnMsg(_('The height of the unit item must be a positive number'),'error');
 		$Errors[$i] = 'UHEI';
 		$i++;
-	}        
+	}
+        if (!isset($_POST['StorageProduct']) or $_POST['StorageProduct']=='') { 
+	$_POST['StorageProduct']=0; 
+        } 
   /* End of code */      
 	if ($InputError !=1){
 		if ($_POST['Serialised']==1){ /*Not appropriate to have several dp on serial items */
@@ -339,7 +342,7 @@ if (isset($_POST['submit'])) {
 			}
 
 
-			if ($InputError == 0){
+			if ($InputError == 0){ 
 				$sql = "UPDATE stockmaster
 						SET longdescription='" . $_POST['LongDescription'] . "',
 							description='" . $_POST['Description'] . "',
@@ -360,7 +363,8 @@ if (isset($_POST['submit'])) {
 							appendfile='" . $_POST['ItemPDF'] . "',
 							shrinkfactor='" . $_POST['ShrinkFactor'] . "',
 							pansize='" . $_POST['Pansize'] . "',
-							nextserialno='" . $_POST['NextSerialNo'] . "'
+							nextserialno='" . $_POST['NextSerialNo'] . "',
+                                                        storageproduct='" . $_POST['StorageProduct'] . "'     
 					WHERE stockid='".$StockID."'";
 
 				$ErrMsg = _('The stock item could not be updated because');
@@ -430,7 +434,8 @@ if (isset($_POST['submit'])) {
 							decimalplaces,
 							appendfile,
 							shrinkfactor,
-							pansize)
+							pansize,
+                                                        storageproduct)
 						VALUES ('".$StockID."',
 							'" . $_POST['Description'] . "',
 							'" . $_POST['LongDescription'] . "',
@@ -450,7 +455,8 @@ if (isset($_POST['submit'])) {
 							'" . $_POST['DecimalPlaces']. "',
 							'" . $_POST['ItemPDF']. "',
 							'" . $_POST['ShrinkFactor'] . "',
-							'" . $_POST['Pansize'] . "'
+							'" . $_POST['Pansize'] . "',
+                                                        '" . $_POST['StorageProduct'] . "'
 							)";
 
 				$ErrMsg =  _('The item could not be added because');
@@ -507,6 +513,7 @@ if (isset($_POST['submit'])) {
 						unset($_POST['ItemPDF']);
 						unset($_POST['ShrinkFactor']);
 						unset($_POST['Pansize']);
+                                                unset($_POST['StorageProduct']);
 						unset($StockID);
                                                 /* 03042014 by Stan unset post variables */
                                                 unset($_POST['ULEN']);
@@ -710,7 +717,8 @@ if (!isset($StockID) or $StockID=='' or isset($_POST['UpdateCategories'])) {
 					taxcatid,
 					decimalplaces,
 					appendfile,
-					nextserialno
+					nextserialno,
+                                        storageproduct
 		FROM stockmaster
 		WHERE stockid = '".$StockID."'";
 
@@ -735,6 +743,7 @@ if (!isset($StockID) or $StockID=='' or isset($_POST['UpdateCategories'])) {
 	$_POST['DecimalPlaces'] = $myrow['decimalplaces'];
 	$_POST['ItemPDF']  = $myrow['appendfile'];
 	$_POST['NextSerialNo'] = $myrow['nextserialno'];
+        $_POST['StorageProduct'] = $myrow['storageproduct'];
         
          /* 04042014 by Stan Customize retrieve measurements data */
         	$sql = "SELECT unitlength,
@@ -888,7 +897,9 @@ if (!isset($_POST['ShrinkFactor'])) {
 if (!isset($_POST['NextSerialNo'])) {
 	$_POST['NextSerialNo']=0;
 }
-
+if (!isset($_POST['StorageProduct']) or $_POST['StorageProduct']=='') { 
+	$_POST['StorageProduct']=0; 
+} 
 /*03042014 by Stan mesurments data */
 if (!isset($_POST['ULEN']) or $_POST['ULEN']==''){
 	$_POST['ULEN']=0;
@@ -1059,6 +1070,9 @@ while ($myrow = DB_fetch_array($result)) {
 } //end while loop
 
 echo '</select></td></tr>';
+/* 17092014 By Stan a tickbox for Storage Product */
+
+$StorageChecked= $_POST['StorageProduct']==1?'checked':'';
 
 echo '<tr>
 		<td>' . _('Pan Size') . ':</td>
@@ -1067,6 +1081,10 @@ echo '<tr>
 	 <tr>
 		<td>' . _('Shrinkage Factor') . ':</td>
 		<td><input type="Text" class="number" name="ShrinkFactor" size="6" maxlength="6" value=' . $_POST['ShrinkFactor'] . '></td>
+	</tr>
+        <tr>
+		<td>' . _('Storage Product (Y/N)?') . ':</td>
+		<td><input type="checkbox" name="StorageProduct" value=1 '. $StorageChecked.'> </td>
 	</tr>';
 
 echo '</table><div class="centre">';

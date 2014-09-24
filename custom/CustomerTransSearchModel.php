@@ -445,4 +445,13 @@ else{
 $ErrMsg = _('The customer details could not be retrieved by the SQL because');
 return DB_fetch_array(DB_query($SQL,$this->db,$ErrMsg));
     }
+    
+    /*18092014 Check Storage Product */
+     function CheckStorageProduct($order_no){
+            $result = DB_query("SELECT * from salesorderdetails as sod left join stockmaster as stm on sod.stkcode=stm.stockid
+                    where sod.orderno='".$order_no."' and stm.storageproduct=1", $this->db);
+            return DB_num_rows($result);
+            
+        }
+    
 }

@@ -756,13 +756,22 @@ invoices can have a zero amount but there must be a quantity to invoice */
 /* 160602014 Logic to determine order should be released by Stan */
         $CustomerSearch=new CustomerTransSearchModel($db,$_SESSION['Items']->DebtorNo,$_SESSION['PastDueDays1'],$_SESSION['PastDueDays2']); 
         $CustomerRecord=$CustomerSearch->SearchCustomerOverdueResult();
+        $ExistStorage=$CustomerSearch->CheckStorageProduct($_SESSION['Items']->OrderNo); 
+//        echo 'Storage:'.$ExistStorage. ' Balance:'.$CustomerRecord['balance'].' Credit:'.$_SESSION['Items']->CreditAvailable. ' Due1: '.($CustomerRecord['due']-$CustomerRecord['overdue1']).
+//                ' Due2:'.($CustomerRecord['overdue1']-$CustomerRecord['overdue2']). ' Due3:'.$CustomerRecord['overdue2'];
         if($_SESSION['Items']->PaymentTerms>1){
             if($CustomerRecord['balance']<$_SESSION['Items']->CreditAvailable and ($CustomerRecord['due']-$CustomerRecord['overdue1'])<1
-               and ($CustomerRecord['overdue1']-$CustomerRecord['overdue2'])<1 and $CustomerRecord['overdue2']<1){
+               and ($CustomerRecord['overdue1']-$CustomerRecord['overdue2'])<1 and $CustomerRecord['overdue2']<1 and $ExistStorage==0){
                 $Order_Stage=2; 
             }
             else{
+                /* Open Stage for Storage product, others are credit hold stage */
+                if($ExistStorage>0){
+                $Order_Stage=1;    
+                }
+                else{
                 $Order_Stage=6;
+                }
             }
         }
 /* end of logic */       
