@@ -366,7 +366,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         '". strtoupper(str_replace("'", '', $CSVSOImport['deliverysuburb']))."',
                                         '". strtoupper(str_replace("'", '', $CSVSOImport['deliverystate']))."',
                                         '". strtoupper(str_replace("'", '', $CSVSOImport['deliverypostcode']))."',
-                                        '". $CSVSOImport['deliveryphone']."',
+                                        '". $CSVSOImport['billingphone']."',
                                         '". $CSVSOImport['billingemail']."',
                                         '". strtoupper(str_replace("'", '', $deliveryname))."', 
                                         1,
