@@ -33,6 +33,7 @@ include($PathPrefix . 'custom/OrderStagesMessageModel.php');
 include($PathPrefix . 'custom/CustomerTransSearchModel.php');
 include($PathPrefix . 'custom/OrderStagesModel.php');
 include($PathPrefix . 'custom/OrderSummaryModel.php');
+include($PathPrefix . 'custom/KPIReportingModel.php');
 /* Custom weberp Bean Class */
 include($PathPrefix . 'custom/bean/Bean.php');
 include($PathPrefix . 'custom/bean/EmailAuditLogBean.php');
