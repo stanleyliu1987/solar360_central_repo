@@ -16,6 +16,8 @@ echo '<a href="' . $rootpath . '/index.php">' . _('Back to Main Menu') . '</a>';
 /* Initial Invoice Start and End Date 14102014*/
 $InvoiceStart = date('Y-m-d');
 $InvoiceEnd = date('Y-m-d');
+$HoursSOToInv=4;
+$HoursReleaseToPO=2;
 /* Search Invoice according to partial infomation */
 if (isset($_POST['Search'])) {
     if (isset($_POST['InvoiceStart']) and $_POST['InvoiceStart'] != '') {
@@ -30,6 +32,13 @@ if (isset($_POST['Search'])) {
        $msg = _('Invoice end date cannot be before start date, please choose again');
        $msgtype="error";
     }
+    if(isset($_POST['HoursSOToInv']) and ($_POST['HoursSOToInv']!='') and is_numeric($_POST['HoursSOToInv']) and $_POST['HoursSOToInv']>0){
+        $HoursSOToInv=$_POST['HoursSOToInv'];
+    }
+    
+    if(isset($_POST['HoursReleaseToPO']) and ($_POST['HoursReleaseToPO']!='') and is_numeric($_POST['HoursReleaseToPO']) and $_POST['HoursReleaseToPO']>0){
+        $HoursReleaseToPO=$_POST['HoursReleaseToPO'];
+    }
 
     $KPIReporting = new KPIReportingModel($db, $InvoiceStart, $InvoiceEnd);
 
@@ -41,9 +50,9 @@ if (isset($_POST['Search'])) {
     $TotalAfterTimeInvoiceResult= $KPIReporting->TotalAfterTimeInvoiceResult();
 
     /* 1. KPI1 Sales Order to Invoice within 4 hours */
-    $KPIOrderToInvoiceResult = $KPIReporting->KPIOrderToInvoiceResult(); 
+    $KPIOrderToInvoiceResult = $KPIReporting->KPIOrderToInvoiceResult($HoursSOToInv); 
     /* 2. KPI2 Release Invoice to PO/DD Emial within 2 hours */
-    $KPIReleasedInvToPODDEmailResult = $KPIReporting->KPIReleasedInvtoPODDEmailResult();
+    $KPIReleasedInvToPODDEmailResult = $KPIReporting->KPIReleasedInvtoPODDEmailResult($HoursReleaseToPO);
     /* 3. KPI3 Dispatch Stock Date (order before or after the 9:30am) */
     $KPIDispatchBeforeTimeResult = $KPIReporting->KPIDispatchBeforeTimeResult();
     $KPIDispatchAfterTimeResult = $KPIReporting->KPIDispatchAfterTimeResult();
@@ -60,7 +69,13 @@ echo '<table cellpadding="3" colspan="4" class="selection">';
 echo '<tr><td><font size=1>' . _('Invoice Start :') . '</b></font></td>';
 echo '<td><input type="Text" class="date" name="InvoiceStart" size=20 maxlength=25 alt="d/m/Y" value="' . ConvertSQLDate($InvoiceStart) . '"></td>';
 echo '<td><font size=1>' . _('Invoice End :') . '</b></font></td>';
-echo '<td><input type="Text" class="date" name="InvoiceEnd" size=20 maxlength=25 alt="d/m/Y" value="' . ConvertSQLDate($InvoiceEnd) . '"></td></tr></table><br>';
+echo '<td><input type="Text" class="date" name="InvoiceEnd" size=20 maxlength=25 alt="d/m/Y" value="' . ConvertSQLDate($InvoiceEnd) . '"></td></tr>';
+
+echo '<tr><td><font size=1>' . _('KPI Processing Hours (Sales Order to Invoice) :') . '</b></font></td>';
+echo '<td><input type="Text" name="HoursSOToInv" size=3 maxlength=3  value="' . $HoursSOToInv . '"></td>';
+echo '<td><font size=1>' ._('KPI Processing Hours (Released Invoice to PO/DD Emails) :') . '</b></font></td>';
+echo '<td><input type="Text" name="HoursReleaseToPO" size=3 maxlength=3  value="' . $HoursReleaseToPO . '"></td></tr></table><br>';
+
 echo '<div align=center><input type=submit name="Search" value="' . _('Search Now') . '"></div>';
 
 /* Display Total Order Details */
@@ -74,7 +89,7 @@ if (isset($_POST['Search'])) {
     '<th>' . _('KPI %') .'</th></tr>'; 
     /* Display KPI1 Report */
 if (isset($KPIOrderToInvoiceResult) and $KPIOrderToInvoiceResult > 0) {  
-    echo '<tr><td align=right>The processing time of invoice placed after the sales order received within 4 hours time frame</td>
+    echo '<tr><td align=right>The processing time of invoice placed after the sales order received within '.$HoursSOToInv.' hours time frame</td>
                               <td align=right>' . $KPIOrderToInvoiceResult . '</td>
                               <td align=right>' . $TotalInvoiceResult . '</td>
                               <td align=right>' . number_format($KPIOrderToInvoiceResult / $TotalInvoiceResult * 100, 2) . '</td>
@@ -83,7 +98,7 @@ if (isset($KPIOrderToInvoiceResult) and $KPIOrderToInvoiceResult > 0) {
       
     /* Display KPI2 Report */
 if (isset($KPIReleasedInvToPODDEmailResult) and $KPIReleasedInvToPODDEmailResult > 0) {
-    echo '<tr><td align=right>The processing time of sending PO/DD email to the Supplier after the invoiced released within 2 hours time frame</td>
+    echo '<tr><td align=right>The processing time of sending PO/DD email to the Supplier after the invoiced released within '.$HoursReleaseToPO.' hours time frame</td>
                               <td align=right>' . $KPIReleasedInvToPODDEmailResult . '</td>
                               <td align=right>' . $TotalInvoiceResult . '</td>    
                               <td align=right>' . number_format($KPIReleasedInvToPODDEmailResult / $TotalInvoiceResult * 100, 2) . '</td>

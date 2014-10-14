@@ -53,10 +53,10 @@ WHERE TIME(ics.`datepurchased`) > '09:30:00' and DATE(ics.`datepurchased`) BETWE
     }
     /* Calculate the KPI 1 Order to Invoice -- by Stan 13102014 */
 
-    function KPIOrderToInvoiceResult() {
+    function KPIOrderToInvoiceResult($hours) {
         
         $SQL = "SELECT ics.*  FROM `import_csv_salesorders` AS ics INNER JOIN `debtortrans` AS deb ON ics.`Number`=deb.`order_` 
-WHERE deb.`inputdate` BETWEEN ics.`datepurchased` AND DATE_ADD(ics.`datepurchased`, INTERVAL 4 HOUR)
+WHERE deb.`inputdate` BETWEEN ics.`datepurchased` AND DATE_ADD(ics.`datepurchased`, INTERVAL '".$hours."' HOUR)
 AND TIME(ics.`datepurchased`) BETWEEN '09:00:00' AND '17:00:00'
 AND DATE(ics.`datepurchased`) BETWEEN '" . $this->InvoiceStartDate . "' AND '" . $this->InvoiceEndDate . "' AND deb.type=10
 GROUP BY ics.Number";
@@ -66,7 +66,7 @@ GROUP BY ics.Number";
     }
     
   /* Calculate the KPI 2 Released Invoice to send PO/DD Email -- by Stan 134102014 */  
-        function KPIReleasedInvtoPODDEmailResult() {
+        function KPIReleasedInvtoPODDEmailResult($hours) {
         
         $SQL = "SELECT COUNT(*) AS Total  FROM `import_csv_salesorders` AS ics INNER JOIN `debtortrans` AS deb ON ics.`Number`=deb.`order_` INNER JOIN
             
@@ -78,7 +78,7 @@ ON osm.debtortran_fk=deb.id INNER JOIN
 WHERE etem.`emailtype`=18 GROUP BY ordernumber) AS eml
 ON eml.ordernumber=deb.order_ 
 
-WHERE HOUR(TIMEDIFF(releasetime, PODDtime)) <=2
+WHERE HOUR(TIMEDIFF(releasetime, PODDtime)) <='".$hours."'
 AND TIME(ics.`datepurchased`) BETWEEN '09:00:00' AND '17:00:00'
 AND DATE(ics.`datepurchased`) BETWEEN '" . $this->InvoiceStartDate . "' AND '" . $this->InvoiceEndDate . "' AND deb.type=10
 GROUP BY ics.Number";
