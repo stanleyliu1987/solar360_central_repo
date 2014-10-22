@@ -217,7 +217,7 @@ while ($myrow=DB_fetch_array($TransResult)) {
     /* Retrieve Related PO number */
     
 $POList='';    
-$POSQL = "SELECT purchorders.ref_number
+$POSQL = "SELECT purchorders.ref_number, purchorders.orderno,purchorders.status
 	FROM purchorderdetails inner join purchorders on purchorders.orderno=purchorderdetails.orderno
 	WHERE purchorderdetails.suppinvtranref='".$myrow['id']."' group by purchorderdetails.orderno";
 $ErrMsg = _('No PO was returned by the SQL because');
@@ -226,7 +226,9 @@ $POSQLResult = DB_query($POSQL, $db, $ErrMsg, $DbgMsg);
 
 if (DB_num_rows($TransResult) > 0){
 while ($pono=DB_fetch_array($POSQLResult)) {
-    $POList.=$pono['ref_number'].',';
+  //  $POList.=$pono['ref_number'].',';
+    $POList.='<a href="' . $rootpath . '/PO_PDFPurchOrder.php?' . SID . '&OrderNo=' . $pono['orderno'] . '&ViewingOnly=1&PrintDirPO=1&POStatus='.$pono['status'].'">
+				' . $pono['ref_number'] . '<img src="' .$rootpath. '/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '"></a>';
 }	
 }
 $POList=substr($POList,0,-1);
