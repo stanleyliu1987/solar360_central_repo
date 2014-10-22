@@ -48,6 +48,8 @@ if (isset($_POST['Search'])) {
     $TotalBeforeTimeInvoiceResult= $KPIReporting->TotalBeforeTimeInvoiceResult();
 
     $TotalAfterTimeInvoiceResult= $KPIReporting->TotalAfterTimeInvoiceResult();
+    
+    $TotalOnCustomerRequiredTimeInvoiceResult= $KPIReporting->TotalOnCustomerRequiredTimeInvoiceResult();
 
     /* 1. KPI1 Sales Order to Invoice within 4 hours */
     $KPIOrderToInvoiceResult = $KPIReporting->KPIOrderToInvoiceResult($HoursSOToInv); 
@@ -56,6 +58,10 @@ if (isset($_POST['Search'])) {
     /* 3. KPI3 Dispatch Stock Date (order before or after the 9:30am) */
     $KPIDispatchBeforeTimeResult = $KPIReporting->KPIDispatchBeforeTimeResult();
     $KPIDispatchAfterTimeResult = $KPIReporting->KPIDispatchAfterTimeResult();
+    /* 4. KPI4 Stock Delivery Date */
+
+    /* 5. KPI5 Customer Required Delivery Date Achieved */
+    $KPIReleasedInvToPODDEmailResult = $KPIReporting->KPIWithinCustomerRequiredDateResult();       
 }
 
 if (strlen($msg)>1){
@@ -118,6 +124,17 @@ if (isset($KPIDispatchAfterTimeResult) and $KPIDispatchAfterTimeResult > 0) {
                               <td align=right>' . $KPIDispatchAfterTimeResult . '</td>
                               <td align=right>' . $TotalAfterTimeInvoiceResult . '</td>    
                               <td align=right>' . number_format($KPIDispatchAfterTimeResult / $TotalAfterTimeInvoiceResult * 100, 2) . '</td>
+                              </tr>';
+      }
+      
+    /* Display KPI4 Report */  
+      
+    /* Display KPI5 Report */ 
+if (isset($KPIReleasedInvToPODDEmailResult) and $KPIReleasedInvToPODDEmailResult > 0) {
+    echo '<tr><td align=right>Order delivered on customer required date</td>
+                              <td align=right>' . $KPIReleasedInvToPODDEmailResult . '</td>
+                              <td align=right>' . $TotalOnCustomerRequiredTimeInvoiceResult . '</td>    
+                              <td align=right>' . number_format($KPIReleasedInvToPODDEmailResult / $TotalOnCustomerRequiredTimeInvoiceResult * 100, 2) . '</td>
                               </tr>';
       }
    }
