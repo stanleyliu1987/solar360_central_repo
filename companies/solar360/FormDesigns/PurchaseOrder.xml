@@ -337,17 +337,17 @@
 		</Column1>
 		<Column2 type="SimpleText" name="Heading 2" id="Heading2">
 			<FontSize>12</FontSize>
-			<x>130</x>
+			<x>120</x>
 			<y>595</y>
 		</Column2>
 		<Column3 type="SimpleText" name="Heading 3" id="Heading3">
 			<FontSize>12</FontSize>
-			<x>330</x>
+			<x>190</x>
 			<y>595</y>
 		</Column3>
 		<Column4 type="SimpleText" name="Heading 4" id="Heading4">
 			<FontSize>12</FontSize>
-			<x>385</x>
+			<x>400</x>
 			<y>595</y>
 		</Column4>
 		<Column5 type="SimpleText" name="Heading 5" id="Heading5">
@@ -376,17 +376,17 @@
 		</Column1>
 		<Column2 type="DataText" name="Column 2" id="Data2">
 			<FontSize>9</FontSize>
-			<x>130</x>
-			<Length>100</Length>
+			<x>120</x>
+			<Length>40</Length>
 		</Column2>
 		<Column3 type="DataText" name="Column 3" id="Data3">
 			<FontSize>9</FontSize>
-			<x>320</x>
-			<Length>40</Length>
+			<x>190</x>
+			<Length>120</Length>
 		</Column3>
 		<Column4 type="DataText" name="Column 4" id="Data4">
 			<FontSize>9</FontSize>
-			<x>390</x>
+			<x>400</x>
 			<Length>40</Length>
 		</Column4>
 		<Column5 type="DataText" name="Column 5" id="Data5">
