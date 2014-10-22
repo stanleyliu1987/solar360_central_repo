@@ -131,7 +131,7 @@ if (isset($KPIDispatchAfterTimeResult) and $KPIDispatchAfterTimeResult > 0) {
       
     /* Display KPI5 Report */ 
 if (isset($KPIReleasedInvToPODDEmailResult) and $KPIReleasedInvToPODDEmailResult > 0) {
-    echo '<tr><td align=right>Order delivered on customer required date</td>
+    echo '<tr><td align=right>Stock delivered on customer required date</td>
                               <td align=right>' . $KPIReleasedInvToPODDEmailResult . '</td>
                               <td align=right>' . $TotalOnCustomerRequiredTimeInvoiceResult . '</td>    
                               <td align=right>' . number_format($KPIReleasedInvToPODDEmailResult / $TotalOnCustomerRequiredTimeInvoiceResult * 100, 2) . '</td>
