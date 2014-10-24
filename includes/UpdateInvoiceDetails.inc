@@ -506,7 +506,7 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
 			    poline='" . $OrderLine->POLine . "',
 			    itemdue='" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "'
 			    WHERE orderno= '" . $_SESSION['salesorderNum'] . "'
-                             and  stkcode='".$OrderLine->StockID."'";
+                             and  stkcode='".$OrderLine->StockID."' and orderlineno='".$OrderLine->LineNumber."'";
                              
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The salesorderdetails record could not be updated because');
 	$DbgMsg = _('The following SQL to update salesorderdetails record was used');
@@ -525,9 +525,7 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                             discountpercent ='".$Discount."',
                             standardcost='".$OrderLine->StandardCost."'  ,
                             narrative='".$Narrative."' 
-			    WHERE type=10 and transno= '" . $_SESSION['Items'.$identifier]->OrderNo . "'
-                             and  stockid='".$OrderLine->StockID."'
-                             and show_on_inv_crds=1";
+			    WHERE stkmoveno='".$OrderLine->Stockmoveid."'";
                              
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stockmoves record could not be updated because');
 	$DbgMsg = _('The following SQL to updated the stockmoves record was used');
