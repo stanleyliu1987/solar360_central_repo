@@ -400,7 +400,7 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
 						'".$branchno."',
                                                 '" . $Price . "',
 						'" .$PeriodNo."',
-						'" ._('Order Has been Modified')."',
+						'" .$WebSalesOrderNo."',
 						'".-$Quantity."',
                                                 '".$Discount."',
 						'".$OrderLine->StandardCost."',
@@ -410,14 +410,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                   $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK2').'';
 	          $DbgMsg = _('The following SQL to update the invoiced was used');
 	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
-                  
                   $ItemGstRate=$_POST['TaxRate_' . $OrderLine->LineNumber]/100;
                   /* Retrieve last insert id from stockmoves table */
                   $StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
                   
-           if(DB_num_rows($resultTaxExistId)!=0){
+                  if(DB_num_rows($resultTaxExistId)!=0){
                 
-               $SQL = "INSERT INTO stockmovestaxes (	stkmoveno,
+                  $SQL = "INSERT INTO stockmovestaxes (	stkmoveno,
 					        taxauthid,
 						taxrate,
 						taxontax,
@@ -436,6 +435,109 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
      
                 }
                 
+                  /* Insert Assemble product into the stockmoves and stockmovestax table*/
+                  if($OrderLine->MBflag== 'A'){
+                  $SQL = "SELECT bom.component,
+								bom.quantity,
+								stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standard
+							FROM bom,
+								stockmaster
+							WHERE bom.component=stockmaster.stockid
+							AND bom.parent='" . $OrderLine->StockID . "'
+							AND bom.effectiveto >= '" . Date('Y-m-d') . "'
+							AND bom.effectiveafter < '" . Date('Y-m-d') . "'";
+		
+				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Could not retrieve assembly components from the database for'). ' '. $OrderLine->StockID . _('because').' ';
+				$DbgMsg = _('The SQL that failed was');
+				$AssResult = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+				while ($AssParts = DB_fetch_array($AssResult,$db)){
+                                   				/*Need to get the BOM for this part and make
+				stock moves for the components then update the Location stock balances */
+				$Assembly=True;
+				$StandardCost =0; /*To start with - accumulate the cost of the comoponents for use in journals later on */
+				$SQL = "SELECT bom.component,
+								bom.quantity,
+								stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standard
+							FROM bom,
+								stockmaster
+							WHERE bom.component=stockmaster.stockid
+							AND bom.parent='" . $OrderLine->StockID . "'
+							AND bom.effectiveto >= '" . Date('Y-m-d') . "'
+							AND bom.effectiveafter < '" . Date('Y-m-d') . "'";
+		
+				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Could not retrieve assembly components from the database for'). ' '. $OrderLine->StockID . _('because').' ';
+				$DbgMsg = _('The SQL that failed was');
+				$AssResult = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+				while ($AssParts = DB_fetch_array($AssResult,$db)){
+
+					$StandardCost += ($AssParts['standard'] * $AssParts['quantity']) ;
+					/* Need to get the current location quantity
+					will need it later for the stock movement */
+	                  		$SQL="SELECT locstock.quantity
+							FROM locstock
+							WHERE locstock.stockid='" . $AssParts['component'] . "'
+							AND loccode= '" . $_SESSION['Items']->Location . "'";
+
+					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Can not retrieve assembly components location stock quantities because ');
+					$DbgMsg = _('The SQL that failed was');
+					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+	                  		if (DB_num_rows($Result)==1){
+	                  			$LocQtyRow = DB_fetch_row($Result);
+	                  			$QtyOnHandPrior = $LocQtyRow[0];
+					} else {
+						/*There must be some error this should never happen */
+						$QtyOnHandPrior = 0;
+					}
+					if (empty($AssParts['standard'])) {
+						$AssParts['standard']=0;
+					}
+					$SQL = "INSERT INTO stockmoves (	stockid,
+													type,
+													transno,
+													loccode,
+													trandate,
+													debtorno,
+													branchcode,
+													prd,
+													reference,
+													qty,
+													standardcost,
+													show_on_inv_crds,
+													newqoh) 
+			       Values(  '" . $AssParts['component'] . "',
+					        10,
+						'".$_SESSION['Items'.$identifier]->OrderNo."',
+						'".$_SESSION['Items'.$identifier]->Location."',
+						'".$InovicePlaceDate."',
+						'".$debtorno."',
+						'".$branchno."',
+						'" .$PeriodNo."',
+						'" . _('Assembly') . ': ' . $OrderLine->StockID . ' ' . _('Order') . ': ' . $_SESSION['ProcessingOrder'] . "',
+                                                '" . -$AssParts['quantity'] * (-$Quantity). "',
+						'" . $AssParts['standard'] . "',
+						0,
+						'" . ($QtyOnHandPrior - $AssParts['quantity'] * (-$Quantity)) . "' )";
+
+					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Stock movement records for the assembly components of'). ' '. $OrderLine->StockID . ' ' . _('could not be inserted because');
+					$DbgMsg = _('The following SQL to insert the assembly components stock movement records was used');
+					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+
+					$SQL = "UPDATE locstock
+							SET quantity = locstock.quantity - " . $AssParts['quantity'] * (-$Quantity) . "
+							WHERE locstock.stockid = '" . $AssParts['component'] . "'
+							AND loccode = '" . $_SESSION['Items']->Location . "'";
+
+					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated for an assembly component because');
+					$DbgMsg = _('The following SQL to update the locations stock record for the component was used');
+					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true); 
+                                }      
+                  }
+             }
+                  
+             
          /*
           * Insert Freight Cost Measurements into freightcostmeasurement table
           */
@@ -821,13 +923,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
        $resultPOItem=DB_query($SQLCheckPOItem,$db,'','',false,false);   
        
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related PO could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         else{
@@ -870,13 +972,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
             
        $resultPOSupp=DB_query($SQLCheckPOSupp,$db,'','',false,false);          
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related Supplier could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         
@@ -1004,13 +1106,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
             
        $resultSelectSup=DB_query($SQLSelectSup,$db,'','',false,false);
        if (DB_error_no($db) !=0 or DB_num_rows($resultSelectSup)!=1) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related Supplier could not be retrieved or more than one or 0 prefreed supplier selected') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
                 
         }
@@ -1206,13 +1308,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
        $resultSubItems=DB_query($SQLRetrieveSubItem,$db,'','',false,false); 
        
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related BOM sub itmes could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         else{
@@ -1232,13 +1334,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
         $resultPOItem=DB_query($SQLCheckPOItem,$db,'','',false,false);   
        
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related PO could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         else{
@@ -1283,13 +1385,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
             
        $resultPOSupp=DB_query($SQLCheckPOSupp,$db,'','',false,false);          
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related Supplier could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         
@@ -1417,13 +1519,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
             
        $resultSelectSup=DB_query($SQLSelectSup,$db,'','',false,false);
        if (DB_error_no($db) !=0 or DB_num_rows($resultSelectSup)!=1) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related Supplier could not be retrieved or more than one or 0 prefreed supplier selected') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
                 
         }
@@ -1633,13 +1735,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
         
        $resultPO=DB_query($SQLCheckPO,$db,'','',false,false);          
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related PO Item  could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	} 
         else{
