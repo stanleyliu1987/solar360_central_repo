@@ -202,6 +202,7 @@ $tableheader = '<tr>
 				<th>' . _('More Info') . '</th>
 				<th>' . _('More Info') . '</th>
 				<th>' . _('More Info') . '</th>
+                                <th>' . _('More Info') . '</th>
 				</tr>';
 
 echo $tableheader;
@@ -248,6 +249,8 @@ while ($myrow=DB_fetch_array($TransResult)) {
 	<td><a href="%s/%s?FromTransNo=%s&InvOrCredit=Credit&PrintPDF=True">' . _('PDF ') . '<img src="%s/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>
 	<td><a href="%s/EmailCustTrans.php?FromTransNo=%s&InvOrCredit=Credit">' . _('Email') . ' <img src="%s/email.gif" title="' . _('Click to email the credit note') . '"></a></td>';
 
+        /*View Invoice payments 12112014 by Stan */
+        $ViewInvoicePyamentsString='<td><a href="' . $rootpath . '/PaymentInvAllocations.php?InvID=' . $myrow['id'] .'&CustID='.$CustomerID.'">' . _('View Payments') . '</a></td>';
 	/* assumed allowed page security token 3 allows the user to create credits for invoices */
 	if (in_array(3,$_SESSION['AllowedPageSecurityTokens']) && $myrow['type']==10){ 
 		/*Show a link to allow an invoice to be credited */
@@ -257,7 +260,7 @@ while ($myrow=DB_fetch_array($TransResult)) {
 			
 			/* format string with GL inquiry options and for invoice to be credited */
 			
-			printf($BaseFormatString . $CreditInvoiceFormatString . $PreviewInvoiceFormatString .
+			printf($BaseFormatString . $CreditInvoiceFormatString . $PreviewInvoiceFormatString .$ViewInvoicePyamentsString.
 				'<td><a href="%s/GLTransInquiry.php?TypeID=%s&TransNo=%s">' . _('View GL Entries') . ' <img src="' .$rootpath. '/css/'.$theme.'/images/gl.png" title="' . _('View the GL Entries') . '"></a></td>
 				</tr>',
 				//$BaseFormatString parameters
@@ -292,7 +295,7 @@ while ($myrow=DB_fetch_array($TransResult)) {
 				$myrow['transno']);
 		} else { //user does not have privileges to see GL inquiry stuff
 		
-			printf($BaseFormatString . $CreditInvoiceFormatString . $PreviewInvoiceFormatString . 	'</tr>',
+			printf($BaseFormatString . $CreditInvoiceFormatString . $PreviewInvoiceFormatString .$ViewInvoicePyamentsString.	'</tr>',
 				//BaseFormatString parameters
 				$myrow['typename'],
 				$myrow['transno'],
@@ -325,6 +328,7 @@ while ($myrow=DB_fetch_array($TransResult)) {
 
 		printf($BaseFormatString .
 			$PreviewInvoiceFormatString .
+                        $ViewInvoicePyamentsString.
 			'</tr>',
 			//$BaseFormatString parameters
 			$myrow['typename'],
