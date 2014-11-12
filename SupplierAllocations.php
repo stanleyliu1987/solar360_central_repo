@@ -349,9 +349,11 @@ If (isset($_GET['AllocTrans'])){
 			rate,
 			ovamount+ovgst AS total,
 			diffonexch,
-			alloc
+			alloc,
+                        po.orderno AS po_num
 		FROM supptrans INNER JOIN systypes
 		ON supptrans.type = systypes.typeid
+                LEFT JOIN (SELECT orderno, suppinvtranref FROM `purchorderdetails` WHERE suppinvtranref<>'' GROUP BY orderno) AS po ON po.suppinvtranref=supptrans.`id`
 		WHERE supptrans.settled=0
 		AND abs(ovamount+ovgst-alloc)>0.009
 		AND supplierno='" . $_SESSION['Alloc']->SupplierID . "'";
@@ -362,7 +364,7 @@ If (isset($_GET['AllocTrans'])){
 
 	$Result = DB_query($SQL, $db, $ErrMsg, $DbgMsg);
 
-	while ($myrow=DB_fetch_array($Result)){
+	while ($myrow=DB_fetch_array($Result)){ 
 		$_SESSION['Alloc']->add_to_AllocsAllocn ($myrow['id'],
 							$myrow['typename'],
 							$myrow['transno'],
@@ -374,7 +376,8 @@ If (isset($_GET['AllocTrans'])){
 							$myrow['diffonexch'],
 							$myrow['diffonexch'],
 							$myrow['alloc'],
-							'NA');
+							'NA',
+                        $myrow['po_num']);
 }
 
 	/* Now get trans that might have previously been allocated to by this trans
@@ -391,14 +394,16 @@ If (isset($_GET['AllocTrans'])){
 				diffonexch,
 				supptrans.alloc-suppallocs.amt AS prevallocs,
 				amt,
-				suppallocs.id AS allocid
+				suppallocs.id AS allocid,
+                                po.orderno AS po_num
 			FROM supptrans INNER JOIN systypes
 			ON supptrans.type = systypes.typeid 
 			INNER JOIN suppallocs
 			ON supptrans.id=suppallocs.transid_allocto
+                        LEFT JOIN (SELECT orderno, suppinvtranref FROM `purchorderdetails` WHERE suppinvtranref<>'' GROUP BY orderno) AS po ON po.suppinvtranref=supptrans.`id`
 			WHERE suppallocs.transid_allocfrom='" . $_SESSION['AllocTrans'] .
 			"' AND supplierno='" . $_SESSION['Alloc']->SupplierID . "'";
-
+        
 	$ErrMsg = _('There was a problem retrieving the previously allocated transactions for modification');
 
 	$DbgMsg = _('The SQL that was used to retrieve the previously allocated transaction information was');
@@ -418,7 +423,8 @@ If (isset($_GET['AllocTrans'])){
 							$DiffOnExchThisOne,
 							($myrow['diffonexch'] - $DiffOnExchThisOne),
 							$myrow['prevallocs'],
-							$myrow['allocid']);
+							$myrow['allocid'],
+                        $myrow['po_num']);
 	}
 }
 
@@ -450,6 +456,7 @@ if (isset($_POST['AllocTrans'])){
 
         echo '<table cellpadding=2 colspan=7 class=selection>';
 	  	  $TableHeader = '<tr><th>' . _('Type') . '</th>
+                                <th>' . _('Purchase Order') . '<br />' . _('Number') . '</th>
 	 			<th>' . _('Trans') . '<br />' . _('Number') . '</th>
 				<th>' . _('Trans') .'<br />' . _('Date') . '</th>
 				<th>' . _('Supp') . '<br />' . _('Ref') . '</th>
@@ -459,7 +466,7 @@ if (isset($_POST['AllocTrans'])){
         $k = 0;
 	$Counter = 0;
 	$RowCounter = 0;
-        $TotalAllocated = 0;
+        $TotalAllocated = 0; 
 
         foreach ($_SESSION['Alloc']->Allocs as $AllocnItem) {
 
@@ -487,6 +494,7 @@ if (isset($_POST['AllocTrans'])){
 	    $YetToAlloc = ($AllocnItem->TransAmount - $AllocnItem->PrevAlloc);
 
 	    echo '<td>' . $AllocnItem->TransType . '</td>
+                <td>'.$AllocnItem->PONo.'</td>
 		<td>' . $AllocnItem->TypeNo . '</td>
 		<td>' . $AllocnItem->TransDate . '</td>
 		<td>' . $AllocnItem->SuppRef . '</td>

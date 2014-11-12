@@ -269,7 +269,7 @@ if (isset($_GET['AllocTrans'])) {
 			ORDER BY debtortrans.trandate";
 	$Result = DB_query($SQL,$db);
 
-	while ($myrow=DB_fetch_array($Result)) {
+	while ($myrow=DB_fetch_array($Result)) { 
 		$_SESSION['Alloc']->add_to_AllocsAllocn (
 											$myrow['id'],
 											$myrow['typename'],
@@ -281,7 +281,8 @@ if (isset($_GET['AllocTrans'])) {
 											$myrow['diffonexch'],
 											$myrow['diffonexch'],
 											$myrow['alloc'],
-											'NA'
+											'NA',
+                        $myrow['sales_ref_num']
 										);
 	}
 	DB_free_result($Result);
@@ -322,7 +323,8 @@ if (isset($_GET['AllocTrans'])) {
 											$DiffOnExchThisOne,
 											($myrow['diffonexch'] - $DiffOnExchThisOne),
 											$myrow['prevallocs'],
-											$myrow['allocid']
+                                                                                        '',
+											$myrow['sales_ref_num']
 										);
 	}
 	DB_free_result($Result);
@@ -374,7 +376,7 @@ if (isset($_GET['AllocTrans'])) {
 		$TotalAllocated = 0;
 		$balance = 0;
 		$j=0;
-		foreach ($_SESSION['Alloc']->Allocs as $AllocnItem) { echo 'Trans :'.$AllocnItem->TransAmount.' PrevAlloc: '.$AllocnItem->PrevAlloc;
+		foreach ($_SESSION['Alloc']->Allocs as $AllocnItem) { 
 			$YetToAlloc = ($AllocnItem->TransAmount - $AllocnItem->PrevAlloc);
 
 			if ( $AllocnItem->ID == $_POST['AllocTrans'] ) {
