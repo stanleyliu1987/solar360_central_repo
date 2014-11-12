@@ -301,9 +301,9 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 			$result = DB_query($sql,$db,$ErrMsg,$DbgMsg,true);
 
 			/*Now Update the purchase order detail records */
-			foreach ($_SESSION['PO'.$identifier]->LineItems as $POLine) {
-				$result=DB_query($sql,$db,'','',true);
-				if ($POLine->Deleted==true) {
+			foreach ($_SESSION['PO'.$identifier]->LineItems as $POLine) { 
+				//$result=DB_query($sql,$db,'','',true);
+				if ($POLine->Deleted==true) { 
 					if ($POLine->PODetailRec!='') {
 						$sql="DELETE FROM purchorderdetails WHERE podetailitem='" . $POLine->PODetailRec . "'";
 						$ErrMsg =  _('The purchase order could not be deleted because');

@@ -189,7 +189,8 @@ If (isset($PrintPDF)
                                         custbranch.contactname,
 					salesman.salesmanname,
 					debtortrans.debtorno,
-					debtortrans.branchcode
+					debtortrans.branchcode,
+                                        salesorders.fromstkloc
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -313,6 +314,7 @@ If (isset($PrintPDF)
 			if ($InvOrCredit == 'Invoice') {
 				$sql = "SELECT stockmoves.stockid,
 						stockmaster.description,
+                                                stockmaster.mbflag,
 						-stockmoves.qty as quantity,
 						stockmoves.discountpercent,
 						((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . "* -stockmoves.qty) AS fxnet,
@@ -331,6 +333,7 @@ If (isset($PrintPDF)
 				/* only credit notes to be retrieved */
 				$sql = "SELECT stockmoves.stockid,
 						stockmaster.description,
+                                                stockmaster.mbflag,
 						stockmoves.qty as quantity,
 						stockmoves.discountpercent,
 						((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . " * stockmoves.qty) AS fxnet,
@@ -382,7 +385,29 @@ If (isset($PrintPDF)
 				$DisplayPrice = $myrow2['fxprice'];
 				$DisplayQty = $myrow2['quantity'];
                                 $Narrative=htmlspecialchars_decode($myrow2['narrative']);
-				
+	       /* Retrieve the assemble products 12/11/2014 by Stan */
+                if($myrow2['mbflag']=='A'){
+                    	/*Now look for assembly components that would go negative */
+				$ComponentsSQL = "SELECT bom.component,
+                                        bom.quantity,
+					stockmaster.description
+                                        FROM bom INNER JOIN locstock
+						ON bom.component=locstock.stockid
+						INNER JOIN stockmaster
+						ON stockmaster.stockid=bom.component
+						WHERE bom.parent='" . $myrow2['stockid'] . "'
+						AND locstock.loccode='" . $myrow['fromstkloc'] . "'
+						AND effectiveafter <'" . Date('Y-m-d') . "'
+						AND effectiveto >='" . Date('Y-m-d') . "'";
+
+				$ErrMsg = _('Could not retrieve the component quantity left at the location once the assembly item on this order is invoiced (for the purposes of checking that stock will not go negative because)');
+				$ComponentsResult = DB_query($ComponentsSQL,$db,$ErrMsg);
+                                $sub_description=array();
+                                while ($com = DB_fetch_array($ComponentsResult)){
+					$sub_description[]=$com['component'].' '.$com['description'].' x'.$com['quantity'];
+				}
+                }
+
                /* display item details*/
 		$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column1->x, $YPos, $FormDesign->Data->Column1->Length, $FormDesign->Data->Column1->FontSize, $myrow2['stockid'],'left');
           
@@ -392,17 +417,32 @@ If (isset($PrintPDF)
                 else{
                     $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $myrow2['description'],'left');
                 }
-                if (strlen($LeftOvers)>1){
-				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos-10, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
+                while(strlen($LeftOvers)>1){
+                                $YPos-=10;
+				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
 			}
-
-                        
+                                                
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column3->x, $YPos, $FormDesign->Data->Column3->Length, $FormDesign->Data->Column3->FontSize, number_format($DisplayQty,0),'left');
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column4->x, $YPos, $FormDesign->Data->Column4->Length, $FormDesign->Data->Column4->FontSize, number_format($DisplayPrice,2),'right');
           //      $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column5->x, $YPos, $FormDesign->Data->Column5->Length, $FormDesign->Data->Column5->FontSize, $myrow2['units'],'left');
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column5->x, $YPos, $FormDesign->Data->Column5->Length, $FormDesign->Data->Column5->FontSize, $DisplayDiscount,'right');
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column6->x, $YPos, $FormDesign->Data->Column6->Length, $FormDesign->Data->Column6->FontSize, number_format($DisplayNet,2),'right');
-				
+              if(count($sub_description)>0){
+                  $YPos-=20;
+                   $pdf->addTextWrap($FormDesign->Data->Column1->x, $YPos, $FormDesign->Data->Column1->Length+15, $FormDesign->Data->Column1->FontSize, 'Each Pack Contains:','left');
+              }
+              $i=0;
+              while ($i < count($sub_description)) {
+                  
+		  $LeftOvers =$pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length+700, $FormDesign->Data->Column2->FontSize, $sub_description[$i],'left');  
+                  while(strlen($LeftOvers)>1){
+                                $YPos-=10;
+				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length+700, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
+			}
+                  $YPos-=10;      
+                  $i++;
+              }        
+		
                 $TotalSaleAmount+=$DisplayNet;
 
 				if ($myrow2['controlled']==1){
@@ -1064,6 +1104,7 @@ If (isset($PrintPDF)
 
 				   $sql ="SELECT stockmoves.stockid,
 				   		stockmaster.description,
+                                                stockmaster.mbflag,
 						-stockmoves.qty as quantity,
 						stockmoves.discountpercent,
 						((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . "* -stockmoves.qty) AS fxnet,
@@ -1105,6 +1146,7 @@ If (isset($PrintPDF)
 
 				   $sql ="SELECT stockmoves.stockid,
 				   		stockmaster.description,
+                                                stockmaster.mbflag,
 						stockmoves.qty as quantity,
 						stockmoves.discountpercent, ((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . " * stockmoves.qty) AS fxnet,
 						(stockmoves.price * " . $ExchRate . ") AS fxprice,
