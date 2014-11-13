@@ -386,6 +386,7 @@ If (isset($PrintPDF)
 				$DisplayQty = $myrow2['quantity'];
                                 $Narrative=htmlspecialchars_decode($myrow2['narrative']);
 	       /* Retrieve the assemble products 12/11/2014 by Stan */
+                 $sub_description=array();
                 if($myrow2['mbflag']=='A'){
                     	/*Now look for assembly components that would go negative */
 				$ComponentsSQL = "SELECT bom.component,
@@ -402,7 +403,7 @@ If (isset($PrintPDF)
 
 				$ErrMsg = _('Could not retrieve the component quantity left at the location once the assembly item on this order is invoiced (for the purposes of checking that stock will not go negative because)');
 				$ComponentsResult = DB_query($ComponentsSQL,$db,$ErrMsg);
-                                $sub_description=array();
+                         
                                 while ($com = DB_fetch_array($ComponentsResult)){
 					$sub_description[]=$com['component'].' '.$com['description'].' x'.$com['quantity'];
 				}
