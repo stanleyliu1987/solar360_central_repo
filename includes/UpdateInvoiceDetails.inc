@@ -55,16 +55,16 @@ $OrderDateRow = DB_fetch_array($OrderDateResult);
 $OrderPlaceDate=$OrderDateRow[0];
 
 /** Choose the Invoice Date **/
-$SQLInvDate="SELECT debtortrans.trandate						
-       from debtortrans
-       where  debtortrans.transno='" . $_SESSION['Items'.$identifier]->OrderNo . "'
-             AND debtortrans.type=10";
-             
-$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The debtortrans date cannot be retrieved because');
-$DbgMsg = _('The following SQL to select invoice date record was used');
-$InvoiceDateResult= DB_query($SQLInvDate, $db,$ErrMsg,$DbgMsg,true);
-$InvoiceDateRow = DB_fetch_array($InvoiceDateResult);
-$InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
+//$SQLInvDate="SELECT debtortrans.trandate						
+//       from debtortrans
+//       where  debtortrans.transno='" . $_SESSION['Items'.$identifier]->OrderNo . "'
+//             AND debtortrans.type=10";
+//             
+//$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The debtortrans date cannot be retrieved because');
+//$DbgMsg = _('The following SQL to select invoice date record was used');
+//$InvoiceDateResult= DB_query($SQLInvDate, $db,$ErrMsg,$DbgMsg,true);
+//$InvoiceDateRow = DB_fetch_array($InvoiceDateResult);
+$InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
 
 /*Now insert the mod_DebtorTrans and update debtortrans */
 
