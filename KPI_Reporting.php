@@ -61,7 +61,7 @@ if (isset($_POST['Search'])) {
     /* 4. KPI4 Stock Delivery Date */
 
     /* 5. KPI5 Customer Required Delivery Date Achieved */
-    $KPIReleasedInvToPODDEmailResult = $KPIReporting->KPIWithinCustomerRequiredDateResult();       
+    $KPIFullCustomerDelDateResult = $KPIReporting->KPIWithinCustomerRequiredDateResult();       
 }
 
 if (strlen($msg)>1){
@@ -130,11 +130,11 @@ if (isset($KPIDispatchAfterTimeResult) and $KPIDispatchAfterTimeResult > 0) {
     /* Display KPI4 Report */  
       
     /* Display KPI5 Report */ 
-if (isset($KPIReleasedInvToPODDEmailResult) and $KPIReleasedInvToPODDEmailResult > 0) {
+if (isset($KPIFullCustomerDelDateResult) and $KPIFullCustomerDelDateResult > 0) {
     echo '<tr><td align=right>Stock delivered on customer required date</td>
-                              <td align=right>' . $KPIReleasedInvToPODDEmailResult . '</td>
+                              <td align=right>' . $KPIFullCustomerDelDateResult . '</td>
                               <td align=right>' . $TotalOnCustomerRequiredTimeInvoiceResult . '</td>    
-                              <td align=right>' . number_format($KPIReleasedInvToPODDEmailResult / $TotalOnCustomerRequiredTimeInvoiceResult * 100, 2) . '</td>
+                              <td align=right>' . number_format($KPIFullCustomerDelDateResult / $TotalOnCustomerRequiredTimeInvoiceResult * 100, 2) . '</td>
                               </tr>';
       }
    }

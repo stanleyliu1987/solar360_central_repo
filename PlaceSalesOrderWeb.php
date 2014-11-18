@@ -332,8 +332,13 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
               $customername=$CustomerBranchName[0];
               $branchname=$CustomerBranchName[1];
              }
-            
-
+       /* 18112014 Load Required Delivery date field into the sales order table by Stan */     
+if(FormatDateForSQL(substr(trim($CSVSOImport['comments']),-10))=='--'){
+    $deldate= $CSVSOImport['datepurchased'];
+}
+else{
+    $deldate=FormatDateForSQL(substr(trim($CSVSOImport['comments']),-10));
+}
                  $SqlInsertNewSO="INSERT INTO import_salesorders (orderno, 
                               debtorno, 
                               branchcode,
@@ -375,7 +380,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         1,
                                         0,
                                         '001',
-                                        '". $CSVSOImport['datepurchased']."',
+                                        '". $deldate."',
                                         '". $CSVSOImport['datepurchased']."',
                                         0,
                                         '". $CSVSOImport['datepurchased']."',
