@@ -85,7 +85,7 @@ if (isset($_POST['UpdateDatabase'])) {
 		$Result=DB_Txn_Begin($db);
 		$AllAllocations = 0;
 		foreach ($_SESSION['Alloc']->Allocs as $AllocnItem) {
-			if ($AllocnItem->PrevAllocRecordID != 'NA') {
+			if ($AllocnItem->PrevAllocRecordID != 'NA') { 
 			// original allocation has changed so delete the old allocation record
 				$SQL = "DELETE FROM custallocns WHERE id = '" . $AllocnItem->PrevAllocRecordID . "'";
 				if( !$Result = DB_query($SQL,$db) ) {
@@ -323,7 +323,7 @@ if (isset($_GET['AllocTrans'])) {
 											$DiffOnExchThisOne,
 											($myrow['diffonexch'] - $DiffOnExchThisOne),
 											$myrow['prevallocs'],
-                                                                                        '',
+                                                                                        $myrow['allocid'],
 											$myrow['sales_ref_num']
 										);
 	}
