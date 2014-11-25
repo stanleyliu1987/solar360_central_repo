@@ -917,8 +917,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
        $SQLCheckPOItem = " SELECT  count(*) from purchorders
                          inner join purchorderdetails on purchorders.orderno=purchorderdetails.orderno
                          where purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'  and
-                         purchorderdetails.itemcode='".$OrderLine->StockID."' and
-                         purchorders.status<>'Cancelled'";
+                         purchorderdetails.itemcode='".$OrderLine->StockID."'";
             
        $resultPOItem=DB_query($SQLCheckPOItem,$db,'','',false,false);   
        
@@ -967,8 +966,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                                     inner join purchdata on purchorders.supplierno=purchdata.supplierno
                                     where purchorders.ref_salesorder= '" . $WebSalesOrderNo. "'  
                                     and purchdata.stockid='".$OrderLine->StockID."'
-                                    and purchdata.preferred=1
-                                    and purchorders.status<>'Cancelled'";
+                                    and purchdata.preferred=1";
             
        $resultPOSupp=DB_query($SQLCheckPOSupp,$db,'','',false,false);          
        if (DB_error_no($db) !=0) {
@@ -1328,8 +1326,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
          $SQLCheckPOItem = " SELECT  count(*) from purchorders
                          inner join purchorderdetails on purchorders.orderno=purchorderdetails.orderno
                          where purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'  and
-                         purchorderdetails.itemcode='".$subrow['component']."' and
-                         purchorders.status<>'Cancelled'";
+                         purchorderdetails.itemcode='".$subrow['component']."'";
             
         $resultPOItem=DB_query($SQLCheckPOItem,$db,'','',false,false);   
        
@@ -1381,7 +1378,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                                     where purchorders.ref_salesorder= '" . $WebSalesOrderNo. "'  
                                     and purchdata.stockid='".$subrow['component']."'
                                     and purchdata.preferred=1
-                                    and purchorders.status<>'Cancelled'";
+                                    ";
             
        $resultPOSupp=DB_query($SQLCheckPOSupp,$db,'','',false,false);          
        if (DB_error_no($db) !=0) {

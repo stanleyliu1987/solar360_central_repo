@@ -92,6 +92,10 @@ $(document).ready(function(){
         $("#POEmailSubject").val($("#POEmailSubject").val().replace(" RCTI", ""));
     }
 });
+
+$("#metercube").click(function(){
+    $('#Volume').val($( "#ULEN" ).val()*$( "#UWID" ).val()*$( "#UHEI" ).val()/1000000);
+});
 });
 
   function ChangeOrderStages(transID){
