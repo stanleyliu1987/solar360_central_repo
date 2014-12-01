@@ -105,9 +105,12 @@ $("#metercube").click(function(){
     TransID:transID,
     UserID:$("#UserID").val()
   },
-  function(data,status){
+  function(data,status){ 
      if(status!='success'){ 
        alert('Order Stages Updated Failed!');
+     }
+     else{
+             location.reload();
      }
     });
   }

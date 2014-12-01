@@ -204,6 +204,7 @@ if (isset($_GET['ModifyOrderNumber'])
 						stockmoves.stkmoveno,
                                                 stockmaster.taxcatid,
                                                 salesorderdetails.itemdue,
+                                                salesorderdetails.fromstkloc,
                                                 freightcostevaluation.freightamount,
                                                 freightcostevaluation.height,
                                                 freightcostevaluation.width,
@@ -242,7 +243,7 @@ if (isset($_GET['ModifyOrderNumber'])
             while ($myrow = db_fetch_array($LineItemsResult)) {
                 $LineNumber = $_SESSION['Items' . $identifier]->LineCounter;
 
-                $_SESSION['Items' . $identifier]->add_to_cart($myrow['stockid'], $myrow['quantity'], $myrow['description'], $myrow['price'], $myrow['discountpercent'], $myrow['stkmoveno'], $myrow['volume'], $myrow['kgs'], '', $myrow['mbflag'], '', '', '', '', '', '', $myrow['narrative'], 'No', -1, $myrow['taxcatid'], '', ConvertSQLDate($myrow['itemdue']), '', $myrow['standardcost'], '', '', '', $myrow['freightamount'], '', $_SESSION['Items' . $identifier]->DebtorNo, $_SESSION['ExistingOrder'], $myrow['height'], $myrow['width'], $myrow['length'], $myrow['cube'], $myrow['weight'], $myrow['chargeweight'], $myrow['shipper'], $myrow['servicetype'], $myrow['prefsupplier'], $myrow['suppwarehouse'], $myrow['comment']);
+                $_SESSION['Items' . $identifier]->add_to_cart($myrow['stockid'], $myrow['quantity'], $myrow['description'], $myrow['price'], $myrow['discountpercent'], $myrow['stkmoveno'], $myrow['volume'], $myrow['kgs'], '', $myrow['mbflag'], '', '', '', '', '', '', $myrow['narrative'], 'No', -1, $myrow['taxcatid'], '', ConvertSQLDate($myrow['itemdue']), '', $myrow['standardcost'], '', '', '', $myrow['freightamount'], '', $_SESSION['Items' . $identifier]->DebtorNo, $_SESSION['ExistingOrder'], $myrow['height'], $myrow['width'], $myrow['length'], $myrow['cube'], $myrow['weight'], $myrow['chargeweight'], $myrow['shipper'], $myrow['servicetype'], $myrow['prefsupplier'], $myrow['suppwarehouse'], $myrow['comment'], $myrow['fromstkloc']);
 
                 $_SESSION['Items' . $identifier]->GetExistingTaxes($LineNumber, $myrow['stkmoveno']);
                 /* Just populating with existing order - no DBUpdates */
@@ -297,14 +298,15 @@ if (isset($_POST['CancelOrder'])) {
         $orderstage->SaveOrderStagesMessage($orderstagebean);         
 /* Insert the tax totals for each tax authority where tax was charged on the invoice */
             foreach ($_SESSION['Items' . $identifier]->LineItems as $OrderLine) {
-
-                $SQL = "UPDATE locstock SET quantity=quantity-(SELECT sum(qty) FROM stockmoves 
-                          WHERE type=10 and transno= '" . $_SESSION['Items' . $identifier]->OrderNo . "'
-                          and  stockid='" . $OrderLine->StockID . "') WHERE loccode=001 and stockid='" . $OrderLine->StockID . "'";
-
-                $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK in Locstock table') . '';
-                $DbgMsg = _('The following SQL to update the invoiced was used');
-                $Result = DB_query($SQL, $db, $ErrMsg, $DbgMsg, true);
+                
+/* Disconnet the locstock table updates until the stock stage changed to Dispatch Stock By Stan 261102014*/
+//                $SQL = "UPDATE locstock SET quantity=quantity-(SELECT sum(qty) FROM stockmoves 
+//                          WHERE type=10 and transno= '" . $_SESSION['Items' . $identifier]->OrderNo . "'
+//                          and  stockid='" . $OrderLine->StockID . "') WHERE loccode=001 and stockid='" . $OrderLine->StockID . "'";
+//
+//                $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK in Locstock table') . '';
+//                $DbgMsg = _('The following SQL to update the invoiced was used');
+//                $Result = DB_query($SQL, $db, $ErrMsg, $DbgMsg, true);
 
                 $SQL = "UPDATE stockmoves SET qty=0 WHERE type=10 and transno= '" . $_SESSION['Items' . $identifier]->OrderNo . "'
                           and  stockid='" . $OrderLine->StockID . "'";
@@ -809,9 +811,10 @@ if ((isset($_SESSION['Items' . $identifier])) OR isset($NewItem)) {
                     OR ABS($OrderLine->DiscountPercent - $DiscountPercentage / 100) > 0.001
                     OR $OrderLine->Narrative != $Narrative
                     OR $OrderLine->ItemDue != $_POST['ItemDue_' . $OrderLine->LineNumber]
-                    OR $OrderLine->POLine != $_POST['POLine_' . $OrderLine->LineNumber]) {
+                    OR $OrderLine->POLine != $_POST['POLine_' . $OrderLine->LineNumber]
+                    OR $OrderLine->FromStkLoc != $_POST['FromStkLoc_' . $OrderLine->LineNumber]) {
 
-                $_SESSION['Items' . $identifier]->update_cart_item($OrderLine->LineNumber, $Quantity, $Price, ($DiscountPercentage / 100), $Narrative, 'No', /* Update DB */ $_POST['ItemDue_' . $OrderLine->LineNumber], $_POST['POLine_' . $OrderLine->LineNumber], $_POST['GPPercent_' . $OrderLine->LineNumber]);
+                $_SESSION['Items' . $identifier]->update_cart_item($OrderLine->LineNumber, $Quantity, $Price, ($DiscountPercentage / 100), $Narrative, 'No', /* Update DB */ $_POST['ItemDue_' . $OrderLine->LineNumber], $_POST['POLine_' . $OrderLine->LineNumber], $_POST['GPPercent_' . $OrderLine->LineNumber],$_POST['FromStkLoc_' . $OrderLine->LineNumber]);
             }
         } //page not called from itself - POST variables not set
     }
@@ -970,7 +973,8 @@ if (count($_SESSION['Items' . $identifier]->LineItems) > 0) { /* only show order
 		       <th>' . _('Total Amount') . '</th>
                        <th>' . _('Due Date') . '</th>
                        <th>' . _('Tax Rate%') . '</th>  
-                       <th>' . _('PO Status') . '</th>     
+                       <th>' . _('PO Status') . '</th>
+                       <th>' . _('Warehouse') . '</th>   
 		      </tr>';
 
     $_SESSION['Items' . $identifier]->newtotalwithGST = 0;
@@ -1078,6 +1082,20 @@ if (count($_SESSION['Items' . $identifier]->LineItems) > 0) { /* only show order
             $_SESSION['Items' . $identifier]->newtotalwithGST +=$LineTotal * (1 + $rate);
         }
         echo '<td class=number>' . $POStatus . '</td>';
+        /*Select warehouse location from location table 26112014 by Stan */
+        $Sqlloc= "Select loccode, locationname from locations";
+        $result_loc =DB_query($Sqlloc,$db);
+        echo '<td><select name="FromStkLoc_' . $OrderLine->LineNumber . '">';
+        while ($locrow=DB_fetch_array($result_loc)) {
+         if($_SESSION['Items'.$identifier]->LineItems[$OrderLine->LineNumber]->FromStkLoc==$locrow['loccode']){
+            echo '<option value='.$locrow['loccode'].' selected>'.$locrow['locationname'].'</option>';   
+           }
+         else{
+            echo '<option value='.$locrow['loccode'].'>'.$locrow['locationname'].'</option>';    
+            }   
+        }
+        echo '</select></td></tr>';
+        
         echo '<tr><td colspan=10>' . _('Narrative') . ':<textarea ' . $editoption . ' name="Narrative_' . $OrderLine->LineNumber . '" cols="100%" rows="1">' . stripslashes(AddCarriageReturns($OrderLine->Narrative)) . '</textarea><br /></td></tr>';
         $_SESSION['Items' . $identifier]->totalwithoutdis = $LineTotalWithoutDis;
     } /* end of loop around items */

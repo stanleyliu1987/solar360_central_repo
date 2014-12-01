@@ -192,7 +192,7 @@ if ($AlreadyOnThisOrder!=1){
                                         $_SESSION['Items'.$identifier]->ShipVia,1,
                                         $myItemRow['supplierno'],
                                         '',
-                                        '');
+                                        '', '001');
 
 			}
          } else {

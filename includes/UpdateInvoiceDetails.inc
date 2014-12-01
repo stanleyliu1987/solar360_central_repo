@@ -293,12 +293,13 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
 			if ($myrowCount[0]==0){
                 /**
                  * 1. Update location stock quantity
-                 */    
-                  $SQL ="UPDATE locstock SET quantity=quantity-$Quantity WHERE loccode=001 and stockid='".$OrderLine->StockID."'";
-                          
-                  $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK1').'';
-	          $DbgMsg = _('The following SQL to update the invoiced was used');
-	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
+                 */  
+                /* Disconnet the locstock table updates until the stock stage changed to Dispatch Stock By Stan 261102014*/            
+//                  $SQL ="UPDATE locstock SET quantity=quantity-$Quantity WHERE loccode=001 and stockid='".$OrderLine->StockID."'";
+//                          
+//                  $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK1').'';
+//	          $DbgMsg = _('The following SQL to update the invoiced was used');
+//	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
                   
                 /**
                  * 2. Insert New stock into salesorderdetails table
@@ -315,7 +316,8 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                                         completed,
 					narrative,
 					poline,
-					itemdue)
+					itemdue,
+                                        fromstkloc)
 					VALUES (
 					'" . $OrderLine->LineNumber . "',
 					'" . $_SESSION['salesorderNum']. "',
@@ -328,7 +330,8 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                                         1,
 					'" . $Narrative . "',
 					'" . $OrderLine->POLine . "',
-					'" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "'
+					'" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "',
+                                        '".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."'    
 				)";
                 
 	          $ErrMsg = _('Unable to add the sales order line');
@@ -394,7 +397,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
              Values(  '".$OrderLine->StockID."',
 					        10,
 						'".$_SESSION['Items'.$identifier]->OrderNo."',
-						'".$_SESSION['Items'.$identifier]->Location."',
+						'".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."',
 						'".$InovicePlaceDate."',
 						'".$debtorno."',
 						'".$branchno."',
@@ -509,7 +512,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
 			       Values(  '" . $AssParts['component'] . "',
 					        10,
 						'".$_SESSION['Items'.$identifier]->OrderNo."',
-						'".$_SESSION['Items'.$identifier]->Location."',
+						'".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."',
 						'".$InovicePlaceDate."',
 						'".$debtorno."',
 						'".$branchno."',
@@ -524,15 +527,15 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
 					$DbgMsg = _('The following SQL to insert the assembly components stock movement records was used');
 					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
 
-
-					$SQL = "UPDATE locstock
-							SET quantity = locstock.quantity - " . $AssParts['quantity'] * (-$Quantity) . "
-							WHERE locstock.stockid = '" . $AssParts['component'] . "'
-							AND loccode = '" . $_SESSION['Items']->Location . "'";
-
-					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated for an assembly component because');
-					$DbgMsg = _('The following SQL to update the locations stock record for the component was used');
-					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true); 
+/* Disconnet the locstock table updates until the stock stage changed to Dispatch Stock By Stan 261102014*/
+//					$SQL = "UPDATE locstock
+//							SET quantity = locstock.quantity - " . $AssParts['quantity'] * (-$Quantity) . "
+//							WHERE locstock.stockid = '" . $AssParts['component'] . "'
+//							AND loccode = '" . $_SESSION['Items']->Location . "'";
+//
+//					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated for an assembly component because');
+//					$DbgMsg = _('The following SQL to update the locations stock record for the component was used');
+//					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true); 
                                 }      
                   }
              }
@@ -586,13 +589,13 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
         /**
          * 1. Update location stock quantity
          */
-       $SQL ="UPDATE locstock SET quantity=quantity-$Quantity-(SELECT qty FROM stockmoves 
-              WHERE type=10 and transno= '" . $_SESSION['Items'.$identifier]->OrderNo . "'
-              and  stockid='".$OrderLine->StockID."' and price<>0 Limit 1) WHERE loccode=001 and stockid='".$OrderLine->StockID."'";
-                          
-                  $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK3').'';
-	          $DbgMsg = _('The following SQL to update the invoiced was used');
-	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
+//       $SQL ="UPDATE locstock SET quantity=quantity-$Quantity-(SELECT qty FROM stockmoves 
+//              WHERE type=10 and transno= '" . $_SESSION['Items'.$identifier]->OrderNo . "'
+//              and  stockid='".$OrderLine->StockID."' and price<>0 Limit 1) WHERE loccode=001 and stockid='".$OrderLine->StockID."'";
+//                          
+//                  $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK3').'';
+//	          $DbgMsg = _('The following SQL to update the invoiced was used');
+//	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
         /**
          * 2. Update salesorderdetails table
          */ 
@@ -606,7 +609,8 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                             actualdispatchdate='".$OrderPlaceDate."',
                             narrative='" . $Narrative . "',
 			    poline='" . $OrderLine->POLine . "',
-			    itemdue='" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "'
+			    itemdue='" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "',
+                            fromstkloc='" . $_POST['FromStkLoc_'.$OrderLine->LineNumber] . "'
 			    WHERE orderno= '" . $_SESSION['salesorderNum'] . "'
                              and  stkcode='".$OrderLine->StockID."' and orderlineno='".$OrderLine->LineNumber."'";
                              
@@ -620,7 +624,8 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
         $SQL = "UPDATE stockmoves
 			    SET 
                             debtorno='".$debtorno."',
-                            branchcode='".$branchno."',    
+                            branchcode='".$branchno."', 
+                            loccode='".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."',    
                             trandate='".$InovicePlaceDate."',
                             price='" . $Price . "',
                             qty ='".-$Quantity."',
@@ -628,11 +633,41 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                             standardcost='".$OrderLine->StandardCost."'  ,
                             narrative='".$Narrative."' 
 			    WHERE stkmoveno='".$OrderLine->Stockmoveid."'";
-                             
+
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stockmoves record could not be updated because');
 	$DbgMsg = _('The following SQL to updated the stockmoves record was used');
  	$Result= DB_query($SQL, $db,$ErrMsg,$DbgMsg,true);
         
+        /* Update Assemble products in the stockmoves table 27112014 by Stan*/
+        if($OrderLine->MBflag== 'A'){
+                              $SQL = "SELECT bom.component      FROM bom,
+								stockmaster
+							WHERE bom.component=stockmaster.stockid
+							AND bom.parent='" . $OrderLine->StockID . "'
+							AND bom.effectiveto >= '" . Date('Y-m-d') . "'
+							AND bom.effectiveafter < '" . Date('Y-m-d') . "'";
+		
+				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Could not retrieve assembly components from the database for'). ' '. $OrderLine->StockID . _('because').' ';
+				$DbgMsg = _('The SQL that failed was');
+				$AssResult = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+			while ($AssParts = DB_fetch_array($AssResult,$db)){
+                            $SQL = "UPDATE stockmoves
+			    SET 
+                            debtorno='".$debtorno."',
+                            branchcode='".$branchno."', 
+                            loccode='".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."',    
+                            trandate='".$InovicePlaceDate."',
+                            qty ='".(-$Quantity)."' * qty,
+                            discountpercent ='".$Discount."',
+                            narrative='".$Narrative."' 
+			    WHERE stockid='".$AssParts['component']."' and reference like CONCAT('Assembly: ','".$OrderLine->StockID."','%')";
+                         
+	                    $ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stockmoves record could not be updated because');
+	                    $DbgMsg = _('The following SQL to updated the stockmoves record was used');
+ 	                    $Result= DB_query($SQL, $db,$ErrMsg,$DbgMsg,true);                                
+                       }
+        }
         /* Update Item Freight Measurement records */
         
         $LineItemsSQL = "UPDATE freightcostevaluation SET custcode= '".$debtorno."',
@@ -1900,6 +1935,13 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
 	$DbgMsg = _('The following SQL to delete the invoiced was used');
 	$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true); 
         
+        /* 4. Delete qty equals 0 from stckmoves table for the assembl components */
+        $SQL = "DELETE FROM stockmoves WHERE stockmoves.type=10 AND 
+                      stockmoves.transno= '" . $_SESSION['Items'.$identifier]->OrderNo . "' AND stockmoves.qty=0";
+
+	$ErrMsg = _('CRITICAL ERROR') . ' ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stockmoves status cannot be deleted');
+	$DbgMsg = _('The following SQL to delete the invoiced was used');
+	$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true); 
         
   
         /**

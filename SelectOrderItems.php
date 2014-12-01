@@ -204,6 +204,7 @@ if (isset($_GET['ModifyOrderNumber'])
 									salesorderdetails.narrative,
 									salesorderdetails.itemdue,
 									salesorderdetails.poline,
+                                                                        salesorderdetails.fromstkloc,
 									locstock.quantity as qohatloc,
 									stockmaster.mbflag,
 									stockmaster.discountcategory,
@@ -236,7 +237,7 @@ if (isset($_GET['ModifyOrderNumber'])
 		$LineItemsResult = db_query($LineItemsSQL,$db,$ErrMsg);
 		if (db_num_rows($LineItemsResult)>0) {
 
-			while ($myrow=db_fetch_array($LineItemsResult)) {
+			while ($myrow=db_fetch_array($LineItemsResult)) { 
 					if ($myrow['completed']==0){ 
 						$_SESSION['Items'.$identifier]->add_to_cart($myrow['stkcode'],
 														$myrow['quantity'],
@@ -279,7 +280,7 @@ if (isset($_GET['ModifyOrderNumber'])
                                                                                                                 $myrow['servicetype'], 
                                                                                                                 $myrow['prefsupplier'],
                                                                                                                 $myrow['suppwarehouse'],
-                                                                                                                $myrow['comment']
+                                                                                                                $myrow['comment'],$myrow['fromstkloc']
                                                                                                                  );
 
 				/*Just populating with existing order - no DBUpdates */
@@ -950,15 +951,15 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 	 if (isset($_POST['order_items'])
 			OR isset($_POST['QuickEntry'])
 			OR isset($_POST['Recalculate'])
-                        OR isset($_GET['Recalculate'])){
+                        OR isset($_GET['Recalculate'])){ 
 
 		 /* get the item details from the database and hold them in the cart object */
 
 		 /*Discount can only be set later on  -- after quick entry -- so default discount to 0 in the first place */
 		 $Discount = 0;
 
-		 $i=1;
-		  while ($i<=$_SESSION['QuickEntries'] and isset($_POST['part_' . $i]) and $_POST['part_' . $i]!='') {
+		 $i=1; 
+		  while ($i<=$_SESSION['QuickEntries'] and isset($_POST['part_' . $i]) and $_POST['part_' . $i]!='') { 
 			$QuickEntryCode = 'part_' . $i;
 			$QuickEntryQty = 'qty_' . $i;
 			$QuickEntryPOLine = 'poline_' . $i;
@@ -1031,7 +1032,7 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 
 				} elseif ($myrow['mbflag']=='G'){
 					prnMsg(_('Phantom assemblies cannot be sold, these items exist only as bills of materials used in other manufactured items. The following item has not been added to the order:') . ' ' . $NewItem, 'warn');
-				} else { /*Its not a kit set item*/
+				} else { /*Its not a kit set item*/ 
 					include('includes/SelectOrderItems_IntoCart.inc');
 				}
 			}
@@ -1145,13 +1146,15 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 			}
 		}
                 
-		foreach ($_SESSION['Items'.$identifier]->LineItems as $OrderLine) {
+		foreach ($_SESSION['Items'.$identifier]->LineItems as $OrderLine) { 
                 
                      /**Return the Freight Back after re-calculate 2012/03/09**/
-                    if(isset($_POST['FreightCost_' . $OrderLine->LineNumber])){
+                    if(isset($_POST['FreightCost_' . $OrderLine->LineNumber])){ 
                         $_SESSION['Items'.$identifier]->LineItems[$OrderLine->LineNumber]->FreightCost= $_POST['FreightCost_' . $OrderLine->LineNumber];
+                    } 
+                    if(isset($_POST['FromStkLoc_' . $OrderLine->LineNumber])){
+                        $_SESSION['Items'.$identifier]->LineItems[$OrderLine->LineNumber]->FromStkLoc= $_POST['FromStkLoc_' . $OrderLine->LineNumber];
                     }
-
 			if (isset($_POST['Quantity_' . $OrderLine->LineNumber])){
 
 				$Quantity = $_POST['Quantity_' . $OrderLine->LineNumber];
@@ -1196,7 +1199,9 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 							OR ABS($OrderLine->DiscountPercent -$DiscountPercentage/100) >0.001
 							OR $OrderLine->Narrative != $Narrative
 							OR $OrderLine->ItemDue != $_POST['ItemDue_' . $OrderLine->LineNumber]
-							OR $OrderLine->POLine != $_POST['POLine_' . $OrderLine->LineNumber]) {
+							OR $OrderLine->POLine != $_POST['POLine_' . $OrderLine->LineNumber]
+                                                        OR $OrderLine->FreightCost != $_POST['FreightCost_' . $OrderLine->LineNumber]
+                                                        OR $OrderLine->FromStkLoc != $_POST['FromStkLoc_' . $OrderLine->LineNumber]) { 
 
 					$_SESSION['Items'.$identifier]->update_cart_item($OrderLine->LineNumber,
 										$Quantity,
@@ -1207,7 +1212,8 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 										$_POST['ItemDue_' . $OrderLine->LineNumber],
 										$_POST['POLine_' . $OrderLine->LineNumber],
 										$_POST['GPPercent_' . $OrderLine->LineNumber],
-                                                                                $_POST['FreightCost_' . $OrderLine->LineNumber]);
+                                                                                $_POST['FreightCost_' . $OrderLine->LineNumber],
+                                                                                $_POST['FromStkLoc_' . $OrderLine->LineNumber]);
 				}
 			} //page not called from itself - POST variables not set
                         
@@ -1398,7 +1404,8 @@ if ($_SESSION['RequireCustomerSelection'] ==1
 			<th>' . _('Due Date') . '</th>
                         <th>' . _('Delete') . '</th>
                         <th>' . $EstimateFreightCostButton . '</th>
-                         </tr>';
+                        <th>' . _('Warehouse') . '</th>
+                        </tr>';
 
 		$_SESSION['Items'.$identifier]->total = 0;
 		$_SESSION['Items'.$identifier]->totalVolume = 0;
@@ -1475,10 +1482,24 @@ if ($_SESSION['RequireCustomerSelection'] ==1
                         }
                         $_SESSION['Items'.$identifier]->LineItems[$OrderLine->LineNumber]->FreightCost=$freightcost;
                         //onclick="javascript:popupFreightwindow('.$OrderLine->LineNumber.', '.'\''.$theme.'\', '.'\''.$rootpath.'\')"
-                        echo '<td><input type=text id="FreightCost_' . $OrderLine->LineNumber . '"  name="FreightCost_' . $OrderLine->LineNumber . '"   size=10 align=right class=number value="' .  $freightcost . '" ></td></tr>';
-                        
-
-			if ($_SESSION['AllowOrderLineItemNarrative'] == 1){
+                        echo '<td><input type=text id="FreightCost_' . $OrderLine->LineNumber . '"  name="FreightCost_' . $OrderLine->LineNumber . '"   size=10 align=right class=number value="' .  $freightcost . '" ></td>';
+                       
+                        /*Select warehouse location from location table 26112014 by Stan */
+                        $Sqlloc= "Select loccode, locationname from locations";
+                        $result_loc =DB_query($Sqlloc,$db);
+                        echo '<td><select name="FromStkLoc_' . $OrderLine->LineNumber . '">';
+                        while ($locrow=DB_fetch_array($result_loc)) {
+                            if($_SESSION['Items'.$identifier]->LineItems[$OrderLine->LineNumber]->FromStkLoc==$locrow['loccode']){
+                            echo '<option value='.$locrow['loccode'].' selected>'.$locrow['locationname'].'</option>';   
+                            }
+                            else{
+                            echo '<option value='.$locrow['loccode'].'>'.$locrow['locationname'].'</option>';    
+                            }   
+                        }
+                        echo '</select></td></tr>';
+                        /* End of logic */
+			
+                        if ($_SESSION['AllowOrderLineItemNarrative'] == 1){
 				echo $RowStarter;
 				echo '<td colspan=10>' . _('Narrative') . ':<textarea name="Narrative_' . $OrderLine->LineNumber . '" cols="100%" rows="1">' . stripslashes(AddCarriageReturns($OrderLine->Narrative)) . '</textarea><br /></td></tr>';
 			} else {
