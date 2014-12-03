@@ -221,7 +221,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                                 '". $SQLMeasurementList["unitlength"]."',
                                                 purchdata.supplierno FROM salesorderdetails INNER JOIN salesorders ON salesorders.orderno= salesorderdetails.orderno 
                                                 INNER JOIN purchdata ON purchdata.stockid = salesorderdetails.stkcode WHERE purchdata.preferred=1 and
-                                                salesorderdetails.orderno ='". $_GET['OrderNoForImport']."' and salesorderdetails.stkcode='".$items['stkcode']."'";
+                                                salesorderdetails.orderno ='". $_GET['OrderNoForImport']."' and salesorderdetails.stkcode='".$items['stkcode']."' limit 1";
                   }
                   else{
                    $SqlInsertNewSOFreightData="INSERT INTO freightcostevaluation (linenumber, itemcode, custcode, salesorder, quantity, height, width, length, prefsupplier) 
@@ -235,7 +235,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                                 '". $SQLMeasurementList["unitlength"]."',
                                                 360
                                                 FROM salesorderdetails INNER JOIN salesorders ON salesorders.orderno= salesorderdetails.orderno 
-                                                WHERE salesorderdetails.orderno ='". $_GET['OrderNoForImport']."' and salesorderdetails.stkcode='".$items['stkcode']."'";    
+                                                WHERE salesorderdetails.orderno ='". $_GET['OrderNoForImport']."' and salesorderdetails.stkcode='".$items['stkcode']."' limit 1";    
                   }
                
                 $ErrMsg = _('CRITICAL ERROR') . ' ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Freight Details cannot be inserted');
