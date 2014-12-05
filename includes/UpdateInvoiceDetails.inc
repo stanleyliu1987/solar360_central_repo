@@ -1129,7 +1129,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
 	  } 
       }  
           
-         else{  
+         elseif(DB_num_rows($resultPOSupp)==0){  
       /*
        * A5. If supplier not exists, then create new PO
        */        
@@ -1326,6 +1326,10 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                     }
              
                 }
+        else{
+             echo '<p>';
+             prnMsg(_('Stock Item ') . ' ' . $OrderLine->StockID . ' ' . _(' exists in multiple PO(s), so the PO will not updated, please check the related Purchase Orders.'),'WARNING'); 
+        }        
             }
          }
        }
@@ -1541,7 +1545,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
 	       } 
             }
             
-      else{  
+      elseif(DB_num_rows($resultPOSupp)==0){  
     /*
      * B5. If supplier not exists, then create new PO
      */        
@@ -1747,6 +1751,10 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                        }
              
                    }
+        else{
+             echo '<p>';
+             prnMsg(_('Stock Item ') . ' ' . $subrow['component']. ' ' . _(' exists in multiple PO(s), so the PO will not updated, please check the related Purchase Orders.'),'WARNING'); 
+        }
              }
         }
     }
@@ -1990,9 +1998,9 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
         
         unset($_SESSION['TotalFreight']);
         prnMsg(_('Invoice '.$_SESSION['salesorderNum'].' has been Updated'),'success');
-        $redirectpage=$rootpath .'/PrintCustTransPortrait.php?InvoiceNo='.strip_tags($_SESSION['salesorderNum']);
-        echo '<meta http-equiv="Refresh" content="1; url=' . $redirectpage. '">';
+        //$redirectpage=$rootpath .'/PrintCustTransPortrait.php?InvoiceNo='.strip_tags($_SESSION['salesorderNum']);
+        //echo '<meta http-equiv="Refresh" content="1; url=' . $redirectpage. '">';
 	include('includes/footer.inc');
-			exit;
+	exit;
 
 ?>
