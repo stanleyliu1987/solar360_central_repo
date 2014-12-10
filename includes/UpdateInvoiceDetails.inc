@@ -952,7 +952,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
        $SQLCheckPOItem = " SELECT  count(*) from purchorders
                          inner join purchorderdetails on purchorders.orderno=purchorderdetails.orderno
                          where purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'  and
-                         purchorderdetails.itemcode='".$OrderLine->StockID."'";
+                         purchorderdetails.itemcode='".$OrderLine->StockID."' and purchorders.status<>'Cancelled'";
             
        $resultPOItem=DB_query($SQLCheckPOItem,$db,'','',false,false);   
        
@@ -984,14 +984,14 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                             purchorders.contact='".$_POST['DelTo']."'  
 			    WHERE purchorders.orderno=purchorderdetails.orderno
                             and  purchorderdetails.itemcode= '" . $OrderLine->StockID . "'
-                            and  purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'";
+                            and  purchorders.ref_salesorder= '" .$WebSalesOrderNo. "' and purchorders.status<>'Cancelled'";
                              
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The purchorderdetails record could not be updated because');
 	$DbgMsg = _('The following SQL to update purchorderdetails record was used');
  	$Result= DB_query($SQL, $db,$ErrMsg,$DbgMsg,true);       
             }
              
-             else{
+             elseif($myrowCount[0]==0){
       /*
        * A3. If Item not exists, check whether it belongs to existed supplier
        */
@@ -1332,6 +1332,11 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
         }        
             }
          }
+        else{
+           echo '<p>';
+           prnMsg(_('Stock Item ') . ' ' . $OrderLine->StockID . ' ' . _(' exists in PO multiple times, so the PO will not updated, please check the related Purchase Orders.'),'WARNING');   
+        } 
+         
        }
     }
     
@@ -1365,7 +1370,7 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
          $SQLCheckPOItem = " SELECT  count(*) from purchorders
                          inner join purchorderdetails on purchorders.orderno=purchorderdetails.orderno
                          where purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'  and
-                         purchorderdetails.itemcode='".$subrow['component']."'";
+                         purchorderdetails.itemcode='".$subrow['component']."' and purchorders.status<>'Cancelled'";
             
         $resultPOItem=DB_query($SQLCheckPOItem,$db,'','',false,false);   
        
@@ -1400,13 +1405,13 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
                             purchorders.contact='".$_POST['DelTo']."'  
 			    WHERE purchorders.orderno=purchorderdetails.orderno
                             and  purchorderdetails.itemcode= '" . $subrow['component'] . "'
-                            and  purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'";
+                            and  purchorders.ref_salesorder= '" .$WebSalesOrderNo. "' and purchorders.status<>'Cancelled'";
                              
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The purchorderdetails record could not be updated because');
 	$DbgMsg = _('The following SQL to update purchorderdetails record was used');
  	$Result= DB_query($SQL, $db,$ErrMsg,$DbgMsg,true);       
             }
-             else{
+             elseif($myrowCount[0]==0){
       /*
        * B4. If Item not exists, check whether it belongs to existed supplier
        */
@@ -1757,6 +1762,10 @@ $InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
         }
              }
         }
+        else{
+           echo '<p>';
+           prnMsg(_('Stock Item ') . ' ' . $subrow['component'] . ' ' . _(' exists in PO multiple times, so the PO will not updated, please check the related Purchase Orders.'),'WARNING');   
+        } 
     }
 } 
         }
