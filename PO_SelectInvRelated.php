@@ -38,6 +38,36 @@ echo '<form action="' . $_SERVER['PHP_SELF'] . '" method=post>';
 echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />';
 echo '<input type="hidden" name="InvoiceNo" value="' . $InvoiceNo . '" />';
 
+if (isset($_POST['WarehouseInt'])){
+        $POIntegrationFor = ''; 
+    	for ($i=0;$i<count($_POST);$i++){
+		if (isset($_POST['POList_' . $i])) { //checkboxes only set if they are checked
+			$POIntegrationFor.=  $_POST['OrderNo_PO_'.$i].',';
+		}
+	}
+if($POIntegrationFor!= ''){
+$pdfname="ORDSolar360_KW_".date("dmYHis").".txt";
+$FileName ="warehouse/accellos/".$pdfname;
+$remote = "inbox/".$pdfname;
+ 
+$ftp_server = "files.kingstransport.com.au";
+$ftp_conn = ftp_connect($ftp_server) or die("Could not connect to $ftp_server");
+
+$WarehouseIntegration=new WarehouseIntegrationModel($db,$POIntegrationFor); 
+$return = $WarehouseIntegration->FTPPOList($remote,$FileName,$ftp_conn);
+
+if($return){
+ prnMsg("The PO automation to the Kings Warehouse is starting",'success');  
+}
+else{ echo $return;
+ prnMsg("The FTP connnection failed, please contact your system administrator",'error');     
+}
+ftp_close($ftp_conn);
+  }
+else{
+ prnMsg("No PO selected, and Warehouse integration will not be furhter processed",'warn');  
+}
+}
 
 if (isset($_POST['ResetPart'])){
 	 unset($SelectedStockItem);
@@ -216,7 +246,7 @@ echo '<td><input type="Text" name="Keywords" size=20 maxlength=25></td></tr><tr>
 echo '<td><font size<b>' . _('OR') . '</b></font><font size=1>' .  _('Enter extract of the') .  '<b>' .  _('Stock Code') . '</b>:</font></td>';
 echo '<td><input type="Text" name="StockCode" size=15 maxlength=18></td></tr></table><br>';
 echo '<table><tr><td><input type=submit name="SearchParts" value="' . _('Search Parts Now') . '">';
-echo '<input type=submit name="ResetPart" value="' . _('Show All') . '"></td></tr></table>';
+echo '<input type=submit name="ResetPart" value="' . _('Show All') . '"><input type=submit name="WarehouseInt" value="' . _('Accellos WMS') . '"></td></tr></table>';
 
 echo '<br />';
 
@@ -480,7 +510,7 @@ else {
 
 //				   '</td><td class="tableheader">' . _('Receive') .
 
-	echo '<tr><th>' . _('Order #') .
+	echo '<tr><th>' . _('Select to KW') .'</th><th>' . _('Order #') .
 			'</th><th>' . _('Order Date') .
                         '</th><th>'._('PO Docket').
                         '</th><th>'._('RCTI').
@@ -499,6 +529,7 @@ else {
 				</tr>';
 	$j = 1;
 	$k=0; //row colour counter
+        $i=0; //Pointer to the PO list
 	while ($myrow=DB_fetch_array($PurchOrdersResult)) {
 
 		if ($k==1){ /*alternate bgcolour of row for highlighting */
@@ -532,7 +563,9 @@ else {
 		$FormatedOrderValue = number_format($myrow['ordervalue'],2);
                 $PORemarks='<input type="text" name="PORemark_'.$myrow['orderno'].'" id="PORemark_'.$myrow['orderno'].'" value="'.$myrow['remarks'].'" disabled> ';
                 $EmailLink='<a href="'.$rootpath.'/EmailSuppPO.php?OrderNo='.$myrow['orderno'].'&InvoiceNumber='.$InvoiceNo.'" target="_blank">' . _('Email') . ' <img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Purchase Order') . '"></a>';
-		echo '<td>' . $myrow['ref_number'] . '</td>
+		/* 16122014 Customize the selection of PO List to flow into the Accellos WMS */
+                echo '<td><input type="checkbox" name="POList_'.$i.'" value /><input type="hidden" name="OrderNo_PO_'.$i.'" value="'.$myrow['orderno'].'" /></td>';
+                echo '<td>' . $myrow['ref_number'] . '</td>
 					<td>' . $FormatedOrderDate . '</td>
                                         <td><a target="_blank" href="PO_PDFPurchOrder.php?&OrderNo='.$myrow['orderno'].'&realorderno=&ViewingOnly=2&PDocket=OK">' . _('PDF ') . '<img src="' .$rootpath. '/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>';
                             
@@ -556,6 +589,7 @@ echo '<td></td>';
 						<td>' . $ReceiveOrder . '</td>
                                                 <td>' . $PORemarks . '</td>  
 						</tr>';
+                        $i++;
 	//end of page full new headings if
 	}
 	//end of while loop

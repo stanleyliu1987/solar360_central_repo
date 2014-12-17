@@ -34,6 +34,7 @@ include($PathPrefix . 'custom/CustomerTransSearchModel.php');
 include($PathPrefix . 'custom/OrderStagesModel.php');
 include($PathPrefix . 'custom/OrderSummaryModel.php');
 include($PathPrefix . 'custom/KPIReportingModel.php');
+include($PathPrefix . 'custom/WarehouseIntegrationModel.php');
 /* Custom weberp Bean Class */
 include($PathPrefix . 'custom/bean/Bean.php');
 include($PathPrefix . 'custom/bean/EmailAuditLogBean.php');
