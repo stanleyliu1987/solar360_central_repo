@@ -68,6 +68,9 @@ if($_POST["OrderStages"]==3){
                 UpdateActualDispatch($stock["qty"],$stock["stockid"],$stock["orderno"],$db);
          
         }
+/* 5. Update the purchase order status to Rejected if the stock belongs to the Solar360 */
+        
+                UpdateRejectedPO($_POST["InvoiceNo"],$db);
    }   
 
 
@@ -187,6 +190,16 @@ function UpdateActualDispatch($qty,$stockid,$orderno,$db){
                 
 		$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The location stock record could not be updated because');
 		$DbgMsg = _('The following SQL to update the salesorder details record was used');
+		$Result = DB_query($SQL,$db,$ErrMsg, $DbgMsg, true); 
+                $Result = DB_Txn_Commit($db);
+}
+
+function UpdateRejectedPO($invoiceno,$db){
+    
+/* 5. Update the dispatch stock quantity in the salesorderdetails table */
+                $SQL="Update purchorders set status='Rejected' where ref_salesorder='".$invoiceno ."' and supplierno='360'";
+		$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The PO status could not be updated because');
+		$DbgMsg = _('The following SQL to update the PO status record was used');
 		$Result = DB_query($SQL,$db,$ErrMsg, $DbgMsg, true); 
                 $Result = DB_Txn_Commit($db);
 }

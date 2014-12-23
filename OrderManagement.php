@@ -316,7 +316,8 @@ while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['Displ
        }
       $DisplayBalance=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount']+$myrow['ovdiscount']-$tempAP,2);
       $DisplayInvoiceValue=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount']+$myrow['ovdiscount'],2);
-      if($myrow['order_stages']==3 or $myrow['order_stages']==4){
+      /* Only limited to MAcosta has the ability to adjust the invoice after the invoice changed to dispatch stock */
+      if(($myrow['order_stages']==3 or $myrow['order_stages']==4) and $_SESSION['UserID']!='MAcosta'){
           $Invoice_status='';
       }
       else{
@@ -345,7 +346,7 @@ else{
 }
 $orderstageslist = DB_query($OrderStagesSQL,$db);
 /* End of logic */      
-$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['id'].'" name="OrderStagesList_'.$myrow['id'].'" onchange="ChangeOrderStages(\''.$myrow['id'].'\');" disabled>';
+$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['id'].'" name="OrderStagesList_'.$myrow['id'].'" onchange="ChangeOrderStages(\''.$myrow['id'].'\',\''.$myrow['order_'].'\');" disabled>';
 while ($os = DB_fetch_array($orderstageslist)) {
 if($os["stages_id"]==$myrow['order_stages'])    
 $OrderStagesDropdown.= '<option value='.$os["stages_id"].' selected>'.$os["stages"].'</option>';

@@ -98,11 +98,12 @@ $("#metercube").click(function(){
 });
 });
 
-  function ChangeOrderStages(transID){
+  function ChangeOrderStages(transID,InvoiceNo){ 
   $.post("custom/ajax/OrderStagesUpdate.php",
   {
     OrderStages:$("#OrderStagesList_"+transID).val(),
     TransID:transID,
+    InvoiceNo:InvoiceNo,
     UserID:$("#UserID").val()
   },
   function(data,status){ 
@@ -110,7 +111,7 @@ $("#metercube").click(function(){
        alert('Order Stages Updated Failed!');
      }
      else{
-             location.reload();
+       location.reload();
      }
     });
   }
