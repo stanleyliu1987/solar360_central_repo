@@ -151,7 +151,9 @@ echo '<div>
       <p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/customer.png" title="' .
 	_('ClientStockDelivery') . '" alt="" />' . ' ' . _('Invoice Number') . ' : ' . $InvoiceNumber . '<br /></div>';
 /*15052014 Bottom Panel and Choose different templates */
-echo '<br><div><table><tr><td>'  . _('To Address') . ':</td>
+echo '<br><div><table><tr><td>'  . _('From Address') . ':</td>
+	<td><input type="text" name="EmailFromAddr" maxlength=60 size=60 value="' . $_SESSION['CompanyRecord']['email'] . '"></td></tr>';
+echo '<tr><td>'  . _('To Address') . ':</td>
 	<td><input type="text" name="EmailAddr" maxlength=60 size=60 value="' . $CustEmail . '"></td></tr>';
 echo '<tr><td>' . _('CC') . ':</td>
 	<td><input type="text" name="EmailAddrCC" maxlength=60 size=60 value="' . $EmailCCAddress . '"></td></tr>';

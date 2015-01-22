@@ -718,6 +718,12 @@ If (isset($PrintPDF)
                 else{
                 $EmailMessage=_('Please find attached') . ' ' . $InvOrCredit . ' ' . $FromTransNo;    
                 }
+                if(isset($_POST['EmailFromAddr']) and $_POST['EmailFromAddr']!=''){
+                $EmailFromAddr =  $_POST['EmailFromAddr'];  
+                }
+                else{
+                $EmailFromAddr =  $_SESSION['CompanyRecord']['email'];     
+                }
 		$pdf->Output($FileName,'F');
 		$mail = new htmlMimeMail();
                 /* 29082014 send customer statement as well if checkbox ticked */  
@@ -732,10 +738,10 @@ If (isset($PrintPDF)
                 $mail->setHtmlCharset("UTF-8");
                 $mail->setSubject($EmailSubject);
 		$mail->addAttachment($Attachment, $FileName, 'application/pdf');
-		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $_SESSION['CompanyRecord']['email'] . '>');
+		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $EmailFromAddr . '>');
                 $mail->setCc($_POST['EmailAddrCC']);
                 $mail->setBcc($_POST['EmailAddrBCC']);              
-		$result = $mail->send(array($_POST['EmailAddr']),'smtp');
+		$result = $mail->send(array($_POST['EmailAddr']),'mail');
                 /* Record Email Audit Log details */
                 $emaillog=new EmailAuditLogModel($db);
                 $emaillogbean=new EmailAuditLogBean();
@@ -743,7 +749,7 @@ If (isset($PrintPDF)
                 $emaillogbean->sendstatus=$result;
                 $emaillogbean->ordernumber=$_POST['InvoiceNumber']<>''?$_POST['InvoiceNumber']:'';
                 $emaillogbean->emailtemplateid=$_POST['ChooseEmailTemplate']<>''?$_POST['ChooseEmailTemplate']:'';
-                $emaillogbean->emailfromaddress=$_SESSION['CompanyRecord']['email']<>''?$_SESSION['CompanyRecord']['email']:'';
+                $emaillogbean->emailfromaddress=$EmailFromAddr;
                 $emaillogbean->emailtoaddress=$_POST['EmailAddr']<>''?$_POST['EmailAddr']:'';
                 $emaillogbean->emailccaddress=$_POST['EmailAddrCC']<>''?$_POST['EmailAddrCC']:'';
                 $emaillogbean->emailbccaddress=$_POST['EmailAddrBCC']<>''?$_POST['EmailAddrBCC']:'';

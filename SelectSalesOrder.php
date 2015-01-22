@@ -674,8 +674,11 @@ if (isset($StockItemsResult)
 	if (isset($_REQUEST['OrderNumber']) 
 		AND $_REQUEST['OrderNumber'] !='') {
 			$SQL = "SELECT salesorders.orderno,
+                                       salesorders.debtorno,
+                                       salesorders.branchcode,
 					debtorsmaster.name,
 					custbranch.brname,
+                                        custbranch.email,
 					salesorders.customerref,
 					salesorders.orddate,
 					salesorders.deliverydate,
@@ -712,8 +715,11 @@ if (isset($StockItemsResult)
 
 			if (isset($_REQUEST['SelectedStockItem'])) {
 				$SQL = "SELECT salesorders.orderno,
+                                               salesorders.debtorno,
+                                               salesorders.branchcode,
 						debtorsmaster.name,
 						custbranch.brname,
+                                                custbranch.email,
 						salesorders.customerref,
 						salesorders.orddate,
 						salesorders.deliverydate,
@@ -740,8 +746,11 @@ if (isset($StockItemsResult)
 
 			} else {
 				$SQL = "SELECT salesorders.orderno,
+                                               salesorders.debtorno,
+                                               salesorders.branchcode,
 						debtorsmaster.name,
 						custbranch.brname,
+                                                custbranch.email,
 						salesorders.customerref,
 						salesorders.orddate,
 						salesorders.deliverto,
@@ -777,8 +786,11 @@ if (isset($StockItemsResult)
 		} else { //no customer selected
 			if (isset($_REQUEST['SelectedStockItem'])) {
 				$SQL = "SELECT salesorders.orderno,
+                                               salesorders.debtorno,
+                                               salesorders.branchcode,
 						debtorsmaster.name,
 						custbranch.brname,
+                                                custbranch.email,
 						salesorders.customerref,
 						salesorders.orddate,
 						salesorders.deliverto,
@@ -811,8 +823,11 @@ if (isset($StockItemsResult)
 					ORDER BY salesorders.orderno";
 			} else {
 				$SQL = "SELECT salesorders.orderno,
+                                               salesorders.debtorno,
+                                               salesorders.branchcode,                         
 						debtorsmaster.name,
 						custbranch.brname,
+                                                custbranch.email,
 						salesorders.customerref,
 						salesorders.orddate,
 						salesorders.deliverto,
@@ -868,6 +883,8 @@ if (isset($StockItemsResult)
 			$tableheader = '<tr>
 								<th>' . _('Modify') . '</th>
 								<th>' . _('Invoice') . '</th>
+                                                                <th>' . _('Email Proforma Invoice') . '</th>
+                                                                <th>' . _('Print Proforma Invoice') . '</th>
 								<th>' . _('Dispatch Note') . '</th>
 								<th>' . _('Customer') . '</th>
 								<th>' . _('Branch') . '</th>
@@ -923,6 +940,7 @@ if (isset($StockItemsResult)
 				$PrintDispatchNote = $rootpath . '/PrintCustOrder.php?TransNo=' . $myrow['orderno'];
 			}
 			$PrintQuotation = $rootpath . '/PDFQuotation.php?QuotationNo=' . $myrow['orderno'];
+                        $PrintProformaInv = $rootpath . '/PDFProformaInv.php?ProformaInvNo=' . $myrow['orderno'];
 			$FormatedDelDate = ConvertSQLDate($myrow['deliverydate']);
 			$FormatedOrderDate = ConvertSQLDate($myrow['orddate']);
 			$FormatedOrderValue = number_format($myrow['ordervalue'],$_SESSION['CompanyRecord']['decimalplaces']);
@@ -932,13 +950,17 @@ if (isset($StockItemsResult)
 			} else {
 			  $PrintText = _('Reprint');
 			}
-	
+                        
+                        /* Email and Print Proforma Invoice link 21012015*/
+	                $EmailProInvLink= $rootpath.'/EmailClientPInv.php?CustEmail='.$myrow['email'].'&SalesOrderNo='.$myrow['orderno'].'&debtorno='.$myrow['debtorno'].'&branchcode='.$myrow['branchcode']; 
 			if ($_POST['Quotations']=='Orders_Only'){
 	
 			 /*Check authority to create POs if user has authority then show the check boxes to select sales orders to place POs for otherwise don't provide this option */
 				if ($AuthRow['cancreate']==0 AND $myrow['poplaced']==0){ //cancreate==0 if the user can create POs and not already placed
 				printf('<td><a href="%s">%s</a></td>
         				<td><a href="%s">' . _('Invoice') . '</a></td>
+                                        <td><a href="%s" target="_blank">' . _('Email') . '<img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Proforma Invoice') . '"></a></td>
+                                        <td><a href="%s" target="_blank">Print  <img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>    
         				<td><a target="_blank" href="%s">' . $PrintText . ' <img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>
         				<td>%s</td>
         				<td>%s</td>
@@ -952,6 +974,8 @@ if (isset($StockItemsResult)
         				$ModifyPage,
         				$myrow['orderno'],
         				$Confirm_Invoice,
+                                        $EmailProInvLink,
+                                        $PrintProformaInv,
         				$PrintDispatchNote,
         				$myrow['name'],
         				$myrow['brname'],
@@ -966,6 +990,8 @@ if (isset($StockItemsResult)
 				} else {  /*User is not authorised to create POs so don't even show the option */
 					printf('<td><a href="%s">%s</a></td>
 							<td><a href="%s">' . _('Invoice') . '</a></td>
+                                                        <td><a href="%s" target="_blank">' . _('Email') . '<img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Proforma Invoice') . '"></a></td>
+                                                        <td><a href="%s" target="_blank">' . _('Print') . '<img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>        
 							<td><a target="_blank" href="%s">' . $PrintText . ' <img src="' .$rootpath . '/css/' . $theme .'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>
 							<td>%s</td>
 							<td>%s</td>
@@ -978,6 +1004,8 @@ if (isset($StockItemsResult)
 							$ModifyPage,
 							$myrow['orderno'],
 							$Confirm_Invoice,
+                                                        $EmailProInvLink,
+                                                        $PrintProformaInv,
 							$PrintDispatchNote,
 							$myrow['name'],
 							$myrow['brname'],

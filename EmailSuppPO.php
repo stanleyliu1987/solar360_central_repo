@@ -91,6 +91,8 @@ echo '<option value='.$myrow["emailtemp_id"].'>'.$myrow["templatename"].'</optio
 echo '</select></td></tr>';
 echo '<tr><td>'._('Attachments:').'<input type="file" name="ConsignmentPDF[]" multiple /></td></tr>';
 /* 150502014 Email Content Panel */
+echo '<tr><td>'  . _('From Address') . ':</td>
+	<td><input type="text" name="EmailFromAddr" maxlength=60 size=60 value="' . $_SESSION['CompanyRecord']['email'] . '"></td></tr>';
 echo '<tr><td>'  . _('To Address') . ':</td>
 	<td><input type="text" name="EmailAddr" maxlength=60 size=60 value="' . $EmailAddress . '"></td></tr>';
 echo '<tr><td>' . _('CC') . ':</td>
