@@ -648,6 +648,9 @@ If (isset($PrintPDF)
                     if (strlen($LeftOvers)>0){
 	            $LeftOvers = $pdf->addTextWrap($FormDesign->Comments->x, $FormDesign->Comments->y-10, $FormDesign->Comments->Length, $FormDesign->Comments->FontSize, $LeftOvers,'left');
                     }
+                    if (strlen($LeftOvers)>0){
+	            $LeftOvers = $pdf->addTextWrap($FormDesign->Comments->x, $FormDesign->Comments->y-20, $FormDesign->Comments->Length, $FormDesign->Comments->FontSize, $LeftOvers,'left');
+                    }
                   }
 			
 //		$LeftOvers=$pdf->addTextWrap($FormDesign->RoClause->x,$FormDesign->RoClause->y,200,$FormDesign->RoClause->FontSize, $_SESSION['RomalpaClause']);

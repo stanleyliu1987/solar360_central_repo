@@ -301,6 +301,9 @@ if (DB_num_rows($result)>0){
                     if (strlen($LeftOvers)>0){
 	            $LeftOvers = $pdf->addTextWrap($FormDesign->Comments->x, $FormDesign->Comments->y-10, $FormDesign->Comments->Length, $FormDesign->Comments->FontSize, $LeftOvers,'left');
                     }
+                    if (strlen($LeftOvers)>0){
+	            $LeftOvers = $pdf->addTextWrap($FormDesign->Comments->x, $FormDesign->Comments->y-20, $FormDesign->Comments->Length, $FormDesign->Comments->FontSize, $LeftOvers,'left');
+                    }
                   }
         /** Display Payment Methods **/          
 	// check if the user has set a default bank account for invoices, if not leave it blank
