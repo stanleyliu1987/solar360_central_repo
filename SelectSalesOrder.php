@@ -885,7 +885,7 @@ if (isset($StockItemsResult)
 								<th>' . _('Invoice') . '</th>
                                                                 <th>' . _('Email Proforma Invoice') . '</th>
                                                                 <th>' . _('Print Proforma Invoice') . '</th>
-								<th>' . _('Dispatch Note') . '</th>
+								<th>' . _('Email Send Date') . '</th>
 								<th>' . _('Customer') . '</th>
 								<th>' . _('Branch') . '</th>
 								<th>' . _('Cust Order') . ' #</th>
@@ -951,6 +951,15 @@ if (isset($StockItemsResult)
 			  $PrintText = _('Reprint');
 			}
                         
+                        /* 23012015 Retrieve Send Email Status */
+                        $CheckEmailSQL="Select senddate from emailauditlog where sendstatus=1 and ordernumber='".$myrow['orderno']."' and emailtemplateid in (5,6,7) order by senddate desc limit 1";
+                        $EmailResult=DB_query($CheckEmailSQL,$db);
+                        $EmailSendTime = '';
+                        if (DB_num_rows($EmailResult)>0){
+                            $EmailRow = DB_fetch_array($EmailResult);
+                            $EmailSendTime=$EmailRow['senddate'];
+                        }
+
                         /* Email and Print Proforma Invoice link 21012015*/
 	                $EmailProInvLink= $rootpath.'/EmailClientPInv.php?CustEmail='.$myrow['email'].'&SalesOrderNo='.$myrow['orderno'].'&debtorno='.$myrow['debtorno'].'&branchcode='.$myrow['branchcode']; 
 			if ($_POST['Quotations']=='Orders_Only'){
@@ -961,7 +970,7 @@ if (isset($StockItemsResult)
         				<td><a href="%s">' . _('Invoice') . '</a></td>
                                         <td><a href="%s" target="_blank">' . _('Email') . '<img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Proforma Invoice') . '"></a></td>
                                         <td><a href="%s" target="_blank">Print  <img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>    
-        				<td><a target="_blank" href="%s">' . $PrintText . ' <img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>
+                                        <td>%s</td>
         				<td>%s</td>
         				<td>%s</td>
         				<td>%s</td>
@@ -976,7 +985,8 @@ if (isset($StockItemsResult)
         				$Confirm_Invoice,
                                         $EmailProInvLink,
                                         $PrintProformaInv,
-        				$PrintDispatchNote,
+                                        $EmailSendTime,
+        				//$PrintDispatchNote,
         				$myrow['name'],
         				$myrow['brname'],
         				$myrow['customerref'],
@@ -992,7 +1002,7 @@ if (isset($StockItemsResult)
 							<td><a href="%s">' . _('Invoice') . '</a></td>
                                                         <td><a href="%s" target="_blank">' . _('Email') . '<img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Proforma Invoice') . '"></a></td>
                                                         <td><a href="%s" target="_blank">' . _('Print') . '<img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>        
-							<td><a target="_blank" href="%s">' . $PrintText . ' <img src="' .$rootpath . '/css/' . $theme .'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>
+						        <td>%s</td>
 							<td>%s</td>
 							<td>%s</td>
 							<td>%s</td>
@@ -1006,7 +1016,8 @@ if (isset($StockItemsResult)
 							$Confirm_Invoice,
                                                         $EmailProInvLink,
                                                         $PrintProformaInv,
-							$PrintDispatchNote,
+                                                        $EmailSendTime,
+							//$PrintDispatchNote,
 							$myrow['name'],
 							$myrow['brname'],
 							$myrow['customerref'],
@@ -1050,7 +1061,7 @@ if (isset($StockItemsResult)
 		if ($_POST['Quotations']=='Orders_Only' 
 			AND $AuthRow['cancreate']==0){ //cancreate==0 means can create POs
 			
-			echo '<tr><td colspan="8"><td><td colspan="2" class="number"><input type="submit" name="PlacePO" value="' . _('Place') . "\n" . _('PO') . '" onclick="return confirm(\'' . _('This will create purchase orders for all the items on the checked sales orders above, based on the preferred supplier purchasing data held in the system. Are You Absolutely Sure?') . '\');"></td</tr>';
+			echo '<tr><td colspan="8"><td><td colspan="4" class="number"><input type="submit" name="PlacePO" value="' . _('Place') . "\n" . _('PO') . '" onclick="return confirm(\'' . _('This will create purchase orders for all the items on the checked sales orders above, based on the preferred supplier purchasing data held in the system. Are You Absolutely Sure?') . '\');"></td</tr>';
 		}
 		echo '<tr><td colspan="9" class="number">';
 		if ($_POST['Quotations']=='Orders_Only'){
