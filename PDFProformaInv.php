@@ -184,9 +184,13 @@ if (DB_num_rows($result)>0){
                 else{
                     $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $myrow2['description'],'left');
                 }
-                if (strlen($LeftOvers)>1){
-				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos-10, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
+                 while(strlen($LeftOvers)>1){
+                                $YPos-=10;
+				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
 			}
+//                if (strlen($LeftOvers)>1){
+//				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos-10, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
+//			}
 
                         
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column3->x, $YPos, $FormDesign->Data->Column3->Length, $FormDesign->Data->Column3->FontSize, $DisplayQty,'left');
