@@ -194,7 +194,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6                                        
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -252,7 +253,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM    debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -311,7 +313,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -379,7 +382,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -439,7 +443,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -499,7 +504,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -619,7 +625,8 @@ echo '<br />';
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -948,8 +955,8 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
     /*
      * Add Customer Address Before Invoice Link
      */
-      $customername=$myrow['name'].'/'.$myrow['contactname'];
-      $phonenumber=$myrow['phoneno'];
+      $customername=$myrow['deliverto'].'/'.$myrow['contactname'];
+      $phonenumber=$myrow['contactphone'];
 
       /*20082014 Replace Delivery Address with Shipping Address */
 //    if($myrow['invaddrbranch']==0){
