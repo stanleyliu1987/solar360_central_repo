@@ -7,6 +7,12 @@ $title = _('Search Outstanding Sales Orders');
 include('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
 
+if(isset($_POST['OrderStartDate'])){
+$OrderStartDate=$_POST['OrderStartDate'];
+}
+if(isset($_POST['OrderEndDate'])){
+$OrderEndDate=$_POST['OrderEndDate'];
+}
 if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders */
 
 	/*Note the button would not have been displayed if the user had no authority 
@@ -428,6 +434,8 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
 
 if (isset($_POST['ResetPart'])){
      unset($_REQUEST['SelectedStockItem']);
+     unset($OrderStartDate);
+     unset($OrderEndDate);
 }
 
 echo '<p><div class="centre">';
@@ -453,7 +461,8 @@ if (isset($_REQUEST['OrderNumber']) AND $_REQUEST['OrderNumber']!='') {
 }
 
 if (isset($_POST['SearchParts'])){
-
+     unset($OrderStartDate);
+     unset($OrderEndDate);
 	if ($_POST['Keywords'] AND $_POST['StockCode']) {
 		echo _('Stock description keywords have been used in preference to the Stock code extract entered');
 	}
@@ -569,7 +578,11 @@ if (!isset($StockID)) {
 			echo '<option value="Quotes_Only">' . _('Quotations Only') . '</option>';
 		}
 
-		echo '</select> </td>
+		echo '</select> </td></tr>
+                 <tr><td><font size="1">' . _('Order Start Date') . ':</font></td>
+                <td><input type="text" maxlength="10" size="15" name="OrderStartDate" value="'.$OrderStartDate.'" id="datepicker" alt="'.$_SESSION['DefaultDateFormat'].'" class="date"></td>
+		<td><font size=1>' . _('Order End Date') . ':</font></td>
+		<td><input type="text" maxlength="10" size="15" name="OrderEndDate"  value="'.$OrderEndDate.'" id="datepicker" alt="'.$_SESSION['DefaultDateFormat'].'" class="date"></td>
 				<td><input type=submit name="SearchOrders" value="' . _('Search') . '"></td>
 				<td><a href="' . $rootpath . '/SelectOrderItems.php?NewOrder=Yes">' . _('Add Sales Order') . '</a></td>
 			</tr>
@@ -671,6 +684,22 @@ if (isset($StockItemsResult)
 	if(!isset($_POST['StockLocation'])) {
 		$_POST['StockLocation'] = '';
 	}
+
+        if($OrderStartDate!='' and $OrderEndDate==''){ 
+           $OrderRangeCriteria="AND salesorders.orddate  >='".FormatDateForSQL($OrderStartDate)."' ";
+        }
+        elseif($OrderStartDate=='' and $OrderEndDate!=''){ 
+           $OrderRangeCriteria="AND salesorders.orddate  <='".FormatDateForSQL($OrderEndDate)."' "; 
+        }
+        elseif($OrderStartDate!='' and $OrderEndDate!=''){ 
+           $OrderRangeCriteria="AND salesorders.orddate  between '".FormatDateForSQL($OrderStartDate)."' and '".FormatDateForSQL($OrderEndDate)."' ";
+        } 
+        else{ 
+           $OrderRangeCriteria=' ';  
+        }
+
+
+
 	if (isset($_REQUEST['OrderNumber']) 
 		AND $_REQUEST['OrderNumber'] !='') {
 			$SQL = "SELECT salesorders.orderno,
@@ -699,6 +728,7 @@ if (isset($StockItemsResult)
 				WHERE salesorderdetails.completed=0
 				AND salesorders.orderno=". $_REQUEST['OrderNumber'] ."
 				AND salesorders.quotation =" .$Quotations . "
+                                ".$OrderRangeCriteria."    
 				GROUP BY salesorders.orderno,
 					debtorsmaster.name,
 					custbranch.brname,
@@ -743,6 +773,7 @@ if (isset($StockItemsResult)
 					AND salesorderdetails.stkcode='". $_REQUEST['SelectedStockItem'] ."'
 					AND salesorders.debtorno='" . $_REQUEST['SelectedCustomer'] ."'
 					AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+                                            ".$OrderRangeCriteria." 
 					ORDER BY salesorders.orderno";
 
 
@@ -774,6 +805,7 @@ if (isset($StockItemsResult)
 					AND salesorderdetails.completed=0
 					AND salesorders.debtorno='" . $_REQUEST['SelectedCustomer'] . "'
 					AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+                                            ".$OrderRangeCriteria." 
 					GROUP BY salesorders.orderno,
 						debtorsmaster.name,
 						salesorders.debtorno,
@@ -815,6 +847,7 @@ if (isset($StockItemsResult)
 					AND salesorders.quotation =" .$Quotations . "
 					AND salesorderdetails.stkcode='". $_REQUEST['SelectedStockItem'] . "'
 					AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+                                            ".$OrderRangeCriteria." 
 					GROUP BY salesorders.orderno,
 						debtorsmaster.name,
 						custbranch.brname,
@@ -852,6 +885,7 @@ if (isset($StockItemsResult)
 					WHERE salesorderdetails.completed=0
 					AND salesorders.quotation =" .$Quotations . "
 					AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+                                            ".$OrderRangeCriteria." 
 					GROUP BY salesorders.orderno,
 						debtorsmaster.name,
 						custbranch.brname,
@@ -1058,7 +1092,8 @@ if (isset($StockItemsResult)
 			}
 			$i++;
 			$j++;
-			$OrdersTotal += $myrow['ordervalue'];
+                          
+			$OrdersTotal += ((($myrow['ordervalue']+$myrow['freightcost']))/10)+$myrow['freightcost']+$myrow['ordervalue'];
 			if ($j == 12){
 				$j=1;
 				echo $tableheader;
