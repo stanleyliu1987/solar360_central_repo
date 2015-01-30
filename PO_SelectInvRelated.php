@@ -59,7 +59,7 @@ $return = $WarehouseIntegration->FTPPOList($remote,$FileName,$ftp_conn);
 if($return){
  prnMsg("The PO automation to the Kings Warehouse is starting",'success');  
 }
-else{ echo $return;
+else{ 
  prnMsg("The FTP connnection failed, please contact your system administrator",'error');     
 }
 ftp_close($ftp_conn);

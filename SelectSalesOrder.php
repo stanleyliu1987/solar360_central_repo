@@ -685,6 +685,7 @@ if (isset($StockItemsResult)
 					salesorders.deliverto,
 					salesorders.printedpackingslip,
 					salesorders.poplaced,
+                                        salesorders.freightcost,
 					SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
 				FROM salesorders INNER JOIN salesorderdetails 
 					ON salesorders.orderno = salesorderdetails.orderno
@@ -726,6 +727,7 @@ if (isset($StockItemsResult)
 						salesorders.deliverto,
 						salesorders.printedpackingslip,
 						salesorders.poplaced,
+                                                salesorders.freightcost,
 						salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate AS ordervalue
 					FROM salesorders INNER JOIN salesorderdetails 
 						ON salesorders.orderno = salesorderdetails.orderno
@@ -757,6 +759,7 @@ if (isset($StockItemsResult)
 						salesorders.printedpackingslip,
 						salesorders.poplaced,
 						salesorders.deliverydate,
+                                                salesorders.freightcost,
 						SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
 					FROM salesorders INNER JOIN salesorderdetails 
 						ON salesorders.orderno = salesorderdetails.orderno
@@ -797,6 +800,7 @@ if (isset($StockItemsResult)
 					  	salesorders.printedpackingslip,
 					  	salesorders.poplaced,
 						salesorders.deliverydate,
+                                                salesorders.freightcost,
 						SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
 					FROM salesorders INNER JOIN salesorderdetails 
 						ON salesorders.orderno = salesorderdetails.orderno
@@ -834,6 +838,7 @@ if (isset($StockItemsResult)
 						salesorders.deliverydate,
 						salesorders.printedpackingslip,
 						salesorders.poplaced,
+                                                salesorders.freightcost,
 						SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
 					FROM salesorders INNER JOIN salesorderdetails 
 						ON salesorders.orderno = salesorderdetails.orderno
@@ -943,7 +948,9 @@ if (isset($StockItemsResult)
                         $PrintProformaInv = $rootpath . '/PDFProformaInv.php?ProformaInvNo=' . $myrow['orderno'];
 			$FormatedDelDate = ConvertSQLDate($myrow['deliverydate']);
 			$FormatedOrderDate = ConvertSQLDate($myrow['orddate']);
-			$FormatedOrderValue = number_format($myrow['ordervalue'],$_SESSION['CompanyRecord']['decimalplaces']);
+                        /* Hard code the GST rate to 10% 30102015*/
+                        $TotalOrderValue=((($myrow['ordervalue']+$myrow['freightcost']))/10)+$myrow['freightcost']+$myrow['ordervalue'];
+			$FormatedOrderValue = number_format($TotalOrderValue,$_SESSION['CompanyRecord']['decimalplaces']);
 	
 			if ($myrow['printedpackingslip']==0) {
 			  $PrintText = _('Print');

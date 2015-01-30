@@ -54,13 +54,18 @@ $sql = "SELECT salesorders.customerref,
 		locations.taxprovinceid,
 		locations.locationname,
                 custbranch.phoneno,
-                custbranch.contactname
+                custbranch.contactname,
+                paymentterms.daysbeforedue,
+		paymentterms.terms,
+                salesorders.fromstkloc
 	FROM salesorders,
 		debtorsmaster,
 		shippers,
 		locations,
-                custbranch
+                custbranch,
+                paymentterms
 	WHERE salesorders.debtorno=debtorsmaster.debtorno
+        AND debtorsmaster.paymentterms = paymentterms.termsindicator
 	AND salesorders.shipvia=shippers.shipper_id
 	AND salesorders.fromstkloc=locations.loccode
 	AND salesorders.quotation=0
@@ -116,6 +121,7 @@ $sql = "SELECT salesorderdetails.stkcode,
 		salesorderdetails.unitprice,
 		salesorderdetails.discountpercent,
 		stockmaster.taxcatid,
+                stockmaster.mbflag,
 		salesorderdetails.narrative
 	FROM salesorderdetails INNER JOIN stockmaster
 		ON salesorderdetails.stkcode=stockmaster.stockid
@@ -145,7 +151,31 @@ if (DB_num_rows($result)>0){
 			$PageNumber++;
 			include ('includes/PDFProformaInvPageHeader.inc');
 
-		} //end if need a new page headed up
+		}
+                
+	       /* Retrieve the assemble products 12/11/2014 by Stan */
+                 $sub_description=array();
+                if($myrow2['mbflag']=='A'){
+                    	/*Now look for assembly components that would go negative */
+				$ComponentsSQL = "SELECT bom.component,
+                                        bom.quantity,
+					stockmaster.description
+                                        FROM bom INNER JOIN locstock
+						ON bom.component=locstock.stockid
+						INNER JOIN stockmaster
+						ON stockmaster.stockid=bom.component
+						WHERE bom.parent='" . $myrow2['stkcode'] . "'
+						AND locstock.loccode='" . $myrow['fromstkloc'] . "'
+						AND effectiveafter <'" . Date('Y-m-d') . "'
+						AND effectiveto >='" . Date('Y-m-d') . "'";
+
+				$ErrMsg = _('Could not retrieve the component quantity left at the location once the assembly item on this order is invoiced (for the purposes of checking that stock will not go negative because)');
+				$ComponentsResult = DB_query($ComponentsSQL,$db,$ErrMsg);
+                         
+                                while ($com = DB_fetch_array($ComponentsResult)){
+					$sub_description[]=$com['component'].' '.$com['description'].' x'.$com['quantity'];
+				}
+                }//end if need a new page headed up
 
 		$DisplayQty = number_format($myrow2['quantity'],2);
 		$DisplayPrevDel = number_format($myrow2['qtyinvoiced'],2);
@@ -155,6 +185,7 @@ if (DB_num_rows($result)>0){
 		$TaxProv = $myrow['taxprovinceid'];
 		$TaxCat = $myrow2['taxcatid'];
 		$Branch = $myrow['branchcode'];
+                $Daysbeforedue = $myrow['daysbeforedue'];
 		$sql3 = " select taxgrouptaxes.taxauthid from taxgrouptaxes INNER JOIN custbranch ON taxgrouptaxes.taxgroupid=custbranch.taxgroupid WHERE custbranch.branchcode='" .$Branch ."'";
 		$result3=DB_query($sql3,$db, $ErrMsg);
 		while ($myrow3=DB_fetch_array($result3)){
@@ -199,7 +230,23 @@ if (DB_num_rows($result)>0){
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column5->x, $YPos, $FormDesign->Data->Column5->Length, $FormDesign->Data->Column5->FontSize, $DisplayDiscount,'right');
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column6->x, $YPos, $FormDesign->Data->Column6->Length, $FormDesign->Data->Column6->FontSize, $DisplayTotal,'right');
                 
-                
+         /* Display Sub-component items 30012015 by Stan */
+              if(count($sub_description)>0){
+                  $YPos-=20;
+                  $pdf->addTextWrap($FormDesign->Data->Column1->x, $YPos, $FormDesign->Data->Column1->Length+15, $FormDesign->Data->Column1->FontSize, 'Each Pack Contains:','left');
+              }
+              $i=0;
+              while ($i < count($sub_description)) {
+                  
+		  $LeftOvers =$pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length+700, $FormDesign->Data->Column2->FontSize, $sub_description[$i],'left');  
+                  while(strlen($LeftOvers)>1){
+                                $YPos-=10;
+				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length+700, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
+			}
+                  $YPos-=10;      
+                  $i++;
+              }
+              
                 $YPos -= 2*$line_height;
                   	if ($YPos <= $Bottom_Margin){
 
@@ -274,8 +321,15 @@ if (DB_num_rows($result)>0){
             $pdf->addTextWrap($FormDesign->InvoiceTotal->Tax->x, $FormDesign->InvoiceTotal->Tax->y, $FormDesign->InvoiceTotal->Tax->width, $FormDesign->InvoiceTotal->Tax->FontSize, _('Freight'),'right');
 	    $pdf->addTextWrap($FormDesign->InvoiceTotal->Ampaid->x, $FormDesign->InvoiceTotal->Ampaid->y, $FormDesign->InvoiceTotal->Ampaid->width, $FormDesign->InvoiceTotal->Ampaid->FontSize, _('GST'),'right');
 	    $pdf->addTextWrap($FormDesign->InvoiceTotal->ToInv->x, $FormDesign->InvoiceTotal->ToInv->y, $FormDesign->InvoiceTotal->ToInv->width, $FormDesign->InvoiceTotal->ToInv->FontSize, _('Total'),'right');
-	    $pdf->SetTextColor(0);
 
+            if($Daysbeforedue != 1){ 
+            $pdf->addTextWrap($FormDesign->InvoiceTotal->Paydueterm->x, $FormDesign->InvoiceTotal->Paydueterm->y, $FormDesign->InvoiceTotal->Paydueterm->width, $FormDesign->InvoiceTotal->Paydueterm->FontSize, _('Payment on this invoice is due on '.ConvertSQLDate(date('Y-m-d', strtotime("+".$Daysbeforedue." days", strtotime($myrow['orddate']))))),'right');
+            }
+            else{
+            $pdf->addTextWrap($FormDesign->InvoiceTotal->Payduenoterm->x, $FormDesign->InvoiceTotal->Payduenoterm->y, $FormDesign->InvoiceTotal->Payduenoterm->width, $FormDesign->InvoiceTotal->Payduenoterm->FontSize, _('Payment due prior to order release'),'right');    
+            }
+            
+            $pdf->SetTextColor(0);
 	    $pdf->addTextWrap($FormDesign->InvoiceTotalData->SubTotalData->x, $FormDesign->InvoiceTotalData->SubTotalData->y, $FormDesign->InvoiceTotalData->SubTotalData->width, $FormDesign->InvoiceTotalData->SubTotalData->FontSize,number_format($DisplayItemTotal,2),'right');
 	    $pdf->addTextWrap($FormDesign->InvoiceTotalData->TaxData->x, $FormDesign->InvoiceTotalData->TaxData->y, $FormDesign->InvoiceTotalData->TaxData->width,$FormDesign->InvoiceTotalData->TaxData->FontSize, number_format($myrow['freightcost'],2),'right');
             $pdf->addTextWrap($FormDesign->InvoiceTotalData->AmpaidData->x, $FormDesign->InvoiceTotalData->AmpaidData->y,$FormDesign->InvoiceTotalData->AmpaidData->width, $FormDesign->InvoiceTotalData->AmpaidData->FontSize, number_format($TotalGSTAmount,2),'right');
