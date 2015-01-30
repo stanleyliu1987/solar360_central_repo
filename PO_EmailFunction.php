@@ -56,7 +56,7 @@ include ('includes/htmlMimeMail.php');
 		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $EmailFromAddr . '>');
                 $mail->setCc($_POST['EmailAddrCC']);
                 $mail->setBcc($_POST['EmailAddrBCC']);
-		$Success = $mail->send(array($_POST['EmailAddr']),'mail');
+		$Success = $mail->send(array($_POST['EmailAddr']),'smtp');
                 /* Record Email Audit Log details */
                 $emaillog=new EmailAuditLogModel($db);
                 $emaillogbean=new EmailAuditLogBean();
