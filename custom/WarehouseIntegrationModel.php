@@ -25,10 +25,10 @@ $ErrMsg =  _('An error occurred selecting all po headers');
 $DbgMsg =  _('The SQL that was used to select po headers and failed in the process was');
 $result = DB_query($sql,$this->db,$ErrMsg,$DbgMsg);
 while ($item = DB_fetch_array($result)) {
-    $export_data.=$item['PH'].str_repeat("^", 4).$item['Order Number'].str_repeat("^", 7).
+    $export_data.=$item['PH'].str_repeat("^", 3).$item['Customer #'].str_repeat("^", 1).$item['Order Number'].str_repeat("^", 7).
                   $item["Ship Name"].str_repeat("^", 1).$item["Ship Address 1"].str_repeat("^", 2).$item["Ship City"].str_repeat("^", 1).
                   $item["Ship State"].str_repeat("^", 1).$item["Ship Post Code"].str_repeat("^", 1).$item["Ship Country"].str_repeat("^", 2).$item["Ship Phone #"].
-                  str_repeat("^", 15).date("Ymd", strtotime($item["Order Date"])).str_repeat("^", 6)."SLR".str_repeat("^", 1).$item["Special Instructions 1"].str_repeat("^", 38).
+                  str_repeat("^", 8).date("Ymd", strtotime($item["Ship Date Required"])).str_repeat("^", 7).date("Ymd").str_repeat("^", 6)."SLR".str_repeat("^", 1).$item["Special Instructions 1"].str_repeat("^", 38).
                   $item["Business Telephone Number"].str_repeat("^", 1).$item["Email Address"].str_repeat("^", 30)."\r\n";
     
     $sql_pd = "SELECT * FROM pd_kingswarehouse where `ORDER Number`='".$item['Order Number']."'";
