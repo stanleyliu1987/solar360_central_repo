@@ -785,7 +785,7 @@ if ($_SESSION['RequireSupplierSelection'] ==1
 			}
 	}
         echo '</td></tr>';
-	echo '<tr><td>' . _('Delivery Date') . ':</td>
+	echo '<tr><td>' . _('Required Date') . ':</td>
 			<td><input type="text" class="date" alt="' .$_SESSION['DefaultDateFormat'] .'" name="DeliveryDate" size="11" value="' . $_POST['DeliveryDate'] . '" /></td></tr>';
 
 	if (!isset($_POST['Initiator'])) {
