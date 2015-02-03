@@ -158,7 +158,32 @@ function UpdateStockMovementDetails($orderno,$stockid,$location,$tranno,$trandat
 		$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stock movement record cannot be inserted because');
 		$DbgMsg = _('The following SQL to insert the stock movement record was used');
 		$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
-                           
+                
+/* 3. Stock move out from Virtual Consolidation, to clear the stock in VC */                
+                $ref="Order Number: ".$orderno." Stock Move Out From Virtual Consolidation and Cleared";
+		$SQL = "INSERT INTO stockmoves (stockid,
+						type,
+						transno,
+						loccode,
+						trandate,
+						prd,
+						reference,
+						qty,
+						newqoh)
+			VALUES ('" . $stockid. "',
+					16,
+					'" . $tranno . "',
+					'001',
+					'" . $trandate . "',
+					'" . $period . "',
+					'" . $ref ."',
+					'" . -$qty . "',
+					'" . ($qoh_vc) . "'
+					)";
+
+		$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stock movement record cannot be inserted because');
+		$DbgMsg = _('The following SQL to insert the stock movement record was used');
+		$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);     
 /* 4. Update the locstock for the stock going out / coming into of the location */                
           	$SQL = "UPDATE locstock SET quantity = quantity - '" . $qty . "'
 				WHERE stockid='" . $stockid . "'
@@ -168,15 +193,15 @@ function UpdateStockMovementDetails($orderno,$stockid,$location,$tranno,$trandat
 		$DbgMsg = _('The following SQL to update the location stock record was used');
 		$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
 
-		$SQL = "UPDATE locstock
-				SET quantity = quantity + '" . $qty . "'
-				WHERE stockid='" . $stockid. "'
-				AND loccode=001";
-
-
-		$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The location stock record could not be updated because');
-		$DbgMsg = _('The following SQL to update the location stock record was used');
-		$Result = DB_query($SQL,$db,$ErrMsg, $DbgMsg, true);
+//		$SQL = "UPDATE locstock
+//				SET quantity = quantity + '" . $qty . "'
+//				WHERE stockid='" . $stockid. "'
+//				AND loccode=001";
+//
+//
+//		$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The location stock record could not be updated because');
+//		$DbgMsg = _('The following SQL to update the location stock record was used');
+//		$Result = DB_query($SQL,$db,$ErrMsg, $DbgMsg, true);
 
 		$Result = DB_Txn_Commit($db);
 }
