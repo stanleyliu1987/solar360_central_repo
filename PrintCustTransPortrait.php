@@ -744,7 +744,7 @@ If (isset($PrintPDF)
 		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $EmailFromAddr . '>');
                 $mail->setCc($_POST['EmailAddrCC']);
                 $mail->setBcc($_POST['EmailAddrBCC']);              
-		$result = $mail->send(array($_POST['EmailAddr']),'stmp');
+		$result = $mail->send(array($_POST['EmailAddr']),'smtp');
                 /* Record Email Audit Log details */
                 $emaillog=new EmailAuditLogModel($db);
                 $emaillogbean=new EmailAuditLogBean();
