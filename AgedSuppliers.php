@@ -53,7 +53,7 @@ If (isset($_POST['PrintPDF'])
 		paymentterms.terms,
 		paymentterms.daysbeforedue,
 		paymentterms.dayinfollowingmonth
-	HAVING Sum(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) <>0";
+	HAVING ABS(Sum(supptrans.ovamount + supptrans.ovgst - supptrans.alloc)) >1";
 
 	} else {
 
@@ -93,9 +93,9 @@ If (isset($_POST['PrintPDF'])
 				paymentterms.terms,
 				paymentterms.daysbeforedue,
 				paymentterms.dayinfollowingmonth
-			HAVING Sum(IF (paymentterms.daysbeforedue > 0,
+			HAVING ABS(Sum(IF (paymentterms.daysbeforedue > 0,
 			CASE WHEN TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(supptrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END,
-			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(DATE_ADD(DATE_ADD(supptrans.trandate, " . INTERVAL('1', 'MONTH') . "), " . INTERVAL('(paymentterms.dayinfollowingmonth - DAYOFMONTH(supptrans.trandate))', 'DAY') . ")) >= " . $_SESSION['PastDueDays1'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END)) > 0";
+			CASE WHEN (TO_DAYS(Now()) - TO_DAYS(DATE_ADD(DATE_ADD(supptrans.trandate, " . INTERVAL('1', 'MONTH') . "), " . INTERVAL('(paymentterms.dayinfollowingmonth - DAYOFMONTH(supptrans.trandate))', 'DAY') . ")) >= " . $_SESSION['PastDueDays1'] . ") THEN supptrans.ovamount + supptrans.ovgst - supptrans.alloc ELSE 0 END))) > 1";
 
 	}
 
@@ -178,7 +178,7 @@ If (isset($_POST['PrintPDF'])
 			   WHERE systypes.typeid = supptrans.type
 			   AND suppliers.paymentterms = paymentterms.termsindicator
 			   AND suppliers.supplierid = supptrans.supplierno
-			   AND ABS(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) >0.009
+			   AND ABS(supptrans.ovamount + supptrans.ovgst - supptrans.alloc) >1
 			   AND supptrans.settled = 0
 			   AND supptrans.supplierno = '" . $AgedAnalysis["supplierid"] . "'";
 

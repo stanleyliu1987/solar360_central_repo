@@ -92,7 +92,7 @@ if (isset($_POST['PrintPDF'])
 					holdreasons.dissallowinvoices,
 					holdreasons.reasondescription
 				HAVING
-					Sum(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc) <>0";
+					ABS(Sum(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc)) >1 ";
 
 	} elseif ($_POST['All_Or_Overdues']=='OverduesOnly') {
 
@@ -165,7 +165,7 @@ if (isset($_POST['PrintPDF'])
 	      			debtorsmaster.creditlimit,
 	      			holdreasons.dissallowinvoices,
 	      			holdreasons.reasondescription
-			HAVING Sum(
+			HAVING ABS(Sum(
 				CASE WHEN (paymentterms.daysbeforedue > 0)
 	      				THEN
 						CASE WHEN TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) > paymentterms.daysbeforedue AND TO_DAYS(Now()) - TO_DAYS(debtortrans.trandate) >= (paymentterms.daysbeforedue + " . $_SESSION['PastDueDays1'] . ")
@@ -176,7 +176,7 @@ if (isset($_POST['PrintPDF'])
 	      					THEN debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc
 	      					ELSE 0 END
 					END
-	      			) > 0";
+	      			)) > 1 ";
 
 	} elseif ($_POST['All_Or_Overdues']=='HeldOnly'){
 
@@ -254,13 +254,13 @@ if (isset($_POST['PrintPDF'])
 		debtorsmaster.creditlimit,
 		holdreasons.dissallowinvoices,
 		holdreasons.reasondescription
-		HAVING Sum(
+		HAVING ABS(Sum(
 			debtortrans.ovamount +
 			debtortrans.ovgst +
 			debtortrans.ovfreight +
 			debtortrans.ovdiscount -
 			debtortrans.alloc
-		) <>0";
+		)) >1 ";
 	}
 	$CustomerResult = DB_query($SQL,$db,'','',False,False); /*dont trap errors handled below*/
 
@@ -361,7 +361,7 @@ if (isset($_POST['PrintPDF'])
 		   				AND debtorsmaster.paymentterms = paymentterms.termsindicator
 		   				AND debtorsmaster.debtorno = debtortrans.debtorno
 				   		AND debtortrans.debtorno = '" . $AgedAnalysis['debtorno'] . "'
-		   				AND ABS(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc)>0.004";
+		   				AND ABS(debtortrans.ovamount + debtortrans.ovgst + debtortrans.ovfreight + debtortrans.ovdiscount - debtortrans.alloc)>1";
 
 
 		    $DetailResult = DB_query($sql,$db,'','',False,False); /*Dont trap errors */
