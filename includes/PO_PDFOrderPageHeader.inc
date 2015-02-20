@@ -285,18 +285,23 @@ $pdf->SetTextColor(0);
 
 $pdf->Rectangle($FormDesign->HeaderRectangle->x, $FormDesign->HeaderRectangle->y, $FormDesign->HeaderRectangle->width,$FormDesign->HeaderRectangle->height);
 /*Set up headings */
-$pdf->addText($FormDesign->Headings->Column1->x, $FormDesign->Headings->Column1->y, $FormDesign->Headings->Column1->FontSize, _('CODE') );
-$pdf->addText($FormDesign->Headings->Column2->x, $FormDesign->Headings->Column2->y, $FormDesign->Headings->Column2->FontSize, _('ITEM') );
-$pdf->addText($FormDesign->Headings->Column3->x, $FormDesign->Headings->Column3->y, $FormDesign->Headings->Column3->FontSize, _('DESCRIPTION') );
+
+$pdf->addText($FormDesign->Headings->Column3->x, $FormDesign->Headings->Column3->y, $FormDesign->Headings->Column3->FontSize, _('ITEM DESCRIPTION') );
 $pdf->addText($FormDesign->Headings->Column4->x, $FormDesign->Headings->Column4->y, $FormDesign->Headings->Column4->FontSize, _('QTY') );
 
 
 if(!isset($MakePDFDocket)){
+$pdf->addText($FormDesign->Headings->Column1->x, $FormDesign->Headings->Column1->y, $FormDesign->Headings->Column1->FontSize, _('SUPPLIER REF.') );    
+$pdf->addText($FormDesign->Headings->Column2->x, $FormDesign->Headings->Column2->y, $FormDesign->Headings->Column2->FontSize, _('360-CODE') );    
 $pdf->addText($FormDesign->Headings->Column5->x, $FormDesign->Headings->Column5->y, $FormDesign->Headings->Column5->FontSize, _('PRICE') );
 $pdf->addText($FormDesign->Headings->Column6->x, $FormDesign->Headings->Column6->y, $FormDesign->Headings->Column6->FontSize, _('TOTAL') );
 $pdf->line($FormDesign->DrawLine2->x1,$FormDesign->DrawLine2->y1,$FormDesign->DrawLine2->x2,$FormDesign->DrawLine2->y2);
 $pdf->line($FormDesign->DrawVerticalLine2->x1,$FormDesign->DrawVerticalLine2->y1,$FormDesign->DrawVerticalLine2->x2,$FormDesign->DrawVerticalLine2->y2);
 }
+else{
+$pdf->addText($FormDesign->Headings->Column1->x, $FormDesign->Headings->Column1->y, $FormDesign->Headings->Column1->FontSize, _('360-CODE') );    
+}
+
 /*draw a rectangle to hold the data lines */
 $pdf->Rectangle($FormDesign->DataRectangle->x, $FormDesign->DataRectangle->y, $FormDesign->DataRectangle->width,$FormDesign->DataRectangle->height);
 

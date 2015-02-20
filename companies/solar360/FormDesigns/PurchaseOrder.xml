@@ -337,12 +337,12 @@
 		</Column1>
 		<Column2 type="SimpleText" name="Heading 2" id="Heading2">
 			<FontSize>12</FontSize>
-			<x>120</x>
+			<x>150</x>
 			<y>595</y>
 		</Column2>
 		<Column3 type="SimpleText" name="Heading 3" id="Heading3">
 			<FontSize>12</FontSize>
-			<x>190</x>
+			<x>220</x>
 			<y>595</y>
 		</Column3>
 		<Column4 type="SimpleText" name="Heading 4" id="Heading4">
@@ -376,13 +376,13 @@
 		</Column1>
 		<Column2 type="DataText" name="Column 2" id="Data2">
 			<FontSize>9</FontSize>
-			<x>120</x>
+			<x>150</x>
 			<Length>40</Length>
 		</Column2>
 		<Column3 type="DataText" name="Column 3" id="Data3">
 			<FontSize>9</FontSize>
-			<x>190</x>
-			<Length>120</Length>
+			<x>220</x>
+			<Length>100</Length>
 		</Column3>
 		<Column4 type="DataText" name="Column 4" id="Data4">
 			<FontSize>9</FontSize>
