@@ -190,7 +190,7 @@ if (isset($_GET['NewOrder']) AND isset($_GET['StockID']) AND isset($_GET['Select
 
 }
 
-if (isset($_POST['EnterLines'])){ 
+if (isset($_POST['EnterLines']) or isset($_POST['EnterLines_Add'])){ 
 /*User hit the button to enter line items -
  *  ensure session variables updated then meta refresh to PO_Items.php*/
         $_SESSION['PO'.$identifier]->SupplierName = '%' . str_replace(' ', '%', $_POST['Keywords']) . '%';
@@ -237,12 +237,20 @@ if (isset($_POST['EnterLines'])){
 	} else {
 		$_POST['RePrint'] = 0;
 	}
-
+        if(isset($_POST['EnterLines'])){                
 	echo '<meta http-equiv="Refresh" content="0; url=' . $rootpath . '/PO_Items.php?identifier='.$identifier. '">';
 	echo '<p>';
 	prnMsg(_('You should automatically be forwarded to the entry of the purchase order line items page') . '. ' .
 		_('If this does not happen') . ' (' . _('if the browser does not support META Refresh') . ') ' .
 		'<a href="' . $rootpath . '/PO_Items.php?identifier='.$identifier . '">' . _('click here') . '</a> ' . _('to continue'),'info');
+        }
+        else{
+        echo '<meta http-equiv="Refresh" content="0; url=' . $rootpath . '/PO_Items_Add.php?identifier='.$identifier. '">';
+	echo '<p>';
+	prnMsg(_('You should automatically be forwarded to the entry of the purchase order line items page') . '. ' .
+		_('If this does not happen') . ' (' . _('if the browser does not support META Refresh') . ') ' .
+		'<a href="' . $rootpath . '/PO_Items_Add.php?identifier='.$identifier . '">' . _('click here') . '</a> ' . _('to continue'),'info');    
+        }
 		include('includes/footer.inc');
 		exit;
 } /* end of if isset _POST'EnterLines' */
@@ -1198,7 +1206,8 @@ if ($_SESSION['RequireSupplierSelection'] ==1
 
 	echo '</td></tr></table><br />'; /* end of main table */
 
-	echo '<div class="centre"><input type="submit" name="EnterLines" value="' . _('Enter Line Items') . '"></div>';
+	echo '<div class="centre"><input type="submit" name="EnterLines" value="' . _('Delete Line Items') . '">'
+                . '<input type="submit" name="EnterLines_Add" value="' . _('Add New Items') . '"></div>';
 
 } /*end of if supplier selected */
 

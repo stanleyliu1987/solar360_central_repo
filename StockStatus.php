@@ -179,7 +179,8 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 									WHERE purchorderdetails.itemcode='" . $StockID . "'
 									AND purchorders.intostocklocation='" . $myrow['loccode'] . "'
 									AND (purchorders.status<>'Cancelled'
-									AND purchorders.status<>'Pending')";
+									AND purchorders.status<>'Pending'
+                                                                        AND purchorders.status<>'Rejected')";
 		$ErrMsg = _('The quantity on order for this product to be received into') . ' ' . $myrow['loccode'] . ' ' . _('cannot be retrieved because');
 		$QOOResult = DB_query($sql,$db,$ErrMsg, $DbgMsg);
 
