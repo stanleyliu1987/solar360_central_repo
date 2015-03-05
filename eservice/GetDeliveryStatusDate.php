@@ -32,15 +32,15 @@ $formatdate=$year.'-'.$month.'-'.$day;
 $intervaldays = round((strtotime($formatdate)-strtotime($paymentdate))/86400);   
 
 /* 0. Update Invoice Delivery Status, 05052014 By Stan update delivery status of each invoice*/
-$sqlupdateInvoiceDelStatus="UPDATE debtortrans
-			    SET order_stages='".$_GET['Invdelstatus']."' 
-			    WHERE id = '".$_GET['InvoiceId']."'";
-$ErrMsg =_('The invoice delivery status could not be updated');
-$resultInvDelStatusUpdate=mysql_query($sqlupdateInvoiceDelStatus); 
-
-/* 16062014 Update Order stage message by Stan */
-mysql_query("INSERT INTO order_stages_messages (debtortran_fk,order_stage_change,userid,changedatetime)
-          VALUES ('" . $_GET['InvoiceId'] ."','" . $_GET['Invdelstatus'] ."', '" . $_GET["UserID"] ."','" . date('Y-m-d H:i:s')."')");
+//$sqlupdateInvoiceDelStatus="UPDATE debtortrans
+//			    SET order_stages='".$_GET['Invdelstatus']."' 
+//			    WHERE id = '".$_GET['InvoiceId']."'";
+//$ErrMsg =_('The invoice delivery status could not be updated');
+//$resultInvDelStatusUpdate=mysql_query($sqlupdateInvoiceDelStatus); 
+//
+///* 16062014 Update Order stage message by Stan */
+//mysql_query("INSERT INTO order_stages_messages (debtortran_fk,order_stage_change,userid,changedatetime)
+//          VALUES ('" . $_GET['InvoiceId'] ."','" . $_GET['Invdelstatus'] ."', '" . $_GET["UserID"] ."','" . date('Y-m-d H:i:s')."')");
 /* End of update process */
 
 /* 1. Tracking Star Track Service */
