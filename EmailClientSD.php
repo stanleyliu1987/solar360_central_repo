@@ -68,7 +68,7 @@ $EmailSubject="Invoice ".$InvoiceNumber. " Tracking Information";
 /* 15072014 Retrieve Email Message */
 $SearchOrderNumber=substr(trim($InvoiceNumber),1,strpos(trim($InvoiceNumber),'-')-1);
 $SearchEmailString = '%' . str_replace(' ', '%', str_replace("  "," ",strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($CustEmail))))) . '%';
-$sql="Select * from onlineordertracking AS ont LEFT JOIN stockmoves AS stm ON (ont.transno=stm.transno AND ont.itemcode=stm.stockid) where ont.email like '".$SearchEmailString."' and  ont.order_='".$SearchOrderNumber."'";
+$sql="Select * from onlineordertracking AS ont LEFT JOIN stockmoves AS stm ON (ont.transno=stm.transno AND ont.itemcode=stm.stockid) where ont.email like '".$SearchEmailString."' and  ont.order_='".$SearchOrderNumber."' GROUP BY stockid";
 $result=DB_query($sql,$db,'','',false,false);
  $_POST['EmailMessage']= '<p class="MsoNormal">Dear [Customer],</p><br/><p class="MsoNormal">Please find below all the tracking information for the Invoice '.$InvoiceNumber.':</p>';
        if($result==0){
