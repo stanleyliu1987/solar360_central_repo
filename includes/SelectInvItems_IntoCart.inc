@@ -190,7 +190,7 @@ if ($AlreadyOnThisOrder!=1){
                                         1,
                                         $myItemSuppRow['supplierno'],
                                         '',
-                                        '');
+                                        '', '001');
 
 			}
          } else {

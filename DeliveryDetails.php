@@ -398,7 +398,7 @@ if (isset($OK_to_PROCESS) and $OK_to_PROCESS == 1 && $_SESSION['ExistingOrder']=
 											discountpercent,
 											narrative,
 											poline,
-											itemdue)
+											itemdue, fromstkloc)
 										VALUES (";
 	$DbgMsg = _('The SQL that failed was');
 	foreach ($_SESSION['Items'.$identifier]->LineItems as $StockItem) {
@@ -412,7 +412,8 @@ if (isset($OK_to_PROCESS) and $OK_to_PROCESS == 1 && $_SESSION['ExistingOrder']=
 					'" . floatval($StockItem->DiscountPercent) . "',
 					'" . DB_escape_string($StockItem->Narrative) . "',
 					'" . $StockItem->POLine . "',
-					'" . FormatDateForSQL($StockItem->ItemDue) . "'
+					'" . FormatDateForSQL($StockItem->ItemDue) . "',
+                                        '" . $_SESSION['Items'.$identifier]->LineItems[$StockItem->LineNumber]->FromStkLoc. "'
 				)";
 		$ErrMsg = _('Unable to add the sales order line');
 		$Ins_LineItemResult = DB_query($LineItemsSQL,$db,$ErrMsg,$DbgMsg,true);
@@ -805,7 +806,8 @@ if (isset($OK_to_PROCESS) and $OK_to_PROCESS == 1 && $_SESSION['ExistingOrder']=
 													discountpercent='" . floatval($StockItem->DiscountPercent) . "',
 													completed='" . $Completed . "',
 													poline='" . $StockItem->POLine . "',
-													itemdue='" . FormatDateForSQL($StockItem->ItemDue) . "'
+													itemdue='" . FormatDateForSQL($StockItem->ItemDue) . "',
+                                                                                                        fromstkloc='" . $StockItem->FromStkLoc . "'
 						WHERE salesorderdetails.orderno='" . $_SESSION['ExistingOrder'] . "'
 						AND salesorderdetails.orderlineno='" . $StockItem->LineNumber . "'";
 

@@ -146,6 +146,7 @@ if (!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 								salesorderdetails.orderlineno,
 								salesorderdetails.poline,
 								salesorderdetails.itemdue,
+                                                                salesorderdetails.fromstkloc,
 								stockmaster.materialcost + stockmaster.labourcost + stockmaster.overheadcost AS standardcost
 							FROM salesorderdetails INNER JOIN stockmaster
 							 	ON salesorderdetails.stkcode = stockmaster.stockid
@@ -184,7 +185,7 @@ if (!isset($_GET['OrderNumber']) AND !isset($_SESSION['ProcessingOrder'])) {
 											'',
 											$myrow['itemdue'],
 											$myrow['poline'],
-											$myrow['standardcost']);	/*NB NO Updates to DB */
+											$myrow['standardcost'],1,0,1,'','','','','','','','','','','','','','','',$myrow['fromstkloc']);	/*NB NO Updates to DB */
 
 				/*Calculate the taxes applicable to this line item from the customer branch Tax Group and Item Tax Category */
 
@@ -986,14 +987,14 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					/* There must be some error this should never happen */
 					$QtyOnHandPrior = 0;
 				}
-
-				$SQL = "UPDATE locstock	SET quantity = locstock.quantity - " . $OrderLine->QtyDispatched . "
-						WHERE locstock.stockid = '" . $OrderLine->StockID . "'
-						AND loccode = '" . $_SESSION['Items']->Location . "'";
-	
-				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated because');
-				$DbgMsg = _('The following SQL to update the location stock record was used');
-				$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+/* Disconnet the locstock table updates until the stock stage changed to Dispatch Stock By Stan 261102014*/
+//				$SQL = "UPDATE locstock	SET quantity = locstock.quantity - " . $OrderLine->QtyDispatched . "
+//						WHERE locstock.stockid = '" . $OrderLine->StockID . "'
+//						AND loccode = '" . $_SESSION['Items']->Location . "'";
+//	
+//				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated because');
+//				$DbgMsg = _('The following SQL to update the location stock record was used');
+//				$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
 
 			} else if ($MBFlag=='A'){ /* its an assembly */
 				/*Need to get the BOM for this part and make
@@ -1053,7 +1054,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 										VALUES ('" . $AssParts['component'] . "',
 												 10,
 												 '" . $InvoiceNo . "',
-												 '" . $_SESSION['Items']->Location . "',
+												 '" .$OrderLine->FromStkLoc  . "',
 												 '" . $DefaultDispatchDate . "',
 												 '" . $_SESSION['Items']->DebtorNo . "',
 												 '" . $_SESSION['Items']->Branch . "',
@@ -1068,15 +1069,15 @@ invoices can have a zero amount but there must be a quantity to invoice */
 					$DbgMsg = _('The following SQL to insert the assembly components stock movement records was used');
 					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
 
-
-					$SQL = "UPDATE locstock
-							SET quantity = locstock.quantity - " . $AssParts['quantity'] * $OrderLine->QtyDispatched . "
-							WHERE locstock.stockid = '" . $AssParts['component'] . "'
-							AND loccode = '" . $_SESSION['Items']->Location . "'";
-
-					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated for an assembly component because');
-					$DbgMsg = _('The following SQL to update the locations stock record for the component was used');
-					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+/* Disconnet the locstock table updates until the stock stage changed to Dispatch Stock By Stan 261102014*/
+//					$SQL = "UPDATE locstock
+//							SET quantity = locstock.quantity - " . $AssParts['quantity'] * $OrderLine->QtyDispatched . "
+//							WHERE locstock.stockid = '" . $AssParts['component'] . "'
+//							AND loccode = '" . $_SESSION['Items']->Location . "'";
+//
+//					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated for an assembly component because');
+//					$DbgMsg = _('The following SQL to update the locations stock record for the component was used');
+//					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
 				} /* end of assembly explosion and updates */
 
 				/*Update the cart with the recalculated standard cost from the explosion of the assembly's components*/
@@ -1109,7 +1110,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 											VALUES ('" . $OrderLine->StockID . "',
 												10,
 												'" . $InvoiceNo . "',
-												'" . $_SESSION['Items']->Location . "',
+												'" . $OrderLine->FromStkLoc . "',
 												'" . $DefaultDispatchDate . "',
 												'" . $_SESSION['Items']->DebtorNo . "',
 												'" . $_SESSION['Items']->Branch . "',
@@ -1143,7 +1144,7 @@ invoices can have a zero amount but there must be a quantity to invoice */
 											VALUES ('" . $OrderLine->StockID . "',
 												10,
 												'" . $InvoiceNo . "',
-												'" . $_SESSION['Items']->Location . "',
+												'" . $OrderLine->FromStkLoc . "',
 												'" . $DefaultDispatchDate . "',
 												'" . $_SESSION['Items']->DebtorNo . "',
 												'" . $_SESSION['Items']->Branch . "',

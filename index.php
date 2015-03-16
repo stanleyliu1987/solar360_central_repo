@@ -246,6 +246,11 @@ if (count($_SESSION['AllowedPageSecurityTokens'])==1 and $SupplierLogin==0){
 								<?php echo '<p>&bull; <a href="' . $rootpath . '/PDFLowGP.php">' . _('Sales With Low Gross Profit Report') . '</a></p>'; ?>
 							</td>
 							</tr>
+                                                        <tr>
+							<td class="menu_group_item">
+								<?php echo '<p>&bull; <a href="' . $rootpath . '/KPI_Reporting.php">' . _('Solar360 KPI Reports') . '</a></p>'; ?>
+							</td>
+							</tr>
 							<tr>
 							<td class="menu_group_item">
 								<?php echo GetRptLinks('ord'); ?>

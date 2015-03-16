@@ -363,17 +363,21 @@ if (isset($MakePDFThenDisplayIt) or isset($MakePDFThenEmailIt)) {
 			
 			$OrderTotal += ($POLine['unitprice']*$POLine['quantityord']);
 			
-			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x,$YPos,$FormDesign->Data->Column2->Length,$FormDesign->Data->Column2->FontSize,$Desc.' - '.$POLine['narrative'], 'left');
-                        if (strlen($LeftOvers)>1){
-				$LeftOvers = $pdf->addTextWrap($Left_Margin+90,$YPos-$line_height,270,$FontSize,$LeftOvers, 'left');
-			}
+			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column3->x,$YPos,$FormDesign->Data->Column3->Length,$FormDesign->Data->Column3->FontSize,$Desc.' - '.$POLine['narrative'], 'left');
+                        while(strlen($LeftOvers)>1){
+				$LeftOvers = $pdf->addTextWrap($Left_Margin+180,$YPos-$line_height,270,$FormDesign->Data->Column3->FontSize,$LeftOvers, 'left');
+
+                        }
                         
-			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column3->x,$YPos,$FormDesign->Data->Column3->Length,$FormDesign->Data->Column3->FontSize,$DisplayQty, 'center');
+			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column4->x,$YPos,$FormDesign->Data->Column4->Length,$FormDesign->Data->Column4->FontSize,$DisplayQty, 'left');
                         if(!isset($MakePDFDocket)){
                         $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column1->x,$YPos,$FormDesign->Data->Column1->Length,$FormDesign->Data->Column1->FontSize,$POLine['suppliers_partno'], 'left');
-                        if(!isset($MakePDFRCTI)){   
-                        $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column4->x,$YPos,$FormDesign->Data->Column4->Length,$FormDesign->Data->Column4->FontSize,$DisplayDelDate, 'left');
+                        while(strlen($LeftOvers)>1){
+				$LeftOvers = $pdf->addTextWrap($Left_Margin+5,$YPos-$line_height,270,$FormDesign->Data->Column1->FontSize,$LeftOvers, 'left');
+
                         }
+                        $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x,$YPos,$FormDesign->Data->Column2->Length,$FormDesign->Data->Column2->FontSize,$POLine['itemcode'], 'left');
+               
 			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column5->x,$YPos,$FormDesign->Data->Column5->Length,$FormDesign->Data->Column5->FontSize,$DisplayPrice, 'left');
 			$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column6->x,$YPos,$FormDesign->Data->Column6->Length,$FormDesign->Data->Column6->FontSize,$DisplayLineTotal, 'left');
                         }

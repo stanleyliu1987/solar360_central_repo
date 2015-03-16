@@ -55,16 +55,16 @@ $OrderDateRow = DB_fetch_array($OrderDateResult);
 $OrderPlaceDate=$OrderDateRow[0];
 
 /** Choose the Invoice Date **/
-$SQLInvDate="SELECT debtortrans.trandate						
-       from debtortrans
-       where  debtortrans.transno='" . $_SESSION['Items'.$identifier]->OrderNo . "'
-             AND debtortrans.type=10";
-             
-$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The debtortrans date cannot be retrieved because');
-$DbgMsg = _('The following SQL to select invoice date record was used');
-$InvoiceDateResult= DB_query($SQLInvDate, $db,$ErrMsg,$DbgMsg,true);
-$InvoiceDateRow = DB_fetch_array($InvoiceDateResult);
-$InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
+//$SQLInvDate="SELECT debtortrans.trandate						
+//       from debtortrans
+//       where  debtortrans.transno='" . $_SESSION['Items'.$identifier]->OrderNo . "'
+//             AND debtortrans.type=10";
+//             
+//$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The debtortrans date cannot be retrieved because');
+//$DbgMsg = _('The following SQL to select invoice date record was used');
+//$InvoiceDateResult= DB_query($SQLInvDate, $db,$ErrMsg,$DbgMsg,true);
+//$InvoiceDateRow = DB_fetch_array($InvoiceDateResult);
+$InovicePlaceDate=FormatDateForSQL($_POST['DispatchDate']);
 
 /*Now insert the mod_DebtorTrans and update debtortrans */
 
@@ -293,12 +293,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
 			if ($myrowCount[0]==0){
                 /**
                  * 1. Update location stock quantity
-                 */    
-                  $SQL ="UPDATE locstock SET quantity=quantity-$Quantity WHERE loccode=001 and stockid='".$OrderLine->StockID."'";
-                          
-                  $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK1').'';
-	          $DbgMsg = _('The following SQL to update the invoiced was used');
-	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
+                 */  
+                /* Disconnet the locstock table updates until the stock stage changed to Dispatch Stock By Stan 261102014*/            
+//                  $SQL ="UPDATE locstock SET quantity=quantity-$Quantity WHERE loccode=001 and stockid='".$OrderLine->StockID."'";
+//                          
+//                  $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK1').'';
+//	          $DbgMsg = _('The following SQL to update the invoiced was used');
+//	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
                   
                 /**
                  * 2. Insert New stock into salesorderdetails table
@@ -315,7 +316,8 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                                         completed,
 					narrative,
 					poline,
-					itemdue)
+					itemdue,
+                                        fromstkloc)
 					VALUES (
 					'" . $OrderLine->LineNumber . "',
 					'" . $_SESSION['salesorderNum']. "',
@@ -328,7 +330,8 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                                         1,
 					'" . $Narrative . "',
 					'" . $OrderLine->POLine . "',
-					'" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "'
+					'" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "',
+                                        '".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."'    
 				)";
                 
 	          $ErrMsg = _('Unable to add the sales order line');
@@ -394,13 +397,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
              Values(  '".$OrderLine->StockID."',
 					        10,
 						'".$_SESSION['Items'.$identifier]->OrderNo."',
-						'".$_SESSION['Items'.$identifier]->Location."',
+						'".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."',
 						'".$InovicePlaceDate."',
 						'".$debtorno."',
 						'".$branchno."',
                                                 '" . $Price . "',
 						'" .$PeriodNo."',
-						'" ._('Order Has been Modified')."',
+						'" .$WebSalesOrderNo."',
 						'".-$Quantity."',
                                                 '".$Discount."',
 						'".$OrderLine->StandardCost."',
@@ -410,14 +413,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                   $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK2').'';
 	          $DbgMsg = _('The following SQL to update the invoiced was used');
 	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
-                  
                   $ItemGstRate=$_POST['TaxRate_' . $OrderLine->LineNumber]/100;
                   /* Retrieve last insert id from stockmoves table */
                   $StkMoveNo = DB_Last_Insert_ID($db,'stockmoves','stkmoveno');
                   
-           if(DB_num_rows($resultTaxExistId)!=0){
+                  if(DB_num_rows($resultTaxExistId)!=0){
                 
-               $SQL = "INSERT INTO stockmovestaxes (	stkmoveno,
+                  $SQL = "INSERT INTO stockmovestaxes (	stkmoveno,
 					        taxauthid,
 						taxrate,
 						taxontax,
@@ -436,6 +438,109 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
      
                 }
                 
+                  /* Insert Assemble product into the stockmoves and stockmovestax table*/
+                  if($OrderLine->MBflag== 'A'){
+                  $SQL = "SELECT bom.component,
+								bom.quantity,
+								stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standard
+							FROM bom,
+								stockmaster
+							WHERE bom.component=stockmaster.stockid
+							AND bom.parent='" . $OrderLine->StockID . "'
+							AND bom.effectiveto >= '" . Date('Y-m-d') . "'
+							AND bom.effectiveafter < '" . Date('Y-m-d') . "'";
+		
+				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Could not retrieve assembly components from the database for'). ' '. $OrderLine->StockID . _('because').' ';
+				$DbgMsg = _('The SQL that failed was');
+				$AssResult = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+				while ($AssParts = DB_fetch_array($AssResult,$db)){
+                                   				/*Need to get the BOM for this part and make
+				stock moves for the components then update the Location stock balances */
+				$Assembly=True;
+				$StandardCost =0; /*To start with - accumulate the cost of the comoponents for use in journals later on */
+				$SQL = "SELECT bom.component,
+								bom.quantity,
+								stockmaster.materialcost+stockmaster.labourcost+stockmaster.overheadcost AS standard
+							FROM bom,
+								stockmaster
+							WHERE bom.component=stockmaster.stockid
+							AND bom.parent='" . $OrderLine->StockID . "'
+							AND bom.effectiveto >= '" . Date('Y-m-d') . "'
+							AND bom.effectiveafter < '" . Date('Y-m-d') . "'";
+		
+				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Could not retrieve assembly components from the database for'). ' '. $OrderLine->StockID . _('because').' ';
+				$DbgMsg = _('The SQL that failed was');
+				$AssResult = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+				while ($AssParts = DB_fetch_array($AssResult,$db)){
+
+					$StandardCost += ($AssParts['standard'] * $AssParts['quantity']) ;
+					/* Need to get the current location quantity
+					will need it later for the stock movement */
+	                  		$SQL="SELECT locstock.quantity
+							FROM locstock
+							WHERE locstock.stockid='" . $AssParts['component'] . "'
+							AND loccode= '" . $_SESSION['Items']->Location . "'";
+
+					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Can not retrieve assembly components location stock quantities because ');
+					$DbgMsg = _('The SQL that failed was');
+					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+	                  		if (DB_num_rows($Result)==1){
+	                  			$LocQtyRow = DB_fetch_row($Result);
+	                  			$QtyOnHandPrior = $LocQtyRow[0];
+					} else {
+						/*There must be some error this should never happen */
+						$QtyOnHandPrior = 0;
+					}
+					if (empty($AssParts['standard'])) {
+						$AssParts['standard']=0;
+					}
+					$SQL = "INSERT INTO stockmoves (	stockid,
+													type,
+													transno,
+													loccode,
+													trandate,
+													debtorno,
+													branchcode,
+													prd,
+													reference,
+													qty,
+													standardcost,
+													show_on_inv_crds,
+													newqoh) 
+			       Values(  '" . $AssParts['component'] . "',
+					        10,
+						'".$_SESSION['Items'.$identifier]->OrderNo."',
+						'".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."',
+						'".$InovicePlaceDate."',
+						'".$debtorno."',
+						'".$branchno."',
+						'" .$PeriodNo."',
+						'" . _('Assembly') . ': ' . $OrderLine->StockID . ' ' . _('Order') . ': ' . $_SESSION['ProcessingOrder'] . "',
+                                                '" . -$AssParts['quantity'] * (-$Quantity). "',
+						'" . $AssParts['standard'] . "',
+						0,
+						'" . ($QtyOnHandPrior - $AssParts['quantity'] * (-$Quantity)) . "' )";
+
+					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Stock movement records for the assembly components of'). ' '. $OrderLine->StockID . ' ' . _('could not be inserted because');
+					$DbgMsg = _('The following SQL to insert the assembly components stock movement records was used');
+					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+/* Disconnet the locstock table updates until the stock stage changed to Dispatch Stock By Stan 261102014*/
+//					$SQL = "UPDATE locstock
+//							SET quantity = locstock.quantity - " . $AssParts['quantity'] * (-$Quantity) . "
+//							WHERE locstock.stockid = '" . $AssParts['component'] . "'
+//							AND loccode = '" . $_SESSION['Items']->Location . "'";
+//
+//					$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Location stock record could not be updated for an assembly component because');
+//					$DbgMsg = _('The following SQL to update the locations stock record for the component was used');
+//					$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true); 
+                                }      
+                  }
+             }
+                  
+             
          /*
           * Insert Freight Cost Measurements into freightcostmeasurement table
           */
@@ -484,13 +589,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
         /**
          * 1. Update location stock quantity
          */
-       $SQL ="UPDATE locstock SET quantity=quantity-$Quantity-(SELECT qty FROM stockmoves 
-              WHERE type=10 and transno= '" . $_SESSION['Items'.$identifier]->OrderNo . "'
-              and  stockid='".$OrderLine->StockID."' and price<>0 Limit 1) WHERE loccode=001 and stockid='".$OrderLine->StockID."'";
-                          
-                  $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK3').'';
-	          $DbgMsg = _('The following SQL to update the invoiced was used');
-	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
+//       $SQL ="UPDATE locstock SET quantity=quantity-$Quantity-(SELECT qty FROM stockmoves 
+//              WHERE type=10 and transno= '" . $_SESSION['Items'.$identifier]->OrderNo . "'
+//              and  stockid='".$OrderLine->StockID."' and price<>0 Limit 1) WHERE loccode=001 and stockid='".$OrderLine->StockID."'";
+//                          
+//                  $ErrMsg = _('CRITICAL ERROR') . ' ' . _('CANNOT UPDATE AVAILABLE STOCK3').'';
+//	          $DbgMsg = _('The following SQL to update the invoiced was used');
+//	          $Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);  
         /**
          * 2. Update salesorderdetails table
          */ 
@@ -504,9 +609,10 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                             actualdispatchdate='".$OrderPlaceDate."',
                             narrative='" . $Narrative . "',
 			    poline='" . $OrderLine->POLine . "',
-			    itemdue='" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "'
+			    itemdue='" . FormatDateForSQL($_POST['ItemDue_'.$OrderLine->LineNumber]) . "',
+                            fromstkloc='" . $_POST['FromStkLoc_'.$OrderLine->LineNumber] . "'
 			    WHERE orderno= '" . $_SESSION['salesorderNum'] . "'
-                             and  stkcode='".$OrderLine->StockID."'";
+                             and  stkcode='".$OrderLine->StockID."' and orderlineno='".$OrderLine->LineNumber."'";
                              
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The salesorderdetails record could not be updated because');
 	$DbgMsg = _('The following SQL to update salesorderdetails record was used');
@@ -518,21 +624,50 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
         $SQL = "UPDATE stockmoves
 			    SET 
                             debtorno='".$debtorno."',
-                            branchcode='".$branchno."',    
+                            branchcode='".$branchno."', 
+                            loccode='".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."',    
                             trandate='".$InovicePlaceDate."',
                             price='" . $Price . "',
                             qty ='".-$Quantity."',
                             discountpercent ='".$Discount."',
                             standardcost='".$OrderLine->StandardCost."'  ,
                             narrative='".$Narrative."' 
-			    WHERE type=10 and transno= '" . $_SESSION['Items'.$identifier]->OrderNo . "'
-                             and  stockid='".$OrderLine->StockID."'
-                             and show_on_inv_crds=1";
-                             
+			    WHERE stkmoveno='".$OrderLine->Stockmoveid."'";
+
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stockmoves record could not be updated because');
 	$DbgMsg = _('The following SQL to updated the stockmoves record was used');
  	$Result= DB_query($SQL, $db,$ErrMsg,$DbgMsg,true);
         
+        /* Update Assemble products in the stockmoves table 27112014 by Stan*/
+        if($OrderLine->MBflag== 'A'){
+                              $SQL = "SELECT bom.component      FROM bom,
+								stockmaster
+							WHERE bom.component=stockmaster.stockid
+							AND bom.parent='" . $OrderLine->StockID . "'
+							AND bom.effectiveto >= '" . Date('Y-m-d') . "'
+							AND bom.effectiveafter < '" . Date('Y-m-d') . "'";
+		
+				$ErrMsg = _('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Could not retrieve assembly components from the database for'). ' '. $OrderLine->StockID . _('because').' ';
+				$DbgMsg = _('The SQL that failed was');
+				$AssResult = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true);
+
+			while ($AssParts = DB_fetch_array($AssResult,$db)){
+                            $SQL = "UPDATE stockmoves
+			    SET 
+                            debtorno='".$debtorno."',
+                            branchcode='".$branchno."', 
+                            loccode='".$_POST['FromStkLoc_'.$OrderLine->LineNumber]."',    
+                            trandate='".$InovicePlaceDate."',
+                            qty ='".(-$Quantity)."' * qty,
+                            discountpercent ='".$Discount."',
+                            narrative='".$Narrative."' 
+			    WHERE stockid='".$AssParts['component']."' and reference like CONCAT('Assembly: ','".$OrderLine->StockID."','%')";
+                         
+	                    $ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stockmoves record could not be updated because');
+	                    $DbgMsg = _('The following SQL to updated the stockmoves record was used');
+ 	                    $Result= DB_query($SQL, $db,$ErrMsg,$DbgMsg,true);                                
+                       }
+        }
         /* Update Item Freight Measurement records */
         
         $LineItemsSQL = "UPDATE freightcostevaluation SET custcode= '".$debtorno."',
@@ -817,19 +952,18 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
        $SQLCheckPOItem = " SELECT  count(*) from purchorders
                          inner join purchorderdetails on purchorders.orderno=purchorderdetails.orderno
                          where purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'  and
-                         purchorderdetails.itemcode='".$OrderLine->StockID."' and
-                         purchorders.status<>'Cancelled'";
+                         purchorderdetails.itemcode='".$OrderLine->StockID."' and purchorders.status<>'Cancelled'";
             
        $resultPOItem=DB_query($SQLCheckPOItem,$db,'','',false,false);   
        
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related PO could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         else{
@@ -850,14 +984,14 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                             purchorders.contact='".$_POST['DelTo']."'  
 			    WHERE purchorders.orderno=purchorderdetails.orderno
                             and  purchorderdetails.itemcode= '" . $OrderLine->StockID . "'
-                            and  purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'";
+                            and  purchorders.ref_salesorder= '" .$WebSalesOrderNo. "' and purchorders.status<>'Cancelled'";
                              
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The purchorderdetails record could not be updated because');
 	$DbgMsg = _('The following SQL to update purchorderdetails record was used');
  	$Result= DB_query($SQL, $db,$ErrMsg,$DbgMsg,true);       
             }
              
-             else{
+             elseif($myrowCount[0]==0){
       /*
        * A3. If Item not exists, check whether it belongs to existed supplier
        */
@@ -867,18 +1001,17 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                                     inner join purchdata on purchorders.supplierno=purchdata.supplierno
                                     where purchorders.ref_salesorder= '" . $WebSalesOrderNo. "'  
                                     and purchdata.stockid='".$OrderLine->StockID."'
-                                    and purchdata.preferred=1
-                                    and purchorders.status<>'Cancelled'";
+                                    and purchdata.preferred=1";
             
        $resultPOSupp=DB_query($SQLCheckPOSupp,$db,'','',false,false);          
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related Supplier could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         
@@ -996,7 +1129,7 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
 	  } 
       }  
           
-         else{  
+         elseif(DB_num_rows($resultPOSupp)==0){  
       /*
        * A5. If supplier not exists, then create new PO
        */        
@@ -1006,13 +1139,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
             
        $resultSelectSup=DB_query($SQLSelectSup,$db,'','',false,false);
        if (DB_error_no($db) !=0 or DB_num_rows($resultSelectSup)!=1) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related Supplier could not be retrieved or more than one or 0 prefreed supplier selected') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
                 
         }
@@ -1193,8 +1326,17 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                     }
              
                 }
+        else{
+             echo '<p>';
+             prnMsg(_('Stock Item ') . ' ' . $OrderLine->StockID . ' ' . _(' exists in multiple PO(s), so the PO will not updated, please check the related Purchase Orders.'),'WARNING'); 
+        }        
             }
          }
+        else{
+           echo '<p>';
+           prnMsg(_('Stock Item ') . ' ' . $OrderLine->StockID . ' ' . _(' exists in PO multiple times, so the PO will not updated, please check the related Purchase Orders.'),'WARNING');   
+        } 
+         
        }
     }
     
@@ -1208,13 +1350,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
        $resultSubItems=DB_query($SQLRetrieveSubItem,$db,'','',false,false); 
        
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related BOM sub itmes could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         else{
@@ -1228,19 +1370,18 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
          $SQLCheckPOItem = " SELECT  count(*) from purchorders
                          inner join purchorderdetails on purchorders.orderno=purchorderdetails.orderno
                          where purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'  and
-                         purchorderdetails.itemcode='".$subrow['component']."' and
-                         purchorders.status<>'Cancelled'";
+                         purchorderdetails.itemcode='".$subrow['component']."' and purchorders.status<>'Cancelled'";
             
         $resultPOItem=DB_query($SQLCheckPOItem,$db,'','',false,false);   
        
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related PO could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         else{
@@ -1264,13 +1405,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                             purchorders.contact='".$_POST['DelTo']."'  
 			    WHERE purchorders.orderno=purchorderdetails.orderno
                             and  purchorderdetails.itemcode= '" . $subrow['component'] . "'
-                            and  purchorders.ref_salesorder= '" .$WebSalesOrderNo. "'";
+                            and  purchorders.ref_salesorder= '" .$WebSalesOrderNo. "' and purchorders.status<>'Cancelled'";
                              
 	$ErrMsg =_('CRITICAL ERROR') . '! ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The purchorderdetails record could not be updated because');
 	$DbgMsg = _('The following SQL to update purchorderdetails record was used');
  	$Result= DB_query($SQL, $db,$ErrMsg,$DbgMsg,true);       
             }
-             else{
+             elseif($myrowCount[0]==0){
       /*
        * B4. If Item not exists, check whether it belongs to existed supplier
        */
@@ -1281,17 +1422,17 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                                     where purchorders.ref_salesorder= '" . $WebSalesOrderNo. "'  
                                     and purchdata.stockid='".$subrow['component']."'
                                     and purchdata.preferred=1
-                                    and purchorders.status<>'Cancelled'";
+                                    ";
             
        $resultPOSupp=DB_query($SQLCheckPOSupp,$db,'','',false,false);          
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related Supplier could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	}
         
@@ -1409,7 +1550,7 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
 	       } 
             }
             
-      else{  
+      elseif(DB_num_rows($resultPOSupp)==0){  
     /*
      * B5. If supplier not exists, then create new PO
      */        
@@ -1419,13 +1560,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
             
        $resultSelectSup=DB_query($SQLSelectSup,$db,'','',false,false);
        if (DB_error_no($db) !=0 or DB_num_rows($resultSelectSup)!=1) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related Supplier could not be retrieved or more than one or 0 prefreed supplier selected') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
                 
         }
@@ -1615,8 +1756,16 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
                        }
              
                    }
+        else{
+             echo '<p>';
+             prnMsg(_('Stock Item ') . ' ' . $subrow['component']. ' ' . _(' exists in multiple PO(s), so the PO will not updated, please check the related Purchase Orders.'),'WARNING'); 
+        }
              }
         }
+        else{
+           echo '<p>';
+           prnMsg(_('Stock Item ') . ' ' . $subrow['component'] . ' ' . _(' exists in PO multiple times, so the PO will not updated, please check the related Purchase Orders.'),'WARNING');   
+        } 
     }
 } 
         }
@@ -1635,13 +1784,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
         
        $resultPO=DB_query($SQLCheckPO,$db,'','',false,false);          
        if (DB_error_no($db) !=0) {
-		include('includes/header.inc');
+
 		echo '<p>' . _('The Related PO Item  could not be retrieved by the SQL because') . ' ' . DB_error_msg($db);
 		echo '<br /><a href="' . $rootpath . '/index.php">' . _('Back to the menu') . '</a>';
 		if ($debug==1){
 			echo '<br />' . $SQL;
 		}
-		include('includes/footer.inc');
+
 		exit;
 	} 
         else{
@@ -1803,6 +1952,13 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
 	$DbgMsg = _('The following SQL to delete the invoiced was used');
 	$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true); 
         
+        /* 4. Delete qty equals 0 from stckmoves table for the assembl components */
+        $SQL = "DELETE FROM stockmoves WHERE stockmoves.type=10 AND 
+                      stockmoves.transno= '" . $_SESSION['Items'.$identifier]->OrderNo . "' AND stockmoves.qty=0";
+
+	$ErrMsg = _('CRITICAL ERROR') . ' ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('The stockmoves status cannot be deleted');
+	$DbgMsg = _('The following SQL to delete the invoiced was used');
+	$Result = DB_query($SQL,$db,$ErrMsg,$DbgMsg,true); 
         
   
         /**
@@ -1851,9 +2007,9 @@ $InovicePlaceDate=substr($InvoiceDateRow[0],0,10);
         
         unset($_SESSION['TotalFreight']);
         prnMsg(_('Invoice '.$_SESSION['salesorderNum'].' has been Updated'),'success');
-        $redirectpage=$rootpath .'/PrintCustTransPortrait.php?InvoiceNo='.strip_tags($_SESSION['salesorderNum']);
-        echo '<meta http-equiv="Refresh" content="1; url=' . $redirectpage. '">';
+        //$redirectpage=$rootpath .'/PrintCustTransPortrait.php?InvoiceNo='.strip_tags($_SESSION['salesorderNum']);
+        //echo '<meta http-equiv="Refresh" content="1; url=' . $redirectpage. '">';
 	include('includes/footer.inc');
-			exit;
+	exit;
 
 ?>

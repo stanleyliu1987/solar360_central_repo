@@ -189,7 +189,8 @@ If (isset($PrintPDF)
                                         custbranch.contactname,
 					salesman.salesmanname,
 					debtortrans.debtorno,
-					debtortrans.branchcode
+					debtortrans.branchcode,
+                                        salesorders.fromstkloc
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -313,6 +314,7 @@ If (isset($PrintPDF)
 			if ($InvOrCredit == 'Invoice') {
 				$sql = "SELECT stockmoves.stockid,
 						stockmaster.description,
+                                                stockmaster.mbflag,
 						-stockmoves.qty as quantity,
 						stockmoves.discountpercent,
 						((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . "* -stockmoves.qty) AS fxnet,
@@ -331,6 +333,7 @@ If (isset($PrintPDF)
 				/* only credit notes to be retrieved */
 				$sql = "SELECT stockmoves.stockid,
 						stockmaster.description,
+                                                stockmaster.mbflag,
 						stockmoves.qty as quantity,
 						stockmoves.discountpercent,
 						((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . " * stockmoves.qty) AS fxnet,
@@ -382,7 +385,30 @@ If (isset($PrintPDF)
 				$DisplayPrice = $myrow2['fxprice'];
 				$DisplayQty = $myrow2['quantity'];
                                 $Narrative=htmlspecialchars_decode($myrow2['narrative']);
-				
+	       /* Retrieve the assemble products 12/11/2014 by Stan */
+                 $sub_description=array();
+                if($myrow2['mbflag']=='A'){
+                    	/*Now look for assembly components that would go negative */
+				$ComponentsSQL = "SELECT bom.component,
+                                        bom.quantity,
+					stockmaster.description
+                                        FROM bom INNER JOIN locstock
+						ON bom.component=locstock.stockid
+						INNER JOIN stockmaster
+						ON stockmaster.stockid=bom.component
+						WHERE bom.parent='" . $myrow2['stockid'] . "'
+						AND locstock.loccode='" . $myrow['fromstkloc'] . "'
+						AND effectiveafter <'" . Date('Y-m-d') . "'
+						AND effectiveto >='" . Date('Y-m-d') . "'";
+
+				$ErrMsg = _('Could not retrieve the component quantity left at the location once the assembly item on this order is invoiced (for the purposes of checking that stock will not go negative because)');
+				$ComponentsResult = DB_query($ComponentsSQL,$db,$ErrMsg);
+                         
+                                while ($com = DB_fetch_array($ComponentsResult)){
+					$sub_description[]=$com['component'].' '.$com['description'].' x'.$com['quantity'];
+				}
+                }
+
                /* display item details*/
 		$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column1->x, $YPos, $FormDesign->Data->Column1->Length, $FormDesign->Data->Column1->FontSize, $myrow2['stockid'],'left');
           
@@ -392,17 +418,32 @@ If (isset($PrintPDF)
                 else{
                     $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $myrow2['description'],'left');
                 }
-                if (strlen($LeftOvers)>1){
-				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos-10, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
+                while(strlen($LeftOvers)>1){
+                                $YPos-=10;
+				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
 			}
-
-                        
+                                                
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column3->x, $YPos, $FormDesign->Data->Column3->Length, $FormDesign->Data->Column3->FontSize, number_format($DisplayQty,0),'left');
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column4->x, $YPos, $FormDesign->Data->Column4->Length, $FormDesign->Data->Column4->FontSize, number_format($DisplayPrice,2),'right');
           //      $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column5->x, $YPos, $FormDesign->Data->Column5->Length, $FormDesign->Data->Column5->FontSize, $myrow2['units'],'left');
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column5->x, $YPos, $FormDesign->Data->Column5->Length, $FormDesign->Data->Column5->FontSize, $DisplayDiscount,'right');
                 $LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column6->x, $YPos, $FormDesign->Data->Column6->Length, $FormDesign->Data->Column6->FontSize, number_format($DisplayNet,2),'right');
-				
+              if(count($sub_description)>0){
+                  $YPos-=20;
+                   $pdf->addTextWrap($FormDesign->Data->Column1->x, $YPos, $FormDesign->Data->Column1->Length+15, $FormDesign->Data->Column1->FontSize, 'Each Pack Contains:','left');
+              }
+              $i=0;
+              while ($i < count($sub_description)) {
+                  
+		  $LeftOvers =$pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length+700, $FormDesign->Data->Column2->FontSize, $sub_description[$i],'left');  
+                  while(strlen($LeftOvers)>1){
+                                $YPos-=10;
+				$LeftOvers = $pdf->addTextWrap($FormDesign->Data->Column2->x, $YPos, $FormDesign->Data->Column2->Length+700, $FormDesign->Data->Column2->FontSize, $LeftOvers,'left');
+			}
+                  $YPos-=10;      
+                  $i++;
+              }        
+		
                 $TotalSaleAmount+=$DisplayNet;
 
 				if ($myrow2['controlled']==1){
@@ -607,6 +648,9 @@ If (isset($PrintPDF)
                     if (strlen($LeftOvers)>0){
 	            $LeftOvers = $pdf->addTextWrap($FormDesign->Comments->x, $FormDesign->Comments->y-10, $FormDesign->Comments->Length, $FormDesign->Comments->FontSize, $LeftOvers,'left');
                     }
+                    if (strlen($LeftOvers)>0){
+	            $LeftOvers = $pdf->addTextWrap($FormDesign->Comments->x, $FormDesign->Comments->y-20, $FormDesign->Comments->Length, $FormDesign->Comments->FontSize, $LeftOvers,'left');
+                    }
                   }
 			
 //		$LeftOvers=$pdf->addTextWrap($FormDesign->RoClause->x,$FormDesign->RoClause->y,200,$FormDesign->RoClause->FontSize, $_SESSION['RomalpaClause']);
@@ -677,6 +721,12 @@ If (isset($PrintPDF)
                 else{
                 $EmailMessage=_('Please find attached') . ' ' . $InvOrCredit . ' ' . $FromTransNo;    
                 }
+                if(isset($_POST['EmailFromAddr']) and $_POST['EmailFromAddr']!=''){
+                $EmailFromAddr =  $_POST['EmailFromAddr'];  
+                }
+                else{
+                $EmailFromAddr =  $_SESSION['CompanyRecord']['email'];     
+                }
 		$pdf->Output($FileName,'F');
 		$mail = new htmlMimeMail();
                 /* 29082014 send customer statement as well if checkbox ticked */  
@@ -691,7 +741,7 @@ If (isset($PrintPDF)
                 $mail->setHtmlCharset("UTF-8");
                 $mail->setSubject($EmailSubject);
 		$mail->addAttachment($Attachment, $FileName, 'application/pdf');
-		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $_SESSION['CompanyRecord']['email'] . '>');
+		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $EmailFromAddr . '>');
                 $mail->setCc($_POST['EmailAddrCC']);
                 $mail->setBcc($_POST['EmailAddrBCC']);              
 		$result = $mail->send(array($_POST['EmailAddr']),'smtp');
@@ -702,7 +752,7 @@ If (isset($PrintPDF)
                 $emaillogbean->sendstatus=$result;
                 $emaillogbean->ordernumber=$_POST['InvoiceNumber']<>''?$_POST['InvoiceNumber']:'';
                 $emaillogbean->emailtemplateid=$_POST['ChooseEmailTemplate']<>''?$_POST['ChooseEmailTemplate']:'';
-                $emaillogbean->emailfromaddress=$_SESSION['CompanyRecord']['email']<>''?$_SESSION['CompanyRecord']['email']:'';
+                $emaillogbean->emailfromaddress=$EmailFromAddr;
                 $emaillogbean->emailtoaddress=$_POST['EmailAddr']<>''?$_POST['EmailAddr']:'';
                 $emaillogbean->emailccaddress=$_POST['EmailAddrCC']<>''?$_POST['EmailAddrCC']:'';
                 $emaillogbean->emailbccaddress=$_POST['EmailAddrBCC']<>''?$_POST['EmailAddrBCC']:'';
@@ -1064,6 +1114,7 @@ If (isset($PrintPDF)
 
 				   $sql ="SELECT stockmoves.stockid,
 				   		stockmaster.description,
+                                                stockmaster.mbflag,
 						-stockmoves.qty as quantity,
 						stockmoves.discountpercent,
 						((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . "* -stockmoves.qty) AS fxnet,
@@ -1105,6 +1156,7 @@ If (isset($PrintPDF)
 
 				   $sql ="SELECT stockmoves.stockid,
 				   		stockmaster.description,
+                                                stockmaster.mbflag,
 						stockmoves.qty as quantity,
 						stockmoves.discountpercent, ((1 - stockmoves.discountpercent) * stockmoves.price * " . $ExchRate . " * stockmoves.qty) AS fxnet,
 						(stockmoves.price * " . $ExchRate . ") AS fxprice,

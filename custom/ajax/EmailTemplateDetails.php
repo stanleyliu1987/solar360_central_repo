@@ -4,11 +4,8 @@
  * Return Email Message to openwysiwyg textarea
  * editor  by Stan $ */
 
-$PathPrefix = '../../';
-$_SESSION['DatabaseName']='solar360';
-//$PageSecurity = 1; // set security level for webERP 
-include($PathPrefix . 'config.php');
-include($PathPrefix . 'includes/ConnectDB.inc');
+$PathPrefix = '../';
+include($PathPrefix . 'includes/FileIncludes.php');
 
 $TemplateId = $_POST["TemplateId"];
 $sql = "SELECT emailtemp_id,emailtype,templatename,emailmessage FROM emailtemplates WHERE emailtemp_id='" . $TemplateId . "'";

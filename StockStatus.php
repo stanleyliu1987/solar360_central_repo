@@ -107,13 +107,12 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 		echo '<tr class="OddTableRows">';
 		$k=1;
 	}
-
-	$sql = "SELECT SUM(salesorderdetails.quantity-salesorderdetails.qtyinvoiced) AS dem
+/* Use the fromstkloc in the salesorderdetails rather than salesorders */
+	$sql = "SELECT SUM(salesorderdetails.quantity-salesorderdetails.qtydispatched) AS dem
                  FROM salesorderdetails,
                       salesorders
                  WHERE salesorders.orderno = salesorderdetails.orderno AND
-                 salesorders.fromstkloc='" . $myrow['loccode'] . "' AND
-                 salesorderdetails.completed=0 AND
+                 salesorderdetails.fromstkloc='" . $myrow['loccode'] . "' AND 
 		 salesorders.quotation=0 AND
                  salesorderdetails.stkcode='" . $StockID . "'";
 
@@ -128,24 +127,22 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 	}
 
 	//Also need to add in the demand as a component of an assembly items if this items has any assembly parents.
-	$sql = "SELECT SUM((salesorderdetails.quantity-salesorderdetails.qtyinvoiced)*bom.quantity) AS dem
+	$sql = "SELECT SUM((salesorderdetails.quantity-salesorderdetails.qtydispatched)*bom.quantity) AS dem
                  FROM salesorderdetails,
                       salesorders,
                       bom,
                       stockmaster
                  WHERE salesorderdetails.stkcode=bom.parent AND
                        salesorders.orderno = salesorderdetails.orderno AND
-                       salesorders.fromstkloc='" . $myrow['loccode'] . "' AND
-                       salesorderdetails.quantity-salesorderdetails.qtyinvoiced > 0 AND
+                       salesorderdetails.fromstkloc='" . $myrow['loccode'] . "' AND
                        bom.component='" . $StockID . "' AND stockmaster.stockid=bom.parent AND
                        stockmaster.mbflag='A'
 		       AND salesorders.quotation=0";
-
 	$ErrMsg = _('The demand for this product from') . ' ' . $myrow['loccode'] . ' ' . _('cannot be retrieved because');
 	$DemandResult = DB_query($sql,$db,$ErrMsg,$DbgMsg);
 
 	if (DB_num_rows($DemandResult)==1){
-		$DemandRow = DB_fetch_row($DemandResult);
+		$DemandRow = DB_fetch_row($DemandResult); 
 		$DemandQty += $DemandRow[0];
 	}
 
@@ -182,7 +179,8 @@ while ($myrow=DB_fetch_array($LocStockResult)) {
 									WHERE purchorderdetails.itemcode='" . $StockID . "'
 									AND purchorders.intostocklocation='" . $myrow['loccode'] . "'
 									AND (purchorders.status<>'Cancelled'
-									AND purchorders.status<>'Pending')";
+									AND purchorders.status<>'Pending'
+                                                                        AND purchorders.status<>'Rejected')";
 		$ErrMsg = _('The quantity on order for this product to be received into') . ' ' . $myrow['loccode'] . ' ' . _('cannot be retrieved because');
 		$QOOResult = DB_query($sql,$db,$ErrMsg, $DbgMsg);
 

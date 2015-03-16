@@ -194,7 +194,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6                                        
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -252,7 +253,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM    debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -311,7 +313,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -379,7 +382,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -439,7 +443,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -499,7 +504,8 @@ if(isset($_GET['filtertype'])){
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -619,7 +625,8 @@ echo '<br />';
 					salesorders.deladd3,
 					salesorders.deladd4,
 					salesorders.deladd5,
-					salesorders.deladd6
+					salesorders.deladd6,
+                                        salesorders.contactphone
 				FROM debtortrans,
 					debtorsmaster,
 					custbranch,
@@ -930,26 +937,16 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
     
    /*Select Whole Invoice Delivery Status */
 
-    $InvDelStatusSQL="select stages_id,stages from order_stages where stages_id<5";
-    
-    $ErrMsg = _('No Invoice Delivery Status Exist were returned by the SQL because');
-
+    $InvDelStatusSQL="select stages from order_stages where stages_id='".$myrow['stages_id']."'";
+    $ErrMsg = _('No Order Stage Exist were returned by the SQL because');
     $InvDelStatusList = DB_query($InvDelStatusSQL,$db,$ErrMsg);   
-          
-     while ($InvDelStatusInfo=DB_fetch_array($InvDelStatusList)){
-         
-         if($InvDelStatusInfo['stages_id'] == $myrow['stages_id']){
-      $InvDelStatusoptions.='<option value="'.$InvDelStatusInfo['stages_id'].'" selected>'.$InvDelStatusInfo['stages'].'</option>';
-         }
-         else{
-      $InvDelStatusoptions.='<option value="'.$InvDelStatusInfo['stages_id'].'">'.$InvDelStatusInfo['stages'].'</option>';        
-         }
-     }   
+    $InvDelStatusInfo=DB_fetch_array($InvDelStatusList);
+  
     /*
      * Add Customer Address Before Invoice Link
      */
-      $customername=$myrow['name'].'/'.$myrow['contactname'];
-      $phonenumber=$myrow['phoneno'];
+      $customername=$myrow['deliverto'].'/'.$myrow['contactname'];
+      $phonenumber=$myrow['contactphone'];
 
       /*20082014 Replace Delivery Address with Shipping Address */
 //    if($myrow['invaddrbranch']==0){
@@ -972,7 +969,7 @@ while ($myrow=DB_fetch_array($InvoicesResult)) {
      else{
      $RowInvoicePDFLink ='<a href="'.$rootpath.'/'.$PrintCustomerTransactionScript.'?FromTransNo='.$myrow['transno'].'&InvOrCredit=Invoice&PrintPDF=True"><img src="'.$rootpath.'/css/' . $theme . '/images/pdf.png" title="' . _('Click for PDF') . '">'  . $myrow['sales_ref_num'] .  '</a>'; 
      $RowSearchConsignmentButton=  '<input type="button" value="Update Status" onclick="getDelStatusDate(\''.substr($POListRow,0,-1).'\',\''.$Offset.'\',\''.$i.'\',\''.$myrow['id'].'\');"/>'; 
-     $RowDeliveryStatus='<select id="InvDelStatus_'.$i.'">'.$InvDelStatusoptions.'</select>';
+     $RowDeliveryStatus=$InvDelStatusInfo["stages"];
      }
      $RowEmailClientSD= '<a href="'.$rootpath.'/EmailClientSD.php?CustEmail='.$myrow['email'].'&InvoiceNumber='.$myrow['sales_ref_num'].'&debtorno='.$myrow['debtorno'].'&branchcode='.$myrow['branchcode'].'" target="_blank">' . _('Email') . ' <img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Stock Delivery Details') . '"></a>';
      $UpdateMessage='<p id="msgsuccess_'.$i.'"></p>';

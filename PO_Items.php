@@ -301,9 +301,9 @@ if (isset($_POST['Commit'])){ /*User wishes to commit the order to the database 
 			$result = DB_query($sql,$db,$ErrMsg,$DbgMsg,true);
 
 			/*Now Update the purchase order detail records */
-			foreach ($_SESSION['PO'.$identifier]->LineItems as $POLine) {
-				$result=DB_query($sql,$db,'','',true);
-				if ($POLine->Deleted==true) {
+			foreach ($_SESSION['PO'.$identifier]->LineItems as $POLine) { 
+				//$result=DB_query($sql,$db,'','',true);
+				if ($POLine->Deleted==true) { 
 					if ($POLine->PODetailRec!='') {
 						$sql="DELETE FROM purchorderdetails WHERE podetailitem='" . $POLine->PODetailRec . "'";
 						$ErrMsg =  _('The purchase order could not be deleted because');
@@ -922,140 +922,140 @@ if (isset($_POST['Search'])){  /*ie seach for stock items */
 
 } //end of if search
 
-if (!isset($_GET['Edit'])) {
-	$sql="SELECT categoryid,
-				categorydescription
-		FROM stockcategory
-		WHERE stocktype<>'L'
-		AND stocktype<>'D'
-		ORDER BY categorydescription";
-	$ErrMsg = _('The supplier category details could not be retrieved because');
-	$DbgMsg = _('The SQL used to retrieve the category details but failed was');
-	$result1 = DB_query($sql,$db,$ErrMsg,$DbgMsg);
-
-	echo '<table class=selection>
-			<tr>
-				<th colspan=3><font size=3 color=blue>'. _('Search For Stock Items') . '</th>';
-
-	echo ':</font>
-			</tr>
-			<tr><td><select name="StockCat">';
-
-	echo '<option selected value="All">' . _('All') . '</option>';
-	
-	while ($myrow1 = DB_fetch_array($result1)) {
-		if (isset($_POST['StockCat']) and $_POST['StockCat']==$myrow1['categoryid']){
-			echo '<option selected value="'. $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
-		} else {
-			echo '<option value="'. $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
-		}
-	}
-
-	unset($_POST['Keywords']);
-	unset($_POST['StockCode']);
-
-	if (!isset($_POST['Keywords'])) {
-		$_POST['Keywords']='';
-	}
-
-	if (!isset($_POST['StockCode'])) {
-		$_POST['StockCode']='';
-	}
-
-	echo '</select></td>
-		<td>' . _('Enter text extracts in the description') . ':</td>
-		<td><input type="text" name="Keywords" size=20 maxlength=25 value="' . $_POST['Keywords'] . '"></td></tr>
-		<tr><td></td>
-		<td><font size=3><b>' . _('OR') . ' </b></font>' . _('Enter extract of the Stock Code') . ':</td>
-		<td><input type="text" name="StockCode" size=15 maxlength=18 value="' . $_POST['StockCode'] . '"></td>
-		</tr>
-		<tr><td></td>
-		<td><font size=3><b>' . _('OR') . ' </b></font><a target="_blank" href="'.$rootpath.'/Stocks.php">' . _('Create a New Stock Item') . '</a></td></tr>
-		</table>
-		<br />
-		
-		<div class="centre"><input type="submit" name="Search" value="' . _('Search Now') . '">
-		<input type="submit" name="NonStockOrder" value="' . _('Order a non stock item') . '">
-		</div><br />';
-
-	$PartsDisplayed =0;
-}
-
-if (isset($SearchResult)) {
-
-	echo '<table cellpadding="1" colspan="7" class="selection">';
-
-	$TableHeader = '<tr>
-				<th>' . _('Code')  . '</th>
-				<th>' . _('Description') . '</th>
-				<th>' . _('Our Units') . '</th>
-				<th>' . _('Conversion') . '<br />' ._('Factor') . '</th>
-				<th>' . _('Supplier/Order') . '<br />' .  _('Units') . '</th>
-				<th colspan=2><a href="#end">'._('Go to end of list').'</a></th>
-				</tr>';
-	echo $TableHeader;
-
-	$j = 1;
-	$k=0; //row colour counter
-
-	while ($myrow=DB_fetch_array($SearchResult)) {
-
-		if ($k==1){
-			echo '<tr class="EvenTableRows">';
-			$k=0;
-		} else {
-			echo '<tr class="OddTableRows">';
-			$k=1;
-		}
-
-		$FileName = $myrow['stockid'] . '.jpg';
-		if (file_exists( $_SESSION['part_pics_dir'] . '/' . $FileName) ) {
-			$ImageSource = '<img src="'.$rootpath . '/' . $_SESSION['part_pics_dir'] . '/' . $myrow['stockid'] . '.jpg" width="50" height="50">';
-		} else {
-			$ImageSource = '<i>'._('No Image').'</i>';
-		}
-
-		/*Get conversion factor and supplier units if any */
-		$sql =  "SELECT purchdata.conversionfactor,
-						purchdata.suppliersuom
-					FROM purchdata
-					WHERE purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "' 
-					AND purchdata.stockid='" . $myrow['stockid'] . "'";
-		$ErrMsg = _('Could not retrieve the purchasing data for the item');
-		$PurchDataResult = DB_query($sql,$db,$ErrMsg);
-		
-		if (DB_num_rows($PurchDataResult)>0) {
-			$PurchDataRow = DB_fetch_array($PurchDataResult);
-			$OrderUnits=$PurchDataRow['suppliersuom'];
-			$ConversionFactor =$PurchDataRow['conversionfactor'];
-		} else {
-			$OrderUnits=$myrow['units'];
-			$ConversionFactor =1;
-		}
-		echo '<td>' . $myrow['stockid'] .'</td>
-			<td>' . $myrow['description'] .'</td>
-			<td>' . $myrow['units'] .'</td>
-			<td class="number">' . $ConversionFactor .'</td>
-			<td>' . $OrderUnits . '</td>
-			<td>' . $ImageSource . '</td>
-			<td><input class="number" type="text" size="6" value="0" name="NewQty' . $myrow['stockid'] . '"></td>
-			</tr>';
-			
-		$PartsDisplayed++;
-		if ($PartsDisplayed == $Maximum_Number_Of_Parts_To_Show){
-			break;
-		}
-#end of page full new headings if
-	}
-#end of while loop
-	echo '</table>';
-	if ($PartsDisplayed == $Maximum_Number_Of_Parts_To_Show){
-		/*$Maximum_Number_Of_Parts_To_Show defined in config.php */
-		prnMsg( _('Only the first') . ' ' . $Maximum_Number_Of_Parts_To_Show . ' ' . _('can be displayed') . '. ' .
-			_('Please restrict your search to only the parts required'),'info');
-	}
-	echo '<a name="end"></a><br /><div class="centre"><input type="submit" name="NewItem" value="Order some"></div>';
-}#end if SearchResults to show
+//if (!isset($_GET['Edit'])) {
+//	$sql="SELECT categoryid,
+//				categorydescription
+//		FROM stockcategory
+//		WHERE stocktype<>'L'
+//		AND stocktype<>'D'
+//		ORDER BY categorydescription";
+//	$ErrMsg = _('The supplier category details could not be retrieved because');
+//	$DbgMsg = _('The SQL used to retrieve the category details but failed was');
+//	$result1 = DB_query($sql,$db,$ErrMsg,$DbgMsg);
+//
+//	echo '<table class=selection>
+//			<tr>
+//				<th colspan=3><font size=3 color=blue>'. _('Search For Stock Items') . '</th>';
+//
+//	echo ':</font>
+//			</tr>
+//			<tr><td><select name="StockCat">';
+//
+//	echo '<option selected value="All">' . _('All') . '</option>';
+//	
+//	while ($myrow1 = DB_fetch_array($result1)) {
+//		if (isset($_POST['StockCat']) and $_POST['StockCat']==$myrow1['categoryid']){
+//			echo '<option selected value="'. $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
+//		} else {
+//			echo '<option value="'. $myrow1['categoryid'] . '">' . $myrow1['categorydescription'] . '</option>';
+//		}
+//	}
+//
+//	unset($_POST['Keywords']);
+//	unset($_POST['StockCode']);
+//
+//	if (!isset($_POST['Keywords'])) {
+//		$_POST['Keywords']='';
+//	}
+//
+//	if (!isset($_POST['StockCode'])) {
+//		$_POST['StockCode']='';
+//	}
+//
+//	echo '</select></td>
+//		<td>' . _('Enter text extracts in the description') . ':</td>
+//		<td><input type="text" name="Keywords" size=20 maxlength=25 value="' . $_POST['Keywords'] . '"></td></tr>
+//		<tr><td></td>
+//		<td><font size=3><b>' . _('OR') . ' </b></font>' . _('Enter extract of the Stock Code') . ':</td>
+//		<td><input type="text" name="StockCode" size=15 maxlength=18 value="' . $_POST['StockCode'] . '"></td>
+//		</tr>
+//		<tr><td></td>
+//		<td><font size=3><b>' . _('OR') . ' </b></font><a target="_blank" href="'.$rootpath.'/Stocks.php">' . _('Create a New Stock Item') . '</a></td></tr>
+//		</table>
+//		<br />
+//		
+//		<div class="centre"><input type="submit" name="Search" value="' . _('Search Now') . '">
+//		<input type="submit" name="NonStockOrder" value="' . _('Order a non stock item') . '">
+//		</div><br />';
+//
+//	$PartsDisplayed =0;
+//}
+//
+//if (isset($SearchResult)) {
+//
+//	echo '<table cellpadding="1" colspan="7" class="selection">';
+//
+//	$TableHeader = '<tr>
+//				<th>' . _('Code')  . '</th>
+//				<th>' . _('Description') . '</th>
+//				<th>' . _('Our Units') . '</th>
+//				<th>' . _('Conversion') . '<br />' ._('Factor') . '</th>
+//				<th>' . _('Supplier/Order') . '<br />' .  _('Units') . '</th>
+//				<th colspan=2><a href="#end">'._('Go to end of list').'</a></th>
+//				</tr>';
+//	echo $TableHeader;
+//
+//	$j = 1;
+//	$k=0; //row colour counter
+//
+//	while ($myrow=DB_fetch_array($SearchResult)) {
+//
+//		if ($k==1){
+//			echo '<tr class="EvenTableRows">';
+//			$k=0;
+//		} else {
+//			echo '<tr class="OddTableRows">';
+//			$k=1;
+//		}
+//
+//		$FileName = $myrow['stockid'] . '.jpg';
+//		if (file_exists( $_SESSION['part_pics_dir'] . '/' . $FileName) ) {
+//			$ImageSource = '<img src="'.$rootpath . '/' . $_SESSION['part_pics_dir'] . '/' . $myrow['stockid'] . '.jpg" width="50" height="50">';
+//		} else {
+//			$ImageSource = '<i>'._('No Image').'</i>';
+//		}
+//
+//		/*Get conversion factor and supplier units if any */
+//		$sql =  "SELECT purchdata.conversionfactor,
+//						purchdata.suppliersuom
+//					FROM purchdata
+//					WHERE purchdata.supplierno='" . $_SESSION['PO'.$identifier]->SupplierID . "' 
+//					AND purchdata.stockid='" . $myrow['stockid'] . "'";
+//		$ErrMsg = _('Could not retrieve the purchasing data for the item');
+//		$PurchDataResult = DB_query($sql,$db,$ErrMsg);
+//		
+//		if (DB_num_rows($PurchDataResult)>0) {
+//			$PurchDataRow = DB_fetch_array($PurchDataResult);
+//			$OrderUnits=$PurchDataRow['suppliersuom'];
+//			$ConversionFactor =$PurchDataRow['conversionfactor'];
+//		} else {
+//			$OrderUnits=$myrow['units'];
+//			$ConversionFactor =1;
+//		}
+//		echo '<td>' . $myrow['stockid'] .'</td>
+//			<td>' . $myrow['description'] .'</td>
+//			<td>' . $myrow['units'] .'</td>
+//			<td class="number">' . $ConversionFactor .'</td>
+//			<td>' . $OrderUnits . '</td>
+//			<td>' . $ImageSource . '</td>
+//			<td><input class="number" type="text" size="6" value="0" name="NewQty' . $myrow['stockid'] . '"></td>
+//			</tr>';
+//			
+//		$PartsDisplayed++;
+//		if ($PartsDisplayed == $Maximum_Number_Of_Parts_To_Show){
+//			break;
+//		}
+//#end of page full new headings if
+//	}
+//#end of while loop
+//	echo '</table>';
+//	if ($PartsDisplayed == $Maximum_Number_Of_Parts_To_Show){
+//		/*$Maximum_Number_Of_Parts_To_Show defined in config.php */
+//		prnMsg( _('Only the first') . ' ' . $Maximum_Number_Of_Parts_To_Show . ' ' . _('can be displayed') . '. ' .
+//			_('Please restrict your search to only the parts required'),'info');
+//	}
+//	echo '<a name="end"></a><br /><div class="centre"><input type="submit" name="NewItem" value="Order some"></div>';
+//}#end if SearchResults to show
 
 echo '</form>';
 include('includes/footer.inc');

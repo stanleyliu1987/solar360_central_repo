@@ -17,16 +17,18 @@ Class Allocation {
 	var $TransAmt; /*Total amount of the transaction in FX */
 	var $PrevDiffOnExch; /*The difference on exchange before this allocation */
 	var $CurrDecimalPlaces; /*The number of decimal places to display for the currency being allocated */
+        /* Add PO Order Num reference */
+        var $PONo;
 
 	function Allocation(){
 	/*Constructor function initialises a new supplier allocation*/
 		$this->Allocs = array();
 	}
 
-	function add_to_AllocsAllocn ($ID, $TransType, $TypeNo, $TransDate, $SuppRef, $AllocAmt, $TransAmount, $ExRate, $DiffOnExch, $PrevDiffOnExch, $PrevAlloc, $PrevAllocRecordID){
+	function add_to_AllocsAllocn ($ID, $TransType, $TypeNo, $TransDate, $SuppRef, $AllocAmt, $TransAmount, $ExRate, $DiffOnExch, $PrevDiffOnExch, $PrevAlloc, $PrevAllocRecordID,$PONo){
 
 		if ($TransAmount >0){
-			$this->Allocs[$ID] = new Allocn($ID, $TransType, $TypeNo, $TransDate, $SuppRef, $AllocAmt, $TransAmount, $ExRate, $DiffOnExch, $PrevDiffOnExch, $PrevAlloc, $PrevAllocRecordID);
+			$this->Allocs[$ID] = new Allocn($ID, $TransType, $TypeNo, $TransDate, $SuppRef, $AllocAmt, $TransAmount, $ExRate, $DiffOnExch, $PrevDiffOnExch, $PrevAlloc, $PrevAllocRecordID,$PONo);
 			Return 1;
 		} else {
 			Return 0;
@@ -58,8 +60,9 @@ Class Allocn {
 				   this must be deleted if a new modified record is inserted
 				   THERE CAN BE ONLY ONE ... allocation record for each
 				   payment/inovice combination  */
+        Var $PONo;
 
-	function Allocn ($ID, $TransType, $TypeNo, $TransDate, $SuppRef, $AllocAmt, $TransAmount, $ExRate, $DiffOnExch, $PrevDiffOnExch, $PrevAlloc, $PrevAllocRecordID){
+	function Allocn ($ID, $TransType, $TypeNo, $TransDate, $SuppRef, $AllocAmt, $TransAmount, $ExRate, $DiffOnExch, $PrevDiffOnExch, $PrevAlloc, $PrevAllocRecordID,$PONo){
 
 /* Constructor function to add a new Allocn object with passed params */
 		$this->ID = $ID;
@@ -75,6 +78,7 @@ Class Allocn {
 		$this->PrevDiffOnExch = $PrevDiffOnExch;
 		$this->PrevAlloc = $PrevAlloc;
 		$this->PrevAllocRecordID= $PrevAllocRecordID;
+                $this->PONo= $PONo;
 	}
 }
 

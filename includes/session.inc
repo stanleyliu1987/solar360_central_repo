@@ -18,7 +18,7 @@ if (isset($SessionSavePath)){
 	session_save_path($SessionSavePath);
 }
 
-ini_set('session.gc_Maxlifetime',$SessionLifeTime);
+ini_set('session.gc_maxlifetime',$SessionLifeTime);
 ini_set('max_execution_time',$MaximumExecutionTime);
 
 session_start();
@@ -33,6 +33,8 @@ include($PathPrefix . 'custom/OrderStagesMessageModel.php');
 include($PathPrefix . 'custom/CustomerTransSearchModel.php');
 include($PathPrefix . 'custom/OrderStagesModel.php');
 include($PathPrefix . 'custom/OrderSummaryModel.php');
+include($PathPrefix . 'custom/KPIReportingModel.php');
+include($PathPrefix . 'custom/WarehouseIntegrationModel.php');
 /* Custom weberp Bean Class */
 include($PathPrefix . 'custom/bean/Bean.php');
 include($PathPrefix . 'custom/bean/EmailAuditLogBean.php');

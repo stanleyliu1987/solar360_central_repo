@@ -43,11 +43,17 @@ include ('includes/htmlMimeMail.php');
                 $mail->addAttachment($Attachment, $_FILES['ConsignmentPDF']['name'][$i], 'application/pdf');
               }
           }
+                if(isset($_POST['EmailFromAddr']) and $_POST['EmailFromAddr']!=''){
+                $EmailFromAddr =  $_POST['EmailFromAddr'];  
+                }
+                else{
+                $EmailFromAddr =  $_SESSION['CompanyRecord']['email'];     
+                }
                 /* Send Email Function */
                 $mail->setHtml(str_replace(array("\r","\n",'\r','\n'),'',htmlspecialchars_decode($_POST['EmailMessage'])));
                 $mail->setHtmlCharset("UTF-8");
                 $mail->setSubject($_POST['EmailSubject']);
-		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $_SESSION['CompanyRecord']['email'] . '>');
+		$mail->setFrom($_SESSION['CompanyRecord']['coyname'] . ' <' . $EmailFromAddr . '>');
                 $mail->setCc($_POST['EmailAddrCC']);
                 $mail->setBcc($_POST['EmailAddrBCC']);
 		$Success = $mail->send(array($_POST['EmailAddr']),'smtp');
@@ -58,7 +64,7 @@ include ('includes/htmlMimeMail.php');
                 $emaillogbean->sendstatus=$Success;
                 $emaillogbean->ordernumber=$_POST['InvoiceNumber']<>''?$_POST['InvoiceNumber']:'';
                 $emaillogbean->emailtemplateid=$_POST['ChooseEmailTemplate']<>''?$_POST['ChooseEmailTemplate']:'';
-                $emaillogbean->emailfromaddress=$_SESSION['CompanyRecord']['email']<>''?$_SESSION['CompanyRecord']['email']:'';
+                $emaillogbean->emailfromaddress=$EmailFromAddr;
                 $emaillogbean->emailtoaddress=$_POST['EmailAddr']<>''?$_POST['EmailAddr']:'';
                 $emaillogbean->emailccaddress=$_POST['EmailAddrCC']<>''?$_POST['EmailAddrCC']:'';
                 $emaillogbean->emailbccaddress=$_POST['EmailAddrBCC']<>''?$_POST['EmailAddrBCC']:'';

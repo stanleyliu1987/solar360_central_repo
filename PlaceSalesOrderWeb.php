@@ -32,6 +32,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         import_csv_salesorders.deliverysuburb,
                                         import_csv_salesorders.deliverypostcode,
                                         import_csv_salesorders.deliverystate,
+                                        import_csv_salesorders.deliveryphone,
                                         import_csv_salesorders.billingname,
                                        REPLACE(import_csv_salesorders.billingcompany, '''', '') as billingcompany,
                                         import_csv_salesorders.billingaddress,
@@ -132,7 +133,20 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
 	        $DbgMsg = _('The following SQL to update the PO Status Of Sales Order');
 	        $UpdateNewPOStatusResult = DB_query($SqlUpdateNewSOPO,$db,$ErrMsg,$DbgMsg,true);
            
-            
+               /** 3.1 Update the unit price in Sales order Temporary Table if special price applied */
+                $StockCodeList=DB_query("Select orderlineno, orderno, stkcode from import_salesorderdetails where orderno='".$_GET['OrderNoForImport']."'",$db,'Stock Code select issue','',true);
+                $CurrentDate=str_replace('/','-',FormatDateForSQL(date('d/m/Y')).' '.date('H:m:s'));
+                while ($stock=DB_fetch_array($StockCodeList)) {
+               /** 3.2 Retrieve the Lowest Special price in AUD, Web Price List and Specific Date period */     
+                $SelectPriceSQL= "Select Min(price) from prices where typeabbrev= 1 and currabrev='AUD' and stockid='".$stock['stkcode']."' and 
+                                       debtorno='".$customerCode."' and branchcode='".$branchCode."' and (enddate='0000-00-00 00:00:00' or '".$CurrentDate."' between startdate and enddate)";
+                $CheckSpecial=  DB_query($SelectPriceSQL,$db,'Special price select issue','',true);
+                $price = DB_fetch_row($CheckSpecial);
+                if($price[0]!=NULL){
+                DB_query("Update import_salesorderdetails set unitprice='".$price[0]."' where orderlineno='".$stock['orderlineno']."' and orderno='".$stock['orderno']."'" ,$db,'Update special price issue'); 
+                 }
+               }
+            /** End of logic */ 
             /** 4. Copy the Importing salesorderdetails to actual salesorderdetails table **/
               $SqlInsertNewSODetail="INSERT INTO salesorderdetails (orderlineno,
 	                            orderno,
@@ -207,7 +221,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                                 '". $SQLMeasurementList["unitlength"]."',
                                                 purchdata.supplierno FROM salesorderdetails INNER JOIN salesorders ON salesorders.orderno= salesorderdetails.orderno 
                                                 INNER JOIN purchdata ON purchdata.stockid = salesorderdetails.stkcode WHERE purchdata.preferred=1 and
-                                                salesorderdetails.orderno ='". $_GET['OrderNoForImport']."' and salesorderdetails.stkcode='".$items['stkcode']."'";
+                                                salesorderdetails.orderno ='". $_GET['OrderNoForImport']."' and salesorderdetails.stkcode='".$items['stkcode']."' limit 1";
                   }
                   else{
                    $SqlInsertNewSOFreightData="INSERT INTO freightcostevaluation (linenumber, itemcode, custcode, salesorder, quantity, height, width, length, prefsupplier) 
@@ -221,7 +235,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                                 '". $SQLMeasurementList["unitlength"]."',
                                                 360
                                                 FROM salesorderdetails INNER JOIN salesorders ON salesorders.orderno= salesorderdetails.orderno 
-                                                WHERE salesorderdetails.orderno ='". $_GET['OrderNoForImport']."' and salesorderdetails.stkcode='".$items['stkcode']."'";    
+                                                WHERE salesorderdetails.orderno ='". $_GET['OrderNoForImport']."' and salesorderdetails.stkcode='".$items['stkcode']."' limit 1";    
                   }
                
                 $ErrMsg = _('CRITICAL ERROR') . ' ' . _('NOTE DOWN THIS ERROR AND SEEK ASSISTANCE') . ': ' . _('Freight Details cannot be inserted');
@@ -244,6 +258,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         import_csv_salesorders.deliverysuburb,
                                         import_csv_salesorders.deliverypostcode,
                                         import_csv_salesorders.deliverystate,
+                                        import_csv_salesorders.deliveryphone,
                                         import_csv_salesorders.billingname,
                                        REPLACE(import_csv_salesorders.billingcompany, '''', '') as billingcompany,
                                         import_csv_salesorders.billingaddress,
@@ -270,6 +285,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         import_csv_salesorders.deliverysuburb,
                                         import_csv_salesorders.deliverypostcode,
                                         import_csv_salesorders.deliverystate,
+                                        import_csv_salesorders.deliveryphone,
                                         import_csv_salesorders.billingname,
                                        REPLACE(import_csv_salesorders.billingcompany, '''', '') as billingcompany,
                                         import_csv_salesorders.billingaddress,
@@ -316,8 +332,13 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
               $customername=$CustomerBranchName[0];
               $branchname=$CustomerBranchName[1];
              }
-            
-
+       /* 18112014 Load Required Delivery date field into the sales order table by Stan */     
+if(FormatDateForSQL(substr(trim($CSVSOImport['comments']),-10))=='--'){
+    $deldate= $CSVSOImport['datepurchased'];
+}
+else{
+    $deldate=FormatDateForSQL(substr(trim($CSVSOImport['comments']),-10));
+}
                  $SqlInsertNewSO="INSERT INTO import_salesorders (orderno, 
                               debtorno, 
                               branchcode,
@@ -359,7 +380,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         1,
                                         0,
                                         '001',
-                                        '". $CSVSOImport['datepurchased']."',
+                                        '". $deldate."',
                                         '". $CSVSOImport['datepurchased']."',
                                         0,
                                         '". $CSVSOImport['datepurchased']."',
@@ -381,6 +402,7 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
                                         import_csv_salesorders.deliverysuburb,
                                         import_csv_salesorders.deliverypostcode,
                                         import_csv_salesorders.deliverystate,
+                                        import_csv_salesorders.deliveryphone,
                                         import_csv_salesorders.billingname,
                                        REPLACE(import_csv_salesorders.billingcompany, '''', '') as billingcompany,
                                         import_csv_salesorders.billingaddress,

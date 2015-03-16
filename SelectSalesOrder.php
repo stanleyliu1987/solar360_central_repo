@@ -7,6 +7,12 @@ $title = _('Search Outstanding Sales Orders');
 include('includes/header.inc');
 include('includes/SQL_CommonFunctions.inc');
 
+if(isset($_POST['OrderStartDate'])){
+$OrderStartDate=$_POST['OrderStartDate'];
+}
+if(isset($_POST['OrderEndDate'])){
+$OrderEndDate=$_POST['OrderEndDate'];
+}
 if (isset($_POST['PlacePO'])){ /*user hit button to place PO for selected orders */
 
 	/*Note the button would not have been displayed if the user had no authority 
@@ -428,6 +434,8 @@ echo '<input type="hidden" name="FormID" value="' . $_SESSION['FormID'] . '" />'
 
 if (isset($_POST['ResetPart'])){
      unset($_REQUEST['SelectedStockItem']);
+     unset($OrderStartDate);
+     unset($OrderEndDate);
 }
 
 echo '<p><div class="centre">';
@@ -453,7 +461,8 @@ if (isset($_REQUEST['OrderNumber']) AND $_REQUEST['OrderNumber']!='') {
 }
 
 if (isset($_POST['SearchParts'])){
-
+     unset($OrderStartDate);
+     unset($OrderEndDate);
 	if ($_POST['Keywords'] AND $_POST['StockCode']) {
 		echo _('Stock description keywords have been used in preference to the Stock code extract entered');
 	}
@@ -569,7 +578,11 @@ if (!isset($StockID)) {
 			echo '<option value="Quotes_Only">' . _('Quotations Only') . '</option>';
 		}
 
-		echo '</select> </td>
+		echo '</select> </td></tr>
+                 <tr><td><font size="1">' . _('Order Start Date') . ':</font></td>
+                <td><input type="text" maxlength="10" size="15" name="OrderStartDate" value="'.$OrderStartDate.'" id="datepicker" alt="'.$_SESSION['DefaultDateFormat'].'" class="date"></td>
+		<td><font size=1>' . _('Order End Date') . ':</font></td>
+		<td><input type="text" maxlength="10" size="15" name="OrderEndDate"  value="'.$OrderEndDate.'" id="datepicker" alt="'.$_SESSION['DefaultDateFormat'].'" class="date"></td>
 				<td><input type=submit name="SearchOrders" value="' . _('Search') . '"></td>
 				<td><a href="' . $rootpath . '/SelectOrderItems.php?NewOrder=Yes">' . _('Add Sales Order') . '</a></td>
 			</tr>
@@ -671,17 +684,37 @@ if (isset($StockItemsResult)
 	if(!isset($_POST['StockLocation'])) {
 		$_POST['StockLocation'] = '';
 	}
+
+        if($OrderStartDate!='' and $OrderEndDate==''){ 
+           $OrderRangeCriteria="AND salesorders.orddate  >='".FormatDateForSQL($OrderStartDate)."' ";
+        }
+        elseif($OrderStartDate=='' and $OrderEndDate!=''){ 
+           $OrderRangeCriteria="AND salesorders.orddate  <='".FormatDateForSQL($OrderEndDate)."' "; 
+        }
+        elseif($OrderStartDate!='' and $OrderEndDate!=''){ 
+           $OrderRangeCriteria="AND salesorders.orddate  between '".FormatDateForSQL($OrderStartDate)."' and '".FormatDateForSQL($OrderEndDate)."' ";
+        } 
+        else{ 
+           $OrderRangeCriteria=' ';  
+        }
+
+
+
 	if (isset($_REQUEST['OrderNumber']) 
 		AND $_REQUEST['OrderNumber'] !='') {
 			$SQL = "SELECT salesorders.orderno,
+                                       salesorders.debtorno,
+                                       salesorders.branchcode,
 					debtorsmaster.name,
 					custbranch.brname,
+                                        custbranch.email,
 					salesorders.customerref,
 					salesorders.orddate,
 					salesorders.deliverydate,
 					salesorders.deliverto,
 					salesorders.printedpackingslip,
 					salesorders.poplaced,
+                                        salesorders.freightcost,
 					SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
 				FROM salesorders INNER JOIN salesorderdetails 
 					ON salesorders.orderno = salesorderdetails.orderno
@@ -695,6 +728,7 @@ if (isset($StockItemsResult)
 				WHERE salesorderdetails.completed=0
 				AND salesorders.orderno=". $_REQUEST['OrderNumber'] ."
 				AND salesorders.quotation =" .$Quotations . "
+                                ".$OrderRangeCriteria."    
 				GROUP BY salesorders.orderno,
 					debtorsmaster.name,
 					custbranch.brname,
@@ -712,14 +746,18 @@ if (isset($StockItemsResult)
 
 			if (isset($_REQUEST['SelectedStockItem'])) {
 				$SQL = "SELECT salesorders.orderno,
+                                               salesorders.debtorno,
+                                               salesorders.branchcode,
 						debtorsmaster.name,
 						custbranch.brname,
+                                                custbranch.email,
 						salesorders.customerref,
 						salesorders.orddate,
 						salesorders.deliverydate,
 						salesorders.deliverto,
 						salesorders.printedpackingslip,
 						salesorders.poplaced,
+                                                salesorders.freightcost,
 						salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate AS ordervalue
 					FROM salesorders INNER JOIN salesorderdetails 
 						ON salesorders.orderno = salesorderdetails.orderno
@@ -735,19 +773,24 @@ if (isset($StockItemsResult)
 					AND salesorderdetails.stkcode='". $_REQUEST['SelectedStockItem'] ."'
 					AND salesorders.debtorno='" . $_REQUEST['SelectedCustomer'] ."'
 					AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+                                            ".$OrderRangeCriteria." 
 					ORDER BY salesorders.orderno";
 
 
 			} else {
 				$SQL = "SELECT salesorders.orderno,
+                                               salesorders.debtorno,
+                                               salesorders.branchcode,
 						debtorsmaster.name,
 						custbranch.brname,
+                                                custbranch.email,
 						salesorders.customerref,
 						salesorders.orddate,
 						salesorders.deliverto,
 						salesorders.printedpackingslip,
 						salesorders.poplaced,
 						salesorders.deliverydate,
+                                                salesorders.freightcost,
 						SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
 					FROM salesorders INNER JOIN salesorderdetails 
 						ON salesorders.orderno = salesorderdetails.orderno
@@ -762,6 +805,7 @@ if (isset($StockItemsResult)
 					AND salesorderdetails.completed=0
 					AND salesorders.debtorno='" . $_REQUEST['SelectedCustomer'] . "'
 					AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+                                            ".$OrderRangeCriteria." 
 					GROUP BY salesorders.orderno,
 						debtorsmaster.name,
 						salesorders.debtorno,
@@ -777,14 +821,18 @@ if (isset($StockItemsResult)
 		} else { //no customer selected
 			if (isset($_REQUEST['SelectedStockItem'])) {
 				$SQL = "SELECT salesorders.orderno,
+                                               salesorders.debtorno,
+                                               salesorders.branchcode,
 						debtorsmaster.name,
 						custbranch.brname,
+                                                custbranch.email,
 						salesorders.customerref,
 						salesorders.orddate,
 						salesorders.deliverto,
 					  	salesorders.printedpackingslip,
 					  	salesorders.poplaced,
 						salesorders.deliverydate,
+                                                salesorders.freightcost,
 						SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
 					FROM salesorders INNER JOIN salesorderdetails 
 						ON salesorders.orderno = salesorderdetails.orderno
@@ -799,6 +847,7 @@ if (isset($StockItemsResult)
 					AND salesorders.quotation =" .$Quotations . "
 					AND salesorderdetails.stkcode='". $_REQUEST['SelectedStockItem'] . "'
 					AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+                                            ".$OrderRangeCriteria." 
 					GROUP BY salesorders.orderno,
 						debtorsmaster.name,
 						custbranch.brname,
@@ -811,14 +860,18 @@ if (isset($StockItemsResult)
 					ORDER BY salesorders.orderno";
 			} else {
 				$SQL = "SELECT salesorders.orderno,
+                                               salesorders.debtorno,
+                                               salesorders.branchcode,                         
 						debtorsmaster.name,
 						custbranch.brname,
+                                                custbranch.email,
 						salesorders.customerref,
 						salesorders.orddate,
 						salesorders.deliverto,
 						salesorders.deliverydate,
 						salesorders.printedpackingslip,
 						salesorders.poplaced,
+                                                salesorders.freightcost,
 						SUM(salesorderdetails.unitprice*salesorderdetails.quantity*(1-salesorderdetails.discountpercent)/currencies.rate) AS ordervalue
 					FROM salesorders INNER JOIN salesorderdetails 
 						ON salesorders.orderno = salesorderdetails.orderno
@@ -832,6 +885,7 @@ if (isset($StockItemsResult)
 					WHERE salesorderdetails.completed=0
 					AND salesorders.quotation =" .$Quotations . "
 					AND salesorders.fromstkloc = '". $_POST['StockLocation'] . "'
+                                            ".$OrderRangeCriteria." 
 					GROUP BY salesorders.orderno,
 						debtorsmaster.name,
 						custbranch.brname,
@@ -868,7 +922,9 @@ if (isset($StockItemsResult)
 			$tableheader = '<tr>
 								<th>' . _('Modify') . '</th>
 								<th>' . _('Invoice') . '</th>
-								<th>' . _('Dispatch Note') . '</th>
+                                                                <th>' . _('Email Proforma Invoice') . '</th>
+                                                                <th>' . _('Print Proforma Invoice') . '</th>
+								<th>' . _('Email Send Date') . '</th>
 								<th>' . _('Customer') . '</th>
 								<th>' . _('Branch') . '</th>
 								<th>' . _('Cust Order') . ' #</th>
@@ -923,23 +979,39 @@ if (isset($StockItemsResult)
 				$PrintDispatchNote = $rootpath . '/PrintCustOrder.php?TransNo=' . $myrow['orderno'];
 			}
 			$PrintQuotation = $rootpath . '/PDFQuotation.php?QuotationNo=' . $myrow['orderno'];
+                        $PrintProformaInv = $rootpath . '/PDFProformaInv.php?ProformaInvNo=' . $myrow['orderno'];
 			$FormatedDelDate = ConvertSQLDate($myrow['deliverydate']);
 			$FormatedOrderDate = ConvertSQLDate($myrow['orddate']);
-			$FormatedOrderValue = number_format($myrow['ordervalue'],$_SESSION['CompanyRecord']['decimalplaces']);
+                        /* Hard code the GST rate to 10% 30102015*/
+                        $TotalOrderValue=((($myrow['ordervalue']+$myrow['freightcost']))/10)+$myrow['freightcost']+$myrow['ordervalue'];
+			$FormatedOrderValue = number_format($TotalOrderValue,$_SESSION['CompanyRecord']['decimalplaces']);
 	
 			if ($myrow['printedpackingslip']==0) {
 			  $PrintText = _('Print');
 			} else {
 			  $PrintText = _('Reprint');
 			}
-	
+                        
+                        /* 23012015 Retrieve Send Email Status */
+                        $CheckEmailSQL="Select senddate from emailauditlog where sendstatus=1 and ordernumber='".$myrow['orderno']."' and emailtemplateid in (5,6,7) order by senddate desc limit 1";
+                        $EmailResult=DB_query($CheckEmailSQL,$db);
+                        $EmailSendTime = '';
+                        if (DB_num_rows($EmailResult)>0){
+                            $EmailRow = DB_fetch_array($EmailResult);
+                            $EmailSendTime=$EmailRow['senddate'];
+                        }
+
+                        /* Email and Print Proforma Invoice link 21012015*/
+	                $EmailProInvLink= $rootpath.'/EmailClientPInv.php?CustEmail='.$myrow['email'].'&SalesOrderNo='.$myrow['orderno'].'&debtorno='.$myrow['debtorno'].'&branchcode='.$myrow['branchcode']; 
 			if ($_POST['Quotations']=='Orders_Only'){
 	
 			 /*Check authority to create POs if user has authority then show the check boxes to select sales orders to place POs for otherwise don't provide this option */
 				if ($AuthRow['cancreate']==0 AND $myrow['poplaced']==0){ //cancreate==0 if the user can create POs and not already placed
 				printf('<td><a href="%s">%s</a></td>
         				<td><a href="%s">' . _('Invoice') . '</a></td>
-        				<td><a target="_blank" href="%s">' . $PrintText . ' <img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>
+                                        <td><a href="%s" target="_blank">' . _('Email') . '<img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Proforma Invoice') . '"></a></td>
+                                        <td><a href="%s" target="_blank">Print  <img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>    
+                                        <td>%s</td>
         				<td>%s</td>
         				<td>%s</td>
         				<td>%s</td>
@@ -952,7 +1024,10 @@ if (isset($StockItemsResult)
         				$ModifyPage,
         				$myrow['orderno'],
         				$Confirm_Invoice,
-        				$PrintDispatchNote,
+                                        $EmailProInvLink,
+                                        $PrintProformaInv,
+                                        $EmailSendTime,
+        				//$PrintDispatchNote,
         				$myrow['name'],
         				$myrow['brname'],
         				$myrow['customerref'],
@@ -966,7 +1041,9 @@ if (isset($StockItemsResult)
 				} else {  /*User is not authorised to create POs so don't even show the option */
 					printf('<td><a href="%s">%s</a></td>
 							<td><a href="%s">' . _('Invoice') . '</a></td>
-							<td><a target="_blank" href="%s">' . $PrintText . ' <img src="' .$rootpath . '/css/' . $theme .'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>
+                                                        <td><a href="%s" target="_blank">' . _('Email') . '<img src="'.$rootpath.'/css/'.$theme.'/images/email.gif" title="' . _('Click to email the Client Proforma Invoice') . '"></a></td>
+                                                        <td><a href="%s" target="_blank">' . _('Print') . '<img src="' .$rootpath.'/css/'.$theme.'/images/pdf.png" title="' . _('Click for PDF') . '"></a></td>        
+						        <td>%s</td>
 							<td>%s</td>
 							<td>%s</td>
 							<td>%s</td>
@@ -978,7 +1055,10 @@ if (isset($StockItemsResult)
 							$ModifyPage,
 							$myrow['orderno'],
 							$Confirm_Invoice,
-							$PrintDispatchNote,
+                                                        $EmailProInvLink,
+                                                        $PrintProformaInv,
+                                                        $EmailSendTime,
+							//$PrintDispatchNote,
 							$myrow['name'],
 							$myrow['brname'],
 							$myrow['customerref'],
@@ -1012,7 +1092,8 @@ if (isset($StockItemsResult)
 			}
 			$i++;
 			$j++;
-			$OrdersTotal += $myrow['ordervalue'];
+                          
+			$OrdersTotal += ((($myrow['ordervalue']+$myrow['freightcost']))/10)+$myrow['freightcost']+$myrow['ordervalue'];
 			if ($j == 12){
 				$j=1;
 				echo $tableheader;
@@ -1022,7 +1103,7 @@ if (isset($StockItemsResult)
 		if ($_POST['Quotations']=='Orders_Only' 
 			AND $AuthRow['cancreate']==0){ //cancreate==0 means can create POs
 			
-			echo '<tr><td colspan="8"><td><td colspan="2" class="number"><input type="submit" name="PlacePO" value="' . _('Place') . "\n" . _('PO') . '" onclick="return confirm(\'' . _('This will create purchase orders for all the items on the checked sales orders above, based on the preferred supplier purchasing data held in the system. Are You Absolutely Sure?') . '\');"></td</tr>';
+			echo '<tr><td colspan="8"><td><td colspan="4" class="number"><input type="submit" name="PlacePO" value="' . _('Place') . "\n" . _('PO') . '" onclick="return confirm(\'' . _('This will create purchase orders for all the items on the checked sales orders above, based on the preferred supplier purchasing data held in the system. Are You Absolutely Sure?') . '\');"></td</tr>';
 		}
 		echo '<tr><td colspan="9" class="number">';
 		if ($_POST['Quotations']=='Orders_Only'){

@@ -72,6 +72,8 @@ Class Cart {
         var $ItemPrefSupp;
         var $ItemSuppWare;
         var $ItemFreComment;
+        /* Item Stock Location */
+        var $FromStkLoc;
         
 
 	function Cart(){
@@ -135,7 +137,7 @@ Class Cart {
                                                         $ItemServiceType,
                                                         $ItemPrefSupp,
                                                         $ItemSuppWare,
-                                                        $ItemFreComment){
+                                                        $ItemFreComment,$FromStkLoc){
 
 		if (isset($StockID) AND $StockID!="" AND $Qty>0 AND isset($Qty)){
 
@@ -186,7 +188,7 @@ Class Cart {
                                                                                                                         $ItemServiceType, 
                                                                                                                         $ItemPrefSupp,
                                                                                                                         $ItemSuppWare,
-                                                                                                                        $ItemFreComment);
+                                                                                                                        $ItemFreComment,$FromStkLoc);
 			$this->ItemsOrdered++;
 
 			if ($UpdateDB=='Yes'){
@@ -206,7 +208,7 @@ Class Cart {
 																						unitprice,
 																						discountpercent,
 																						itemdue,
-																						poline)
+																						poline,fromstkloc)
 																					VALUES(" . $LineNumber. ",
 																						" . $_SESSION['ExistingOrder'] . ",
 																						'" . trim(strtoupper($StockID)) ."',
@@ -214,7 +216,8 @@ Class Cart {
 																						" . $Price . ",
 																						" . $Disc . ",'
 																						" . $ItemDue . "',
-																						" . $POLine . ")";
+																						" . $POLine . "," . $FromStkLoc .")";
+                                
 				$result = DB_query($sql,$db ,_('The order line for') . ' ' . strtoupper($StockID) . ' ' ._('could not be inserted'));
                                 
                                 /* Insert into a new line into FreightCostEvaluation */
@@ -274,7 +277,7 @@ Class Cart {
 														$ItemDue,
 														$POLine,
 														$GPPercent,
-                                                                                                                $FreightCost){
+                                                                                                                $FreightCost, $FromStkLoc){
 
 		if ($Qty>0){
 			$this->LineItems[$UpdateLineNumber]->Quantity = $Qty;
@@ -286,14 +289,16 @@ Class Cart {
 		$this->LineItems[$UpdateLineNumber]->POLine = $POLine;
 		$this->LineItems[$UpdateLineNumber]->GPPercent = $GPPercent;
                 $this->LineItems[$UpdateLineNumber]->FreightCost = $FreightCost;
+                $this->LineItems[$UpdateLineNumber]->FromStkLoc = $FromStkLoc;
 		if ($UpdateDB=='Yes'){
-			global $db;
+			global $db; 
 			$result = DB_query("UPDATE salesorderdetails SET quantity=" . $Qty . ",
 																										unitprice=" . $Price . ",
 																										discountpercent=" . $Disc . ",
 																										narrative ='" . DB_escape_string($Narrative) . "',
 																										itemdue = '" . FormatDateForSQL($ItemDue) . "',
-																										poline = '" . DB_escape_string($POLine) . "'
+																										poline = '" . DB_escape_string($POLine) . "',
+                                                                                                                                                                                                                fromstkloc = '" . DB_escape_string($FromStkLoc) . "'    
 														WHERE orderno=" . $_SESSION['ExistingOrder'] . "
 														AND orderlineno=" . $UpdateLineNumber
 													, $db
@@ -577,6 +582,7 @@ Class LineDetails {
         var $ItemPrefSupp;
         var $ItemSuppWare;
         var $ItemFreComment;
+        var $FromStkLoc;
 
 	function LineDetails ($LineNumber,
 							$StockItem,
@@ -617,7 +623,7 @@ Class LineDetails {
                                                         $ItemServiceType,
                                                         $ItemPrefSupp,
                                                         $ItemSuppWare,
-                                                        $ItemFreComment){
+                                                        $ItemFreComment,$FromStkLoc){
 
 /* Constructor function to add a new LineDetail object with passed params */
 		$this->LineNumber = $LineNumber;
@@ -676,6 +682,7 @@ Class LineDetails {
                 $this->ItemPrefSupp=$ItemPrefSupp;
                 $this->ItemSuppWare=$ItemSuppWare;
                 $this->ItemFreComment=$ItemFreComment;
+                $this->FromStkLoc=$FromStkLoc;
                 
 	} //end constructor function for LineDetails
 

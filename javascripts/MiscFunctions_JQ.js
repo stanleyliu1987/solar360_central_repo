@@ -92,18 +92,26 @@ $(document).ready(function(){
         $("#POEmailSubject").val($("#POEmailSubject").val().replace(" RCTI", ""));
     }
 });
+
+$("#metercube").click(function(){
+    $('#Volume').val($( "#ULEN" ).val()*$( "#UWID" ).val()*$( "#UHEI" ).val()/1000000);
+});
 });
 
-  function ChangeOrderStages(transID){
+  function ChangeOrderStages(transID,InvoiceNo){ 
   $.post("custom/ajax/OrderStagesUpdate.php",
   {
     OrderStages:$("#OrderStagesList_"+transID).val(),
     TransID:transID,
+    InvoiceNo:InvoiceNo,
     UserID:$("#UserID").val()
   },
-  function(data,status){
+  function(data,status){ 
      if(status!='success'){ 
        alert('Order Stages Updated Failed!');
+     }
+     else{
+       location.reload();
      }
     });
   }

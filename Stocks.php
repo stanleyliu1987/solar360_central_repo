@@ -914,11 +914,11 @@ if (!isset($_POST['UHEI']) or $_POST['UHEI']==''){
 
 echo '<tr><td>' . _('Economic Order Quantity') . ':</td><td><input ' . (in_array('EOQ',$Errors) ?  'class="inputerror"' : '' ) .'   type="Text" class="number" name="EOQ" size=12 maxlength=10 value="' . $_POST['EOQ'] . '"></td></tr>';
 /* 03042014 by Stan Customized mesurements code */
-echo '<tr><td>' . _('Length (cm)') . ':</td><td><input ' . (in_array('ULEN',$Errors) ?  'class="inputerror"' : '' ) .'   type="Text" class="number" name="ULEN" size=12 maxlength=10 value="' . $_POST['ULEN'] . '"></td></tr>
-      <tr><td>' . _('Width (cm)') . ':</td><td><input ' . (in_array('UWID',$Errors) ?  'class="inputerror"' : '' ) .'   type="Text" class="number" name="UWID" size=12 maxlength=10 value="' . $_POST['UWID'] . '"></td></tr>
-      <tr><td>' . _('Height (cm)') . ':</td><td><input ' . (in_array('UHEI',$Errors) ?  'class="inputerror"' : '' ) .'   type="Text" class="number" name="UHEI" size=12 maxlength=10 value="' . $_POST['UHEI'] . '"></td></tr>';
+echo '<tr><td>' . _('Length (cm)') . ':</td><td><input ' . (in_array('ULEN',$Errors) ?  'class="inputerror"' : '' ) .'   id="ULEN" type="Text" class="number" name="ULEN" size=12 maxlength=10 value="' . $_POST['ULEN'] . '"></td></tr>
+      <tr><td>' . _('Width (cm)') . ':</td><td><input ' . (in_array('UWID',$Errors) ?  'class="inputerror"' : '' ) .'   id="UWID" type="Text" class="number" name="UWID" size=12 maxlength=10 value="' . $_POST['UWID'] . '"></td></tr>
+      <tr><td>' . _('Height (cm)') . ':</td><td><input ' . (in_array('UHEI',$Errors) ?  'class="inputerror"' : '' ) .'   id="UHEI" type="Text" class="number" name="UHEI" size=12 maxlength=10 value="' . $_POST['UHEI'] . '"></td></tr>';
 /* end of code */
-echo '<tr><td>' . _('Packaged Volume (metres cubed)') . ':</td><td><input ' . (in_array('Volume',$Errors) ?  'class="inputerror"' : '' ) .'   type="Text" class="number" name="Volume" size=12 maxlength=10 value="' . $_POST['Volume'] . '"></td></tr>';
+echo '<tr><td>' . _('Packaged Volume (metres cubed)') . ':</td><td><input ' . (in_array('Volume',$Errors) ?  'class="inputerror"' : '' ) .'   id="Volume" type="Text" class="number" name="Volume" size=12 maxlength=10 value="' . $_POST['Volume'] . '"><input type="button" id="metercube" name="metercube" value="Calculate" onclick="Calculate_cube();"/></td></tr>';
 
 echo '<tr><td>' . _('Packaged Weight (KGs)') . ':</td><td><input ' . (in_array('KGS',$Errors) ?  'class="inputerror"' : '' ) .'   type="Text" class="number" name="KGS" size=12 maxlength=10 value="' . $_POST['KGS'] . '"></td></tr>';
 

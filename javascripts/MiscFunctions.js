@@ -295,7 +295,7 @@ toolbar=no,menubar=no,scrollbars=yes,resizable=no, location=no,status=no");
 function getStarTrackDelDetails(conPos,row,Invid){ 
     
 /* 01052015 Continue to update SO delivery status in Tracking Sheet */
-var Invdelstatus=document.getElementById('InvDelStatus_'+row.toString()).value;
+//var Invdelstatus=document.getElementById('InvDelStatus_'+row.toString()).value;
 var conValue= document.getElementById('conID_'+conPos.toString()).value;
 var paymentdate=document.getElementById("paymentdate_"+conPos.toString()).value;
 var paymentdatesplit= paymentdate.split('/');
@@ -343,7 +343,7 @@ xmlhttp.onreadystatechange=function()
    
   }
 xmlhttp.open("GET","eservice/GetDeliveryStatusDate.php?consignmentId="+conValue+"&paymentdate="+paymentdateformat+"&porefnumber="+porefnumber+"&delservice="+delservice+"&pocomment="+poComment
-+"&delstatus="+delstatus+"&deldate="+deldate+"&Invdelstatus="+Invdelstatus+"&InvoiceId="+Invid+"&UserID="+$("#UserID").val(),true);
++"&delstatus="+delstatus+"&deldate="+deldate+"&InvoiceId="+Invid+"&UserID="+$("#UserID").val(),true);
 xmlhttp.send();
 }
 

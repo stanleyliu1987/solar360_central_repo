@@ -316,6 +316,11 @@ while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['Displ
        }
       $DisplayBalance=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount']+$myrow['ovdiscount']-$tempAP,2);
       $DisplayInvoiceValue=number_format($myrow['ovfreight']+$myrow['ovgst']+$myrow['ovamount']+$myrow['ovdiscount'],2);
+      /* Only limited to MAcosta has the ability to adjust the invoice after the invoice changed to dispatch stock */
+      if(($myrow['order_stages']==3 or $myrow['order_stages']==4) and $_SESSION['UserID']!='MAcosta'){
+          $Invoice_status='';
+      }
+      else{
       if(DB_num_rows($POExistList)!=0 and DB_num_rows($FinishPOList)==0 and $myrow['invoice_status'] != 'Undo'){
           $Invoice_status='Completed'; 
         }
@@ -327,12 +332,21 @@ while ($myrow=DB_fetch_array($InvoicesResult) AND ($RowIndex <> $_SESSION['Displ
           else{
           $Invoice_status='<a href="'.$ModifyPage.'">' . _('Edit') . '</a>';   
          }
-      }  
+      }
+      }
 /* 05062014 by Stan Order Status dropdown list */
-$OrderStagesSQL= "SELECT * FROM order_stages";
+if($myrow['order_stages']==3){
+     $OrderStagesSQL= "SELECT * FROM order_stages where stages_id=3 or stages_id=4";
+}
+elseif($myrow['order_stages']==4){
+    $OrderStagesSQL= "SELECT * FROM order_stages where stages_id=4";
+}
+else{
+    $OrderStagesSQL= "SELECT * FROM order_stages where stages_id<>4";
+}
 $orderstageslist = DB_query($OrderStagesSQL,$db);
 /* End of logic */      
-$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['id'].'" name="OrderStagesList_'.$myrow['id'].'" onchange="ChangeOrderStages(\''.$myrow['id'].'\');" disabled>';
+$OrderStagesDropdown= '<select id="OrderStagesList_'.$myrow['id'].'" name="OrderStagesList_'.$myrow['id'].'" onchange="ChangeOrderStages(\''.$myrow['id'].'\',\''.$myrow['order_'].'\');" disabled>';
 while ($os = DB_fetch_array($orderstageslist)) {
 if($os["stages_id"]==$myrow['order_stages'])    
 $OrderStagesDropdown.= '<option value='.$os["stages_id"].' selected>'.$os["stages"].'</option>';

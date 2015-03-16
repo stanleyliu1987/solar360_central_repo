@@ -68,7 +68,7 @@ $EmailSubject="Invoice ".$InvoiceNumber. " Tracking Information";
 /* 15072014 Retrieve Email Message */
 $SearchOrderNumber=substr(trim($InvoiceNumber),1,strpos(trim($InvoiceNumber),'-')-1);
 $SearchEmailString = '%' . str_replace(' ', '%', str_replace("  "," ",strtoupper(preg_replace("/\&(.*?)(amp);/", '', trim($CustEmail))))) . '%';
-$sql="Select * from onlineordertracking AS ont LEFT JOIN stockmoves AS stm ON (ont.transno=stm.transno AND ont.itemcode=stm.stockid) where ont.email like '".$SearchEmailString."' and  ont.order_='".$SearchOrderNumber."'";
+$sql="Select * from onlineordertracking AS ont LEFT JOIN stockmoves AS stm ON (ont.transno=stm.transno AND ont.itemcode=stm.stockid) where ont.email like '".$SearchEmailString."' and  ont.order_='".$SearchOrderNumber."' GROUP BY stockid";
 $result=DB_query($sql,$db,'','',false,false);
  $_POST['EmailMessage']= '<p class="MsoNormal">Dear [Customer],</p><br/><p class="MsoNormal">Please find below all the tracking information for the Invoice '.$InvoiceNumber.':</p>';
        if($result==0){
@@ -151,7 +151,9 @@ echo '<div>
       <p class="page_title_text"><img src="'.$rootpath.'/css/'.$theme.'/images/customer.png" title="' .
 	_('ClientStockDelivery') . '" alt="" />' . ' ' . _('Invoice Number') . ' : ' . $InvoiceNumber . '<br /></div>';
 /*15052014 Bottom Panel and Choose different templates */
-echo '<br><div><table><tr><td>'  . _('To Address') . ':</td>
+echo '<br><div><table><tr><td>'  . _('From Address') . ':</td>
+	<td><input type="text" name="EmailFromAddr" maxlength=60 size=60 value="' . $_SESSION['CompanyRecord']['email'] . '"></td></tr>';
+echo '<tr><td>'  . _('To Address') . ':</td>
 	<td><input type="text" name="EmailAddr" maxlength=60 size=60 value="' . $CustEmail . '"></td></tr>';
 echo '<tr><td>' . _('CC') . ':</td>
 	<td><input type="text" name="EmailAddrCC" maxlength=60 size=60 value="' . $EmailCCAddress . '"></td></tr>';
